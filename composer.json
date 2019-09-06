@@ -1,0 +1,28 @@
+{
+  "name": "ccinn/kafka-swoole",
+  "description": "Kafka client for php",
+  "type": "library",
+  "keywords": [
+    "Client",
+    "Kafka"
+  ],
+  "config": {
+    "platform": {
+      "php": "7.1.12"
+    },
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "require": {
+    "php": "^7.1",
+    "symfony/console": "^4.3",
+    "symfony/dotenv": "^4.3",
+    "symfony/event-dispatcher": "^4.3",
+    "symfony/translation": "^4.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kafka\\": "src"
+    }
+  }
+}
