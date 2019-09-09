@@ -4,12 +4,32 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\Response\OffsetCommit\TopicOffsetCommit;
 
-use Kafka\Protocols\AbstractProtocol;
-use function is_string;
-use function substr;
-
-class OffsetCommitResponse extends AbstractRequest
+class OffsetCommitResponse extends AbstractRequestOrResponse
 {
-    
+    /**
+     * @var TopicOffsetCommit[] $topics
+     */
+    private $topics;
+
+    /**
+     * @return TopicOffsetCommit[]
+     */
+    public function getTopics(): array
+    {
+        return $this->topics;
+    }
+
+    /**
+     * @param TopicOffsetCommit[] $topics
+     *
+     * @return OffsetCommitResponse
+     */
+    public function setTopics(array $topics): OffsetCommitResponse
+    {
+        $this->topics = $topics;
+
+        return $this;
+    }
 }
