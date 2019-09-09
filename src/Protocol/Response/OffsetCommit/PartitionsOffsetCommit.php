@@ -5,7 +5,6 @@ namespace Kafka\Protocol\Response\OffsetCommit;
 
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
-use Kafka\Protocol\Type\String16;
 
 /**
  * Class PartitionsOffsetCommit
@@ -39,9 +38,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int32 $partitionIndex
      *
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetCommit
+    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetFetch
     {
         $this->partitionIndex = $partitionIndex;
 
@@ -59,9 +58,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int16 $errorCode
      *
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function setErrorCode(Int16 $errorCode): PartitionsOffsetCommit
+    public function setErrorCode(Int16 $errorCode): PartitionsOffsetFetch
     {
         $this->errorCode = $errorCode;
 

@@ -22,7 +22,7 @@ class TopicOffsetCommit
     /**
      * The responses for each partition in the topic.
      *
-     * @var PartitionsOffsetCommit $partitions
+     * @var PartitionsOffsetFetch $partitions
      */
     private $partitions;
 
@@ -37,9 +37,9 @@ class TopicOffsetCommit
     /**
      * @param String16 $name
      *
-     * @return TopicOffsetCommit
+     * @return TopicOffsetFetch
      */
-    public function setName(String16 $name): TopicOffsetCommit
+    public function setName(String16 $name): TopicOffsetFetch
     {
         $this->name = $name;
 
@@ -47,19 +47,19 @@ class TopicOffsetCommit
     }
 
     /**
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function getPartitions(): PartitionsOffsetCommit
+    public function getPartitions(): PartitionsOffsetFetch
     {
         return $this->partitions;
     }
 
     /**
-     * @param PartitionsOffsetCommit $partitions
+     * @param PartitionsOffsetFetch $partitions
      *
-     * @return TopicOffsetCommit
+     * @return TopicOffsetFetch
      */
-    public function setPartitions(PartitionsOffsetCommit $partitions): TopicOffsetCommit
+    public function setPartitions(PartitionsOffsetFetch $partitions): TopicOffsetFetch
     {
         $this->partitions = $partitions;
 

@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\Metadata;
+namespace Kafka\Protocol\Request\OffsetCommit;
 
-use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\String16;
 
 class TopicsOffsetCommit

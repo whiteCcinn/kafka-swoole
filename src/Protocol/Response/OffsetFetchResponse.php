@@ -4,12 +4,35 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\Response\Fetch\ResponsesFetch;
 
-use Kafka\Protocols\AbstractProtocol;
-use function is_string;
-use function substr;
 
-class OffsetFetchResponse extends AbstractRequest
+class OffsetFetchResponse extends AbstractRequestOrResponse
 {
-    
+    /**
+     * Responses by topic for fetched offsets
+     *
+     * @var ResponsesFetch[] $responses
+     */
+    private $responses;
+
+    /**
+     * @return ResponsesFetch[]
+     */
+    public function getResponses(): array
+    {
+        return $this->responses;
+    }
+
+    /**
+     * @param ResponsesFetch[] $responses
+     *
+     * @return OffsetFetchResponse
+     */
+    public function setResponses(array $responses): OffsetFetchResponse
+    {
+        $this->responses = $responses;
+
+        return $this;
+    }
 }

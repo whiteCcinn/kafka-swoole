@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\OffsetCommit;
+namespace Kafka\Protocol\Request\OffsetFetch;
 
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 
-class PartitionsOffsetCommit
+class PartitionsOffsetFetch
 {
     /**
      * The partition index.
@@ -41,9 +41,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int32 $partitionIndex
      *
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetCommit
+    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetFetch
     {
         $this->partitionIndex = $partitionIndex;
 
@@ -61,9 +61,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int64 $committedOffset
      *
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function setCommittedOffset(Int64 $committedOffset): PartitionsOffsetCommit
+    public function setCommittedOffset(Int64 $committedOffset): PartitionsOffsetFetch
     {
         $this->committedOffset = $committedOffset;
 
@@ -81,9 +81,9 @@ class PartitionsOffsetCommit
     /**
      * @param String16 $committedMetadata
      *
-     * @return PartitionsOffsetCommit
+     * @return PartitionsOffsetFetch
      */
-    public function setCommittedMetadata(String16 $committedMetadata): PartitionsOffsetCommit
+    public function setCommittedMetadata(String16 $committedMetadata): PartitionsOffsetFetch
     {
         $this->committedMetadata = $committedMetadata;
 
