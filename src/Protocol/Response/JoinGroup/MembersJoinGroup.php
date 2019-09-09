@@ -21,4 +21,44 @@ class MembersJoinGroup
      * @var Bytes32 $metadata
      */
     private $metadata;
+
+    /**
+     * @return String16
+     */
+    public function getMemberId(): String16
+    {
+        return $this->memberId;
+    }
+
+    /**
+     * @param String16 $memberId
+     *
+     * @return MembersJoinGroup
+     */
+    public function setMemberId(String16 $memberId): MembersJoinGroup
+    {
+        $this->memberId = $memberId;
+
+        return $this;
+    }
+
+    /**
+     * @return Bytes32
+     */
+    public function getMetadata(): Bytes32
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * @param Bytes32 $metadata
+     *
+     * @return MembersJoinGroup
+     */
+    public function setMetadata(Bytes32 $metadata): MembersJoinGroup
+    {
+        $this->metadata = $metadata;
+
+        return $this;
+    }
 }
