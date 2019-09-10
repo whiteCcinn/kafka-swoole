@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Response\OffsetFetch;
+namespace Kafka\Protocol\Response\ListOffsets;
 
 use Kafka\Protocol\Type\String16;
 
 /**
- * Class ResponsesOffsetFetch
+ * Class ResponsesListOffsets
  *
- * @package Kafka\Protocol\Response\OffsetFetch
+ * @package Kafka\Protocol\Response\ListOffsets
  */
-class ResponsesOffsetFetch
+class ResponsesListOffsets
 {
     /**
      * Name of topic

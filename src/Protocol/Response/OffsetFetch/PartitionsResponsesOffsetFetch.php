@@ -54,9 +54,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int32 $partition
      *
-     * @return PartitionsResponsesOffsetFetch
+     * @return PartitionsResponsesListOffsets
      */
-    public function setPartition(Int32 $partition): PartitionsResponsesOffsetFetch
+    public function setPartition(Int32 $partition): PartitionsResponsesListOffsets
     {
         $this->partition = $partition;
 
@@ -74,9 +74,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int64 $offset
      *
-     * @return PartitionsResponsesOffsetFetch
+     * @return PartitionsResponsesListOffsets
      */
-    public function setOffset(Int64 $offset): PartitionsResponsesOffsetFetch
+    public function setOffset(Int64 $offset): PartitionsResponsesListOffsets
     {
         $this->offset = $offset;
 
@@ -94,9 +94,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param String16 $metadata
      *
-     * @return PartitionsResponsesOffsetFetch
+     * @return PartitionsResponsesListOffsets
      */
-    public function setMetadata(String16 $metadata): PartitionsResponsesOffsetFetch
+    public function setMetadata(String16 $metadata): PartitionsResponsesListOffsets
     {
         $this->metadata = $metadata;
 
@@ -114,9 +114,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int16 $errorCode
      *
-     * @return PartitionsResponsesOffsetFetch
+     * @return PartitionsResponsesListOffsets
      */
-    public function setErrorCode(Int16 $errorCode): PartitionsResponsesOffsetFetch
+    public function setErrorCode(Int16 $errorCode): PartitionsResponsesListOffsets
     {
         $this->errorCode = $errorCode;
 

@@ -8,7 +8,7 @@ use \Kafka\Protocol\Response\MetadataResponse;
 use \Kafka\Protocol\Response\FetchResponse;
 use \Kafka\Protocol\Response\OffsetCommitResponse;
 use \Kafka\Protocol\Response\OffsetFetchResponse;
-use \Kafka\Protocol\Response\OffsetResponse;
+use \Kafka\Protocol\Response\ListOffsetsResponse;
 use \Kafka\Protocol\Response\ProduceResponse;
 
 
@@ -23,7 +23,7 @@ class ResponseMessage
     private $correlationId;
 
     /**
-     * @var MetadataResponse|FetchResponse|OffsetCommitResponse|OffsetFetchResponse|OffsetResponse|ProduceResponse
+     * @var MetadataResponse|FetchResponse|OffsetCommitResponse|OffsetFetchResponse|ListOffsetsResponse|ProduceResponse
      *      $ResponseMessage
      */
     private $ResponseMessage;
@@ -49,7 +49,7 @@ class ResponseMessage
     }
 
     /**
-     * @return FetchResponse|MetadataResponse|OffsetCommitResponse|OffsetFetchResponse|OffsetResponse|ProduceResponse
+     * @return FetchResponse|MetadataResponse|OffsetCommitResponse|OffsetFetchResponse|ListOffsetsResponse|ProduceResponse
      */
     public function getResponseMessage()
     {
@@ -57,7 +57,7 @@ class ResponseMessage
     }
 
     /**
-     * @param FetchResponse|MetadataResponse|OffsetCommitResponse|OffsetFetchResponse|OffsetResponse|ProduceResponse $ResponseMessage
+     * @param FetchResponse|MetadataResponse|OffsetCommitResponse|OffsetFetchResponse|ListOffsetsResponse|ProduceResponse $ResponseMessage
      *
      * @return ResponseMessage
      */
