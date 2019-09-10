@@ -21,12 +21,12 @@ class ProtocolTypeEnum extends AbstractEnum
     public const B16 = 2;
 
     /**
-     * @message("n")
+     * @message("N")
      */
     public const B32 = 4;
 
     /**
-     * @message("N")
+     * @message("N2")
      */
     public const B64 = 8;
 }

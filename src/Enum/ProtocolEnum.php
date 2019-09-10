@@ -9,17 +9,17 @@ namespace Kafka\Enum;
 class ProtocolEnum extends AbstractEnum
 {
     /**
-     * @message("ProduceRequest")
+     * @message("Produce")
      */
     public const PRODUCE = 0;
 
     /**
-     * @message("FetchRequest")
+     * @message("Fetch")
      */
     public const FETCH = 1;
 
     /**
-     * @message("ListOffsetsRequest")
+     * @message("ListOffsets")
      */
     public const LIST_OFFSETS = 2;
 

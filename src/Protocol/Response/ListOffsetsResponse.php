@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Response\ListOffsets\ResponsesListOffsets;
 
-class ListOffsetsResponse extends AbstractRequestOrResponse
+class ListOffsetsResponse extends AbstractRequest
 {
     /**
      * @var ResponsesListOffsets[] $responses

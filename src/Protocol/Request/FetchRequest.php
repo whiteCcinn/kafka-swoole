@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Request\Metadata\TopicFetch;
 use Kafka\Protocol\Type\Int32;
 
-class FetchRequest extends AbstractRequestOrResponse
+class FetchRequest extends AbstractRequest
 {
     /**
      * Broker id of the follower. For normal consumers, use -1.

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Response\JoinGroup;
+namespace Kafka\Protocol\Response\Produce;
 
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;

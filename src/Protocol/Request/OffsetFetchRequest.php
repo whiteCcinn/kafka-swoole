@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Request\OffsetFetch\TopicsOffsetFetch;
 use Kafka\Protocol\Type\String16;
 
-class OffsetFetchRequest extends AbstractRequestOrResponse
+class OffsetFetchRequest extends AbstractRequest
 {
     /**
      * The unique group identifier

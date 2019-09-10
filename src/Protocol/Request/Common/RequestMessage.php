@@ -6,18 +6,13 @@ namespace Kafka\Protocol\Request\Common;
 use \Kafka\Protocol\Type\Int16;
 use \Kafka\Protocol\Type\Int32;
 use \Kafka\Protocol\Type\String16;
-use \Kafka\Protocol\Request\MetadataRequest;
-use \Kafka\Protocol\Request\FetchRequest;
-use \Kafka\Protocol\Request\OffsetCommitRequest;
-use \Kafka\Protocol\Request\OffsetFetchRequest;
-use \Kafka\Protocol\Request\OffsetRequest;
-use \Kafka\Protocol\Request\ProduceRequest;
-
 
 /**
- * Class RequestMessage
+ * Class RequestHeader
+ *
+ * @package Kafka\Protocol\Request\Common
  */
-class RequestMessage
+class RequestHeader
 {
     /**
      * @var Int16 $apiKey
@@ -38,9 +33,6 @@ class RequestMessage
      * @var String16 $clientId
      */
     private $clientId;
-
-    /** @var MetadataRequest|FetchRequest|OffsetCommitRequest|OffsetFetchRequest|OffsetRequest|ProduceRequest $requestMessage */
-    private $requestMessage;
 
     /**
      * @return Int16
@@ -118,26 +110,6 @@ class RequestMessage
     public function setClientId(String16 $clientId): RequestMessage
     {
         $this->clientId = $clientId;
-
-        return $this;
-    }
-
-    /**
-     * @return FetchRequest|MetadataRequest|OffsetCommitRequest|OffsetFetchRequest|OffsetRequest|ProduceRequest
-     */
-    public function getRequestMessage()
-    {
-        return $this->requestMessage;
-    }
-
-    /**
-     * @param FetchRequest|MetadataRequest|OffsetCommitRequest|OffsetFetchRequest|OffsetRequest|ProduceRequest $requestMessage
-     *
-     * @return RequestMessage
-     */
-    public function setRequestMessage($requestMessage)
-    {
-        $this->requestMessage = $requestMessage;
 
         return $this;
     }

@@ -3,15 +3,13 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol;
 
+use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Type\Int32;
 
-class AbstractRequestOrResponse
+abstract class AbstractRequestOrResponse
 {
     /** @var Int32 $size */
     private $size;
-
-    /** @var RequestMessage $requestMessage */
-    private $requestMessage;
 
     /**
      * @return Int32
@@ -29,26 +27,6 @@ class AbstractRequestOrResponse
     public function setSize(Int32 $size): AbstractRequestOrResponse
     {
         $this->size = $size;
-
-        return $this;
-    }
-
-    /**
-     * @return RequestMessage
-     */
-    public function getRequestMessage(): RequestMessage
-    {
-        return $this->requestMessage;
-    }
-
-    /**
-     * @param RequestMessage $requestMessage
-     *
-     * @return AbstractRequestOrResponse
-     */
-    public function setRequestMessage(RequestMessage $requestMessage): AbstractRequestOrResponse
-    {
-        $this->requestMessage = $requestMessage;
 
         return $this;
     }

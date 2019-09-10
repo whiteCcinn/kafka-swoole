@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Response\Fetch\ResponsesFetch;
 
 
-class OffsetFetchResponse extends AbstractRequestOrResponse
+class OffsetFetchResponse extends AbstractRequest
 {
     /**
      * Responses by topic for fetched offsets

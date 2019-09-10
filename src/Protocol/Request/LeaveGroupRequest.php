@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Type\String16;
 
-class LeaveGroupRequest extends AbstractRequestOrResponse
+class LeaveGroupRequest extends AbstractRequest
 {
     /**
      * The ID of the group to leave.

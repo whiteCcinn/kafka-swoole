@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
-use Kafka\Protocol\Request\Metadata\TopicsOffsetCommit;
+use Kafka\Protocol\AbstractRequest;
+use Kafka\Protocol\Request\OffsetCommit\TopicsOffsetCommit;
 use Kafka\Protocol\Type\String16;
 
-class OffsetCommitRequest extends AbstractRequestOrResponse
+class OffsetCommitRequest extends AbstractRequest
 {
     /**
      * The unique group identifier.

@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 
 use Kafka\Protocol\Request\Metadata\ProtocolsJoinGroup;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
-class JoinGroupRequest extends AbstractRequestOrResponse
+class JoinGroupRequest extends AbstractRequest
 {
     /**
      * The group identifier.

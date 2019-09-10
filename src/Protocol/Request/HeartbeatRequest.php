@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\String16;
 
-class HeartbeatRequest extends AbstractRequestOrResponse
+class HeartbeatRequest extends AbstractRequest
 {
     /**
      * The group id.

@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Request\Metadata\TopicDataProduce;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 
-class ProduceRequest extends AbstractRequestOrResponse
+class ProduceRequest extends AbstractRequest
 {
     /**
      * The number of acknowledgments the producer requires the leader to have received before considering a request

@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Response\OffsetCommit\TopicOffsetCommit;
 
-class OffsetCommitResponse extends AbstractRequestOrResponse
+class OffsetCommitResponse extends AbstractRequest
 {
     /**
      * @var TopicOffsetCommit[] $topics

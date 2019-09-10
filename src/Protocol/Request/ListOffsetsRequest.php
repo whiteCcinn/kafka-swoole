@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request;
 
-use Kafka\Protocol\AbstractRequestOrResponse;
+use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Request\ListOffsets\TopicsListsOffsets;
 use Kafka\Protocol\Type\Int32;
 
-class ListOffsetsRequest extends AbstractRequestOrResponse
+class ListOffsetsRequest extends AbstractRequest
 {
     /**
      * @var Int32 $replicaId
