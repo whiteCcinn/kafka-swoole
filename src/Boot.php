@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace Kafka;
 
+use App\Command\StartCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\Translation\Translator;
 use Kafka\Exceptions\BaseException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Loader\YamlFileLoader;
 
 use function set_exception_handler;
 
@@ -23,6 +25,8 @@ class Boot
      */
     public static function boot()
     {
+        include_once './define.php';
+
         $dispatcher = new EventDispatcher();
 
         self::console();
@@ -37,14 +41,17 @@ class Boot
         set_exception_handler([BaseException::class, BaseException::$exception_function_name]);
 
         $dotenv = new Dotenv();
-        $dotenv->load(__DIR__ . '/.env');
+        $dotenv->load(KAFKA_SWOOLE_ROOT . DIRECTORY_SEPARATOR . '.env');
     }
 
+    /**
+     * @throws \Exception
+     */
     private static function console()
     {
         $application = new Application();
 
-//        $application->add();
+        $application->add(new StartCommand());
 
         $application->run();
     }
