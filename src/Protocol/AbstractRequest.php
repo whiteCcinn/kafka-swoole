@@ -71,7 +71,6 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                         $matches['protocolType']);
                 }
 
-                var_dump($className);
                 if ($isArray) {
                     $protocolObjectArray = $this->getPropertyValue($instance, $propertyName);
                     $arrayCount = count($protocolObjectArray);
@@ -80,11 +79,17 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                         $protocol = $this->pack($className, $protocolObject, $protocol);
                     }
                 } else {
-                    $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
-                    echo "wrapperProtocol : {$wrapperProtocol}, value : " . var_export($this->getTypePropertyValue($instance,
-                            $propertyName),
-                            true) . PHP_EOL;
-                    $protocol .= pack($wrapperProtocol, (string)$this->getTypePropertyValue($instance, $propertyName));
+                    if ($className === RequestHeader::class) {
+                        $protocol = $this->pack($className, $this->getPropertyValue($instance, $propertyName),
+                            $protocol);
+                    } else {
+                        $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
+                        echo "wrapperProtocol : {$wrapperProtocol}, value : " . var_export($this->getTypePropertyValue($instance,
+                                $propertyName),
+                                true) . PHP_EOL;
+                        $protocol .= pack($wrapperProtocol,
+                            (string)$this->getTypePropertyValue($instance, $propertyName));
+                    }
                 }
             } else {
                 throw new ProtocolTypeException("protocolType undefined , comment: " . $propertyComment);
@@ -111,19 +116,21 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
     ): string
     {
         $className = "{$typeNamespace}{$protocolType}";
-        if (!class_exists($className, false)) {
+        if (!class_exists($className)) {
             if (Str::endsWith($shortClassName, 'Request')) {
-                $secondNamespace = Str::before($shortClassName, 'Request');
-                $className = "{$classNamespace}\\{$secondNamespace}\\{$protocolType}";
-            } elseif ($protocolType == 'RequestHeader') {
-                $className = Str::before($classNamespace, 'Request') . "Common\\{$protocolType}";
+                if ($protocolType === 'RequestHeader') {
+                    $className = Str::before($classNamespace, 'Request') . "Request\\Common\\{$protocolType}";
+                } else {
+                    $secondNamespace = Str::before($shortClassName, 'Request');
+                    $className = "{$classNamespace}\\{$secondNamespace}\\{$protocolType}";
+                }
             } else {
                 $className = "{$classNamespace}\\{$protocolType}";
             }
         }
         var_dump($className);
 
-        if (!class_exists($className, false)) {
+        if (!class_exists($className)) {
             throw new ProtocolTypeException('There are no protocol mines');
         }
 
