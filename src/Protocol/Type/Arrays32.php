@@ -5,9 +5,14 @@ namespace Kafka\Protocol\Type;
 
 class Arrays32 extends AbstractType
 {
+    /**
+     * @var string
+     */
     protected static $wrapperProtocol = 'N';
 
-    /** @var mixed $value */
+    /**
+     * @var $value
+     */
     protected $value;
 
     /**

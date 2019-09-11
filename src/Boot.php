@@ -8,8 +8,6 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Dotenv\Dotenv;
 use Kafka\Exceptions\BaseException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Translation\Translator;
-use Symfony\Component\Translation\Loader\YamlFileLoader;
 
 use function set_exception_handler;
 
@@ -25,8 +23,6 @@ class Boot
      */
     public static function boot()
     {
-        include_once './define.php';
-
         $dispatcher = new EventDispatcher();
 
         self::console();

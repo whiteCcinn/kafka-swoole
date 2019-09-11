@@ -5,11 +5,12 @@ namespace Kafka\Protocol;
 
 use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Type\Int32;
+use Kafka\Support\Str;
 
 abstract class AbstractRequestOrResponse
 {
     /** @var Int32 $size */
-    private $size;
+    protected $size;
 
     /**
      * @return Int32
@@ -29,5 +30,18 @@ abstract class AbstractRequestOrResponse
         $this->size = $size;
 
         return $this;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        $getMethod = Str::camel('get_' . $name);
+        $value = $this->{$getMethod}();
+
+        return $value;
     }
 }

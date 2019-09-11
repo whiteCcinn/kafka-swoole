@@ -20,7 +20,7 @@ abstract class AbstractEnum
      *
      * @return bool
      */
-    private static function init(): ?bool
+    private static function init(): bool
     {
         if (isset(self::$comment[static::class])) {
             return false;
@@ -36,6 +36,8 @@ abstract class AbstractEnum
             preg_match('/@message\([\'|\"](?P<comment>.+)[\'|\"]\)/', $doc, $matches);
             self::$comment[static::class][$ref->getValue()] = $matches['comment'];
         }
+
+        return true;
     }
 
     /**

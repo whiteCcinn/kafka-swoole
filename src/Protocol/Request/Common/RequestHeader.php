@@ -43,18 +43,6 @@ class RequestHeader
     }
 
     /**
-     * @param Int16 $apiKey
-     *
-     * @return RequestMessage
-     */
-    public function setApiKey(Int16 $apiKey): RequestMessage
-    {
-        $this->apiKey = $apiKey;
-
-        return $this;
-    }
-
-    /**
      * @return Int16
      */
     public function getApiVersion(): Int16
@@ -65,9 +53,9 @@ class RequestHeader
     /**
      * @param Int16 $apiVersion
      *
-     * @return RequestMessage
+     * @return RequestHeader
      */
-    public function setApiVersion(Int16 $apiVersion): RequestMessage
+    public function setApiVersion(Int16 $apiVersion): RequestHeader
     {
         $this->apiVersion = $apiVersion;
 
@@ -85,9 +73,9 @@ class RequestHeader
     /**
      * @param Int32 $correlationId
      *
-     * @return RequestMessage
+     * @return RequestHeader
      */
-    public function setCorrelationId(Int32 $correlationId): RequestMessage
+    public function setCorrelationId(Int32 $correlationId): RequestHeader
     {
         $this->correlationId = $correlationId;
 
@@ -105,9 +93,9 @@ class RequestHeader
     /**
      * @param String16 $clientId
      *
-     * @return RequestMessage
+     * @return RequestHeader
      */
-    public function setClientId(String16 $clientId): RequestMessage
+    public function setClientId(String16 $clientId): RequestHeader
     {
         $this->clientId = $clientId;
 

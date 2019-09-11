@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Type;
 
-use Kafka\Exceptions\ProtocolTypeException;
+use Kafka\Exception\ProtocolTypeException;
 
 /**
  * Class AbstractType
@@ -26,6 +26,19 @@ abstract class AbstractType
         }
 
         return static::$wrapperProtocol;
+    }
+
+    /**
+     * @param $value
+     *
+     * @return AbstractType | Arrays32 | Bytes32 | Int8 | Int16 | Int32 | Int64 | String16
+     */
+    public static function value($value)
+    {
+        $typeObject = new static();
+        $typeObject->setValue($value);
+
+        return $typeObject;
     }
 
     abstract function setValue($value);
