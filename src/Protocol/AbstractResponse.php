@@ -31,4 +31,9 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 
         return $this;
     }
+
+    public function unpack()
+    {
+
+    }
 }

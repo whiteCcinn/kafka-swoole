@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
-use Kafka\Protocol\AbstractRequest;
+use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Produce\ResponsesProduce;
 
-class ProduceResponse extends AbstractRequest
+class ProduceResponse extends AbstractResponse
 {
     /**
      * @var ResponsesProduce[] $responses

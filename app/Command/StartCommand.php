@@ -39,8 +39,6 @@ class StartCommand extends Command
             // 主进程逻辑（监控子进程/控制进程数）
             $retval = $socket->connect('mkafka1', 9092);
             while ($retval) {
-                $n = $socket->send("hello");
-                echo 'length:' . $n . PHP_EOL;
 
                 $protocol = new ListOffsetsRequest();
                 $partitions = [];
@@ -63,8 +61,11 @@ class StartCommand extends Command
                 $protocol->setSize(Int32::value(strlen('kafka-swoole')));
                 $protocol->setReplicaId(Int32::value(-1));
                 $protocol->setTopics($topics);
-                var_dump(bin2hex($protocol->pack()));
+                $payload = $protocol->pack();
+                var_dump(bin2hex($payload));
 
+                $n = $socket->send($payload);
+                echo 'length:' . $n . PHP_EOL;
 //                $protocol = new HeartbeatRequest;
 //                $protocol->setGenerationId(Int32::value(2));
 //                $protocol->setGroupId(String16::value('test'));
@@ -80,13 +81,14 @@ class StartCommand extends Command
 //                var_dump(bin2hex($protocol->pack()));
 
                 $data = $socket->recv();
+                $protocol->response->unpack($data);
                 var_dump($data);
 
                 if (empty($data)) {
                     $socket->close();
                     break;
                 }
-                co::sleep(1.0);
+                \Co::sleep(1.0);
             }
             var_dump($retval, $socket->errCode);
         });

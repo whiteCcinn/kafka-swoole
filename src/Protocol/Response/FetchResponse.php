@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
-use Kafka\Protocol\AbstractRequest;
+use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Fetch\ResponsesFetch;
 
-class FetchResponse extends AbstractRequest
+class FetchResponse extends AbstractResponse
 {
     /**
      * null

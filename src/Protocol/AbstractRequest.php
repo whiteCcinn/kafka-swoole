@@ -6,6 +6,8 @@ namespace Kafka\Protocol;
 use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Request\Common\RequestHeader;
+use Kafka\Protocol\Response\FetchResponse;
+use Kafka\Protocol\Response\ListOffsetsResponse;
 use Kafka\Protocol\Type\Arrays32;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
@@ -14,12 +16,32 @@ use ReflectionClass;
 use function call_user_func;
 use Kafka\Support\Str;
 
+/**
+ * Class AbstractRequest
+ *
+ * @property ListOffsetsResponse | FetchResponse $response
+ * @package Kafka\Protocol
+ */
 abstract class AbstractRequest extends AbstractRequestOrResponse
 {
     /**
      * @var RequestHeader $requestHeader
      */
     protected $requestHeader;
+
+    /**
+     * AbstractRequest constructor.
+     */
+    public function __construct()
+    {
+        $refClass = new ReflectionClass(static::class);
+        $className = $refClass->getName();
+        $namespace = $refClass->getNamespaceName();
+        $requestName = Str::after($className, "{$namespace}\"");
+        $responseClass = str_replace('Request', 'Response', $requestName);
+
+        $this->response = new $responseClass();
+    }
 
     /**
      * @return RequestHeader
