@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Request;
 
 use Kafka\Protocol\AbstractRequest;
-use Kafka\Protocol\Type\Int16;
+use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
 class HeartbeatRequest extends AbstractRequest
@@ -19,7 +19,7 @@ class HeartbeatRequest extends AbstractRequest
     /**
      * The generation of the group.
      *
-     * @var Int16 $generationId
+     * @var Int32 $generationId
      */
     private $generationId;
 
@@ -51,19 +51,19 @@ class HeartbeatRequest extends AbstractRequest
     }
 
     /**
-     * @return Int16
+     * @return Int32
      */
-    public function getGenerationId(): Int16
+    public function getGenerationId(): Int32
     {
         return $this->generationId;
     }
 
     /**
-     * @param Int16 $generationId
+     * @param Int32 $generationId
      *
      * @return HeartbeatRequest
      */
-    public function setGenerationId(Int16 $generationId): HeartbeatRequest
+    public function setGenerationId(Int32 $generationId): HeartbeatRequest
     {
         $this->generationId = $generationId;
 

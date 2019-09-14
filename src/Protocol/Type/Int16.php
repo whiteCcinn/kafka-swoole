@@ -5,7 +5,7 @@ namespace Kafka\Protocol\Type;
 
 class Int16 extends AbstractType
 {
-    protected static $wrapperProtocol = 's';
+    protected static $wrapperProtocol = 'n';
 
     /** @var mixed $value */
     protected $value;

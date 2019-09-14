@@ -2,7 +2,11 @@
 
 namespace App\Command;
 
+use Kafka\Enum\ProtocolEnum;
+use Kafka\Enum\ProtocolTypeEnum;
+use Kafka\Enum\ProtocolVersionEnum;
 use Kafka\Protocol\Request\Common\RequestHeader;
+use Kafka\Protocol\Request\HeartbeatRequest;
 use Kafka\Protocol\Request\ListOffsets\PartitionsListsOffsets;
 use Kafka\Protocol\Request\ListOffsets\TopicsListsOffsets;
 use Kafka\Protocol\Request\ListOffsetsRequest;
@@ -51,13 +55,29 @@ class StartCommand extends Command
                                               ->setPartitions($partitions)
                 );
                 $protocol->setRequestHeader(
-                    (new RequestHeader())->setApiVersion(Int16::value('0.9.0.0'))
-                                         ->setClientId(String16::value('kafka-swoole'))
-                                         ->setCorrelationId(Int32::value(-1))
+                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+                                         ->setClientId(String16::value('kafka-php'))
+                                         ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
+                                         ->setApiKey(Int16::value(ProtocolEnum::LIST_OFFSETS))
                 );
+                $protocol->setSize(Int32::value(strlen('kafka-swoole')));
                 $protocol->setReplicaId(Int32::value(-1));
                 $protocol->setTopics($topics);
-                var_dump($protocol->pack());
+                var_dump(bin2hex($protocol->pack()));
+
+//                $protocol = new HeartbeatRequest;
+//                $protocol->setGenerationId(Int32::value(2));
+//                $protocol->setGroupId(String16::value('test'));
+//                $protocol->setMemberId(String16::value('kafka-php-0e7cbd33-7950-40af-b691-eceaa665d297'));
+//                $protocol->setRequestHeader(
+//                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+//                                         ->setClientId(String16::value('kafka-php'))
+//                                         ->setCorrelationId(Int32::value(ProtocolEnum::HEARTBEAT))
+//                                         ->setApiKey(Int16::value(ProtocolEnum::HEARTBEAT))
+//                );
+//                $expected = '0000004d000c00000000000c00096b61666b612d70687000047465737400000002002e6b61666b612d7068702d30653763626433332d373935302d343061662d623639312d656365616136363564323937';
+//                var_dump($expected);
+//                var_dump(bin2hex($protocol->pack()));
 
                 $data = $socket->recv();
                 var_dump($data);

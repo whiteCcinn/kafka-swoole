@@ -9,7 +9,9 @@ use Kafka\Support\Str;
 
 abstract class AbstractRequestOrResponse
 {
-    /** @var Int32 $size */
+    /**
+     * @var Int32 $size
+     */
     protected $size;
 
     /**

@@ -43,6 +43,18 @@ class RequestHeader
     }
 
     /**
+     * @param Int16 $apiKey
+     *
+     * @return RequestHeader
+     */
+    public function setApiKey(Int16 $apiKey): RequestHeader
+    {
+        $this->apiKey = $apiKey;
+
+        return $this;
+    }
+
+    /**
      * @return Int16
      */
     public function getApiVersion(): Int16
