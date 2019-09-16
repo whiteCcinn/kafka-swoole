@@ -58,7 +58,7 @@ class StartCommand extends Command
                 $partitions = [];
                 array_push($partitions,
                     (new PartitionsListsOffsets())->setPartition(Int32::value(0))
-                                                  ->setMaxNumOffsets(Int32::value(200))
+                                                  ->setMaxNumOffsets(Int32::value(10))
                                                   ->setTimestamp(Int64::value(time()))
                 );
                 $topics = [];
@@ -74,6 +74,7 @@ class StartCommand extends Command
                 );
                 $protocol->setReplicaId(Int32::value(-1));
                 $protocol->setTopics($topics);
+
 //                $n = $socket->send($payload);
 //                echo 'length:' . $n . PHP_EOL;
 //                $protocol = new HeartbeatRequest;

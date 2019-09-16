@@ -61,7 +61,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    public function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '')
+    private function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '')
     {
         $fullClassName = $fullClassName ?? static::class;
         $instance = $instance ?? $this;
@@ -121,8 +121,8 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
                         }
                         $arrayCount--;
                     }
-//                    echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . var_export($value,
-//                            true) . PHP_EOL;
+                    echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . var_export($value,
+                            true) . PHP_EOL;
                     $this->setTypePropertyValue($instance, $propertyName, $value);
                 } else {
                     if ($className === ResponseHeader::class) {
@@ -149,7 +149,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 
                         $valueInstance = call_user_func([$className, 'value'], $value);
 
-//                        echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $value . PHP_EOL;
+                        echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $value . PHP_EOL;
 
                         $this->setTypePropertyValue($instance, $propertyName, $valueInstance);
                     }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\ListOffsets;
 
+use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 
@@ -14,11 +15,18 @@ use Kafka\Protocol\Type\Int64;
 class PartitionsResponsesListOffsets
 {
     /**
-     * 	Topic partition id
+     * Topic partition id
      *
      * @var Int32 $partition
      */
     private $partition;
+
+    /**
+     * Response error code.
+     *
+     * @var Int16 $error_code
+     */
+    private $errorCode;
 
     /**
      * A list of offsets.
@@ -63,6 +71,26 @@ class PartitionsResponsesListOffsets
     public function setOffsets(array $offsets): PartitionsResponsesListOffsets
     {
         $this->offsets = $offsets;
+
+        return $this;
+    }
+
+    /**
+     * @return Int16
+     */
+    public function getErrorCode(): Int16
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param Int16 $errorCode
+     *
+     * @return PartitionsResponsesListOffsets
+     */
+    public function setErrorCode(Int16 $errorCode): PartitionsResponsesListOffsets
+    {
+        $this->errorCode = $errorCode;
 
         return $this;
     }

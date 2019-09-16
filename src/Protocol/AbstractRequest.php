@@ -64,6 +64,16 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
     }
 
     /**
+     * @return string
+     * @throws ProtocolTypeException
+     * @throws \ReflectionException
+     */
+    public function pack(): string
+    {
+        return $this->packProtocol();
+    }
+
+    /**
      * @param null   $fullClassName
      * @param null   $instance
      * @param string $protocol
@@ -72,7 +82,7 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    public function pack($fullClassName = null, $instance = null, $protocol = '')
+    public function packProtocol($fullClassName = null, $instance = null, $protocol = ''): string
     {
         $fullClassName = $fullClassName ?? static::class;
         $instance = $instance ?? $this;
@@ -100,7 +110,7 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                     $protocol .= pack(Arrays32::getWrapperProtocol(), (string)$arrayCount);
                     if (!Str::startsWith($className, $typeNamespace)) {
                         foreach ($protocolObjectArray as $protocolObject) {
-                            $protocol = $this->pack($className, $protocolObject, $protocol);
+                            $protocol = $this->packProtocol($className, $protocolObject, $protocol);
                         }
                     } else {
                         $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
@@ -126,7 +136,7 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                     }
                 } else {
                     if ($className === RequestHeader::class) {
-                        $protocol = $this->pack($className, $this->getPropertyValue($instance, $propertyName),
+                        $protocol = $this->packProtocol($className, $this->getPropertyValue($instance, $propertyName),
                             $protocol);
                     } else {
                         $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
