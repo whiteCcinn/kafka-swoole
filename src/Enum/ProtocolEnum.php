@@ -26,7 +26,7 @@ class ProtocolEnum extends AbstractEnum
     /**
      * @message("")
      */
-    public const METADATA = 4;
+    public const METADATA = 3;
 
     /**
      * @message("")

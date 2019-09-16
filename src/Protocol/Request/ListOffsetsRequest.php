@@ -7,6 +7,14 @@ use Kafka\Protocol\AbstractRequest;
 use Kafka\Protocol\Request\ListOffsets\TopicsListsOffsets;
 use Kafka\Protocol\Type\Int32;
 
+/**
+ * Class ListOffsetsRequest
+ *
+ * @property $replicaId
+ * @property $topics
+ *
+ * @package Kafka\Protocol\Request
+ */
 class ListOffsetsRequest extends AbstractRequest
 {
     /**

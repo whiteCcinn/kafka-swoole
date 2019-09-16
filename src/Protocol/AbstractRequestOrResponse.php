@@ -3,12 +3,23 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol;
 
-use Kafka\Protocol\Request\Common\RequestHeader;
+use Kafka\Protocol\TraitStructure\ValueTrait;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Support\Str;
+use \ReflectionClass;
+use \ReflectionProperty;
 
+/**
+ * Class AbstractRequestOrResponse
+ *
+ * @property $size
+ *
+ * @package Kafka\Protocol
+ */
 abstract class AbstractRequestOrResponse
 {
+//    use ValueTrait;
+
     /**
      * @var Int32 $size
      */

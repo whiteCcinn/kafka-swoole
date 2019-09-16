@@ -524,7 +524,7 @@ class Str
      *
      * @return string
      */
-    public static function studly($value)
+    public static function studly($value): string
     {
         $key = $value;
 
@@ -546,7 +546,7 @@ class Str
      *
      * @return string
      */
-    public static function substr($string, $start, $length = null)
+    public static function substr($string, $start, $length = null): string
     {
         return mb_substr($string, $start, $length, 'UTF-8');
     }
@@ -558,10 +558,31 @@ class Str
      *
      * @return string
      */
-    public static function ucfirst($string)
+    public static function ucfirst($string): string
     {
         return static::upper(static::substr($string, 0, 1)) . static::substr($string, 1);
     }
+
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
+    public static function pathToNamespace(string $path): string
+    {
+        return str_replace('/', '\\', $path);
+    }
+
+    /**
+     * @param string $namespace
+     *
+     * @return string
+     */
+    public static function namespaceToPath(string $namespace): string
+    {
+        return str_replace('\\', '/', $namespace);
+    }
+
 
     /**
      * Returns the replacements for the ascii method.
@@ -572,7 +593,7 @@ class Str
      *
      * @return array
      */
-    protected static function charsArray()
+    protected static function charsArray(): array
     {
         static $charsArray;
 

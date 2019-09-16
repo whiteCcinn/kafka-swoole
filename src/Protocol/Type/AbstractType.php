@@ -15,6 +15,9 @@ abstract class AbstractType
     /** @var string $wrapperProtocol */
     protected static $wrapperProtocol = '';
 
+    /** @var string $setFunc */
+    public static $setFunc = 'value';
+
     /**
      * @return string
      * @throws ProtocolTypeException

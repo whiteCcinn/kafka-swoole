@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol;
 
-use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Response\FetchResponse;
 use Kafka\Protocol\Response\ListOffsetsResponse;
+use Kafka\Protocol\TraitStructure\ValueTrait;
 use Kafka\Protocol\Type\Arrays32;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 use ReflectionProperty;
 use ReflectionClass;
-use function call_user_func;
 use Kafka\Support\Str;
+use function call_user_func;
 
 /**
  * Class AbstractRequest
@@ -87,23 +87,42 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
         foreach ($refProperties as $refProperty) {
             $propertyComment = $refProperty->getDocComment();
             $propertyName = $refProperty->getName();
-            if (preg_match('/.*@var\s+(?P<protocolType>\w+(\[\])?)\s+.*/', $propertyComment, $matches)) {
-                $isArray = false;
-                if (preg_match('/^(?P<protocolType>.*)\[\]$/', $matches['protocolType'], $matches2)) {
-                    $className = $this->correctionClassName($shortClassName, $classNamespace, $typeNamespace,
-                        $matches2['protocolType']);
-                    $isArray = true;
-                } else {
-                    $className = $this->correctionClassName($shortClassName, $classNamespace, $typeNamespace,
-                        $matches['protocolType']);
-                }
+            if (preg_match('/.*@var\s+(?P<protocolType>\w+)(?P<isArray>\[\])?\s+.*/', $propertyComment,
+                $matches)) {
+                $isArray = isset($matches['isArray']) ? true : false;
+                $protocolType = $matches['protocolType'];
+                $className = $this->correctionClassName($shortClassName, $classNamespace, $typeNamespace,
+                    $protocolType);
 
                 if ($isArray) {
                     $protocolObjectArray = $this->getPropertyValue($instance, $propertyName);
                     $arrayCount = count($protocolObjectArray);
                     $protocol .= pack(Arrays32::getWrapperProtocol(), (string)$arrayCount);
-                    foreach ($protocolObjectArray as $protocolObject) {
-                        $protocol = $this->pack($className, $protocolObject, $protocol);
+                    if (!Str::startsWith($className, $typeNamespace)) {
+                        foreach ($protocolObjectArray as $protocolObject) {
+                            $protocol = $this->pack($className, $protocolObject, $protocol);
+                        }
+                    } else {
+                        $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
+                        foreach ($protocolObjectArray as $protocolObject) {
+                            echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $protocolObject->getValue() . PHP_EOL;
+                            $value = $protocolObject->getValue();
+                            if ($className === String16::class) {
+                                $protocol .= pack($wrapperProtocol, (string)strlen($value)) . $value;
+                            } else {
+                                if ($wrapperProtocol == 'N2') {
+                                    $left = 0xffffffff00000000;
+                                    $right = 0x00000000ffffffff;
+
+                                    $l = ($value & $left) >> 32;
+                                    $r = $value & $right;
+
+                                    $protocol .= pack($wrapperProtocol, $l, $r);
+                                } else {
+                                    $protocol .= pack($wrapperProtocol, $value);
+                                }
+                            }
+                        }
                     }
                 } else {
                     if ($className === RequestHeader::class) {
