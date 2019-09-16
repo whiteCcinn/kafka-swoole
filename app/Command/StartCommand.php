@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use Kafka\Enum\ProtocolEnum;
+use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Enum\ProtocolVersionEnum;
 use Kafka\Protocol\Request\Common\RequestHeader;
@@ -14,6 +15,7 @@ use Kafka\Protocol\Request\Metadata\DataProduce;
 use Kafka\Protocol\Request\Metadata\TopicDataProduce;
 use Kafka\Protocol\Request\MetadataRequest;
 use Kafka\Protocol\Request\ProduceRequest;
+use Kafka\Protocol\Response\ListOffsetsResponse;
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
@@ -117,7 +119,15 @@ class StartCommand extends Command
 
                 $data = $socket->recv();
                 $protocol->response->unpack($data);
-                var_dump(get_class_vars($protocol->response));
+                /** @var ListOffsetsResponse $response */
+                $response = $protocol->response;
+                foreach ($response->getResponses() as $resp) {
+                    foreach ($resp->getPartitionResponses() as $resp2) {
+                        var_dump(ProtocolErrorEnum::getTextByCode($resp2->getErrorCode()->getValue()));
+                    }
+                }
+
+                var_dump($protocol->response);
                 /*
 object(Kafka\Protocol\Response\MetadataResponse)#46 (4) {
   ["brokers":"Kafka\Protocol\Response\MetadataResponse":private]=>

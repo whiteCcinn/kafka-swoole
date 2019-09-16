@@ -33,8 +33,9 @@ abstract class AbstractEnum
         /** @var \ReflectionClassConstant $ref */
         foreach ($refConstants as $ref) {
             $doc = $ref->getDocComment();
-            preg_match('/@message\([\'|\"](?P<comment>.+)[\'|\"]\)/', $doc, $matches);
-            self::$comment[static::class][$ref->getValue()] = $matches['comment'];
+            preg_match('/@message\([\'|\"](?P<comment>[\s\S]+)[\'|\"]\)/', $doc, $matches);
+            $comment = preg_replace('/\s+\*\s+/', ' ', $matches['comment']);
+            self::$comment[static::class][$ref->getValue()] = $comment;
         }
 
         return true;
