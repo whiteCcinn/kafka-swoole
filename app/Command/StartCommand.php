@@ -45,35 +45,35 @@ class StartCommand extends Command
             while ($retval) {
 //
 
-                $protocol = new MetadataRequest();
-                $protocol->setRequestHeader(
-                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
-                                         ->setClientId(String16::value('kafka-php'))
-                                         ->setCorrelationId(Int32::value(ProtocolEnum::METADATA))
-                                         ->setApiKey(Int16::value(ProtocolEnum::METADATA))
-                );
-                $protocol->setTopicName([String16::value('caiwenhui')]);
-
-//                $protocol = new ListOffsetsRequest();
-//                $partitions = [];
-//                array_push($partitions,
-//                    (new PartitionsListsOffsets())->setPartition(Int32::value(0))
-//                                                  ->setMaxNumOffsets(Int32::value(200))
-//                                                  ->setTimestamp(Int64::value(time()))
-//                );
-//                $topics = [];
-//                array_push($topics,
-//                    (new TopicsListsOffsets())->setTopic(String16::value('caiwenhui'))
-//                                              ->setPartitions($partitions)
-//                );
+//                $protocol = new MetadataRequest();
 //                $protocol->setRequestHeader(
 //                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
 //                                         ->setClientId(String16::value('kafka-php'))
-//                                         ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
-//                                         ->setApiKey(Int16::value(ProtocolEnum::LIST_OFFSETS))
+//                                         ->setCorrelationId(Int32::value(ProtocolEnum::METADATA))
+//                                         ->setApiKey(Int16::value(ProtocolEnum::METADATA))
 //                );
-//                $protocol->setReplicaId(Int32::value(-1));
-//                $protocol->setTopics($topics);
+//                $protocol->setTopicName([String16::value('caiwenhui')]);
+
+                $protocol = new ListOffsetsRequest();
+                $partitions = [];
+                array_push($partitions,
+                    (new PartitionsListsOffsets())->setPartition(Int32::value(0))
+                                                  ->setMaxNumOffsets(Int32::value(200))
+                                                  ->setTimestamp(Int64::value(time()))
+                );
+                $topics = [];
+                array_push($topics,
+                    (new TopicsListsOffsets())->setTopic(String16::value('caiwenhui'))
+                                              ->setPartitions($partitions)
+                );
+                $protocol->setRequestHeader(
+                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+                                         ->setClientId(String16::value('kafka-php'))
+                                         ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
+                                         ->setApiKey(Int16::value(ProtocolEnum::LIST_OFFSETS))
+                );
+                $protocol->setReplicaId(Int32::value(-1));
+                $protocol->setTopics($topics);
 //                $n = $socket->send($payload);
 //                echo 'length:' . $n . PHP_EOL;
 //                $protocol = new HeartbeatRequest;

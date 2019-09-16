@@ -6,8 +6,6 @@ namespace Kafka\Protocol;
 use Kafka\Protocol\TraitStructure\ValueTrait;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Support\Str;
-use \ReflectionClass;
-use \ReflectionProperty;
 
 /**
  * Class AbstractRequestOrResponse
