@@ -117,7 +117,7 @@ class StartCommand extends Command
 
                 $data = $socket->recv();
                 $protocol->response->unpack($data);
-                var_dump($protocol->response);
+                var_dump(get_class_vars($protocol->response));
                 /*
 object(Kafka\Protocol\Response\MetadataResponse)#46 (4) {
   ["brokers":"Kafka\Protocol\Response\MetadataResponse":private]=>
