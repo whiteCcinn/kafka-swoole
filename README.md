@@ -3,13 +3,13 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 > If you would like to contribute code to help me speed up my progress, please contact me at email:471113744@qq.com
 
-## Client API
+## Config
 
 ### HighLevel
 
 #### Options
 
-FILE: `app/Config/high_level.yaml`
+FILE: `config/high_level.yaml`
 
 |  option   | optional | default  |
 |  ----  | ----  | ----  |
@@ -17,7 +17,11 @@ FILE: `app/Config/high_level.yaml`
 
 ### LowLevel
 
-FILE: `app/Config/low_level.yaml`
+FILE: `config/low_level.yaml`
+
+### Producer
+
+FILE: `config/producer.yaml`
 
 ## Protocol API VERSION
 
@@ -192,4 +196,5 @@ array(3) {
 ## References
 
 - [Apache.kafka.protocol](http://kafka.apache.org/protocol.html)
-- [Kafka.client.options](https://github.com/apache/kafka/blob/0.9.0/core/src/main/scala/kafka/consumer/ConsumerConfig.scala)
+- [Kafka.ConsumerConfig](https://github.com/apache/kafka/blob/0.9.0/core/src/main/scala/kafka/consumer/ConsumerConfig.scala)
+- [Kafka.ProducerConfig](https://github.com/apache/kafka/blob/0.9.0/core/src/main/scala/kafka/producer/ProducerConfig.scala)

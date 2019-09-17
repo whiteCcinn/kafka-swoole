@@ -1,0 +1,28 @@
+# This is for bootstrapping and the producer will only use it for getting metadata
+# (topics, partitions and replicas). The socket connections for sending the actual data
+# will be established based on the broker information returned in the metadata. The
+# format is host1:port1,host2:port2, and the list can be a subset of brokers or
+# a VIP pointing to a subset of brokers.
+metadata.broker.list: mkafka1:9092,mkafka2:9092,mkafka3:9092,mkafka4:9092
+
+# this parameter specifies whether the messages are sent asynchronously
+# or not. Valid values are - async for asynchronous send
+#                            sync for synchronous send
+producer.type: sync
+
+# The leader may be unavailable transiently, which can fail the sending of a message.
+# This property specifies the number of retries when such failures occur.
+message.send.max.retries: 3
+
+# Before each retry, the producer refreshes the metadata of relevant topics. Since leader
+# election takes a bit of time, this property specifies the amount of time that the producer
+# waits before refreshing the metadata.
+retry.backoff.ms: 100
+
+# The producer generally refreshes the topic metadata from brokers when there is a failure
+# (partition missing, leader not available...). It will also poll regularly (default: every 10min
+# so 600000ms). If you set this to a negative value, metadata will only get refreshed on failure.
+# If you set this to zero, the metadata will get refreshed after each message sent (not recommended)
+# Important note: the refresh happen only AFTER the message is sent, so if the producer never sends
+# a message the metadata is never refreshed
+topic.metadata.refresh.interval.ms: 600000
