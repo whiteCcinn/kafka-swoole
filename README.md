@@ -1,7 +1,7 @@
 # kafka-swoole
 Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis respectively, and utilize swoole to realize collaboration and flexibly extend consumers' client
 
-## API
+## Client API
 
 ### HighLevel
 
