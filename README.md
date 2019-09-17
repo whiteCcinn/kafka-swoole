@@ -7,11 +7,15 @@ kafka + swoole
 
 #### Options
 
+FILE: `app/Config/high_level.yaml`
+
 |  option   | optional | default  |
 |  ----  | ----  | ----  |
-| auto.offset.reset  | smallest\|largest | largest |
+| auto.offset.reset  | smallest \| largest | largest |
 
 ### LowLevel
+
+FILE: `app/Config/low_level.yaml`
 
 ## Protocol API VERSION
 
