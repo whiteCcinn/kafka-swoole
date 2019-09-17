@@ -68,12 +68,6 @@ class StartCommand extends Command
                     (new TopicsListsOffsets())->setTopic(String16::value('caiwenhui'))
                                               ->setPartitions($partitions)
                 );
-                $protocol->setRequestHeader(
-                    (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
-                                         ->setClientId(String16::value('kafka-swoole'))
-                                         ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
-                                         ->setApiKey(Int16::value(ProtocolEnum::LIST_OFFSETS))
-                );
                 $protocol->setReplicaId(Int32::value(-1));
                 $protocol->setTopics($topics);
 

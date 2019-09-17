@@ -5,6 +5,12 @@ kafka + swoole
 
 ### HighLevel
 
+#### Options
+
+|  option   | optional | default  |
+|  ----  | ----  | ----  |
+| auto.offset.reset  | smallest\|largest | largest |
+
 ### LowLevel
 
 ## Protocol API VERSION

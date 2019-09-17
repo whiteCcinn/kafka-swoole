@@ -37,8 +37,9 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
      */
     public function __construct()
     {
-        $this->adJoinResponse();
-        $this->defaultPreDealwith();
+        $ref = new ReflectionClass(static::class);
+        $this->adJoinResponse($ref);
+        $this->defaultPreDealwith($ref);
     }
 
     /**
@@ -263,33 +264,31 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
 
     /**
      * Attach a response object to the request object
+     *
+     * @param ReflectionClass $refClass
      */
-    private function adJoinResponse(): void
+    private function adJoinResponse(ReflectionClass $refClass): void
     {
-        $refClass = new ReflectionClass(static::class);
         $className = $refClass->getName();
-        $namespace = $refClass->getNamespaceName();
-        $requestName = Str::after($className, "{$namespace}\"");
-        $responseClass = str_replace('Request', 'Response', $requestName);
+        $responseClass = str_replace('Request', 'Response', $className);
 
         $this->response = new $responseClass();
     }
 
     /**
-     *
+     * @param ReflectionClass $refClass
      */
-    private function defaultPreDealwith()
+    private function defaultPreDealWith(ReflectionClass $refClass): void
     {
-        $refClass = new ReflectionClass(static::class);
         $className = $refClass->getName();
         $namespace = $refClass->getNamespaceName();
-        $requestName = Str::after($className, "{$namespace}\"");
-        var_dump($requestName);exit;
+        $requestName = Str::after($className, "{$namespace}\\");
+        $protocolPreName = Str::before($requestName, 'Request');
         $this->setRequestHeader(
             (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
                                  ->setClientId(String16::value('kafka-swoole'))
-                                 ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
-                                 ->setApiKey(Int16::value(ProtocolEnum::getCodeByText()))
+                                 ->setCorrelationId(Int32::value(ProtocolEnum::getCodeByText($protocolPreName)))
+                                 ->setApiKey(Int16::value(ProtocolEnum::getCodeByText($protocolPreName)))
         );
     }
 }
