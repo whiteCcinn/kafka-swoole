@@ -188,3 +188,8 @@ array(3) {
 }
 */
 ```
+
+## References
+
+- [Apache.kafka.protocol](http://kafka.apache.org/protocol.html)
+- [Client.options](https://github.com/apache/kafka/blob/0.9.0/core/src/main/scala/kafka/consumer/ConsumerConfig.scala)
