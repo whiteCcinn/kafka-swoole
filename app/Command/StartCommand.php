@@ -128,6 +128,7 @@ class StartCommand extends Command
                 }
 
                 var_dump($protocol->response);
+                var_dump($protocol->response->toArray());
                 /*
 object(Kafka\Protocol\Response\MetadataResponse)#46 (4) {
   ["brokers":"Kafka\Protocol\Response\MetadataResponse":private]=>
