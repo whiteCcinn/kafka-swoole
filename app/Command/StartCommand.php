@@ -70,7 +70,7 @@ class StartCommand extends Command
                 );
                 $protocol->setRequestHeader(
                     (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
-                                         ->setClientId(String16::value('kafka-php'))
+                                         ->setClientId(String16::value('kafka-swoole'))
                                          ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
                                          ->setApiKey(Int16::value(ProtocolEnum::LIST_OFFSETS))
                 );
@@ -127,9 +127,41 @@ class StartCommand extends Command
                     }
                 }
 
-                var_dump($protocol->response);
                 var_dump($protocol->response->toArray());
+                var_dump($protocol->response);
+
                 /*
+array(3) {
+  ["responses"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["topic"]=>
+      string(9) "caiwenhui"
+      ["partitionResponses"]=>
+      array(1) {
+        [0]=>
+        array(3) {
+          ["partition"]=>
+          int(0)
+          ["errorCode"]=>
+          int(3)
+          ["offsets"]=>
+          array(0) {
+          }
+        }
+      }
+    }
+  }
+  ["responseHeader"]=>
+  array(1) {
+    ["correlationId"]=>
+    int(2)
+  }
+  ["size"]=>
+  int(33)
+}
+
 object(Kafka\Protocol\Response\MetadataResponse)#46 (4) {
   ["brokers":"Kafka\Protocol\Response\MetadataResponse":private]=>
   array(4) {

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Common;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use \Kafka\Protocol\Type\Int32;
 
 /**
@@ -12,6 +13,8 @@ use \Kafka\Protocol\Type\Int32;
  */
 class ResponseHeader
 {
+    use ToArrayTrait;
+
     /**
      * @var Int32 $correlationId
      */

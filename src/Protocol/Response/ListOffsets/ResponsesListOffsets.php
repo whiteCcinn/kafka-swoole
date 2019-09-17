@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\ListOffsets;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\String16;
 
 /**
@@ -12,6 +13,7 @@ use Kafka\Protocol\Type\String16;
  */
 class ResponsesListOffsets
 {
+    use ToArrayTrait;
     /**
      * Name of topic
      *

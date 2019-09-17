@@ -5,9 +5,11 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\ListOffsets\ResponsesListOffsets;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 class ListOffsetsResponse extends AbstractResponse
 {
+    use ToArrayTrait;
     /**
      * @var ResponsesListOffsets[] $responses
      */

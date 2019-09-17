@@ -222,15 +222,4 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 
         return $valueInstance;
     }
-
-
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        foreach ($this as $k => $v) {
-            var_dump($k, $v);
-        }
-    }
 }
