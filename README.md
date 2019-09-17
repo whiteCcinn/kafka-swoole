@@ -98,36 +98,6 @@ $data = $socket->recv();
 $protocol->response->unpack($data);
 var_dump($protocol->response,$protocol->response->toArray()); // Here you can see the response protocol of the kafka service
 /*
-array(3) {
-  ["responses"]=>
-  array(1) {
-    [0]=>
-    array(2) {
-      ["topic"]=>
-      string(9) "caiwenhui"
-      ["partitionResponses"]=>
-      array(1) {
-        [0]=>
-        array(3) {
-          ["partition"]=>
-          int(0)
-          ["errorCode"]=>
-          int(3)
-          ["offsets"]=>
-          array(0) {
-          }
-        }
-      }
-    }
-  }
-  ["responseHeader"]=>
-  array(1) {
-    ["correlationId"]=>
-    int(2)
-  }
-  ["size"]=>
-  int(33)
-}
 object(Kafka\Protocol\Response\ListOffsetsResponse)#46 (3) {
   ["responses":"Kafka\Protocol\Response\ListOffsetsResponse":private]=>
   array(1) {
@@ -172,6 +142,37 @@ object(Kafka\Protocol\Response\ListOffsetsResponse)#46 (3) {
     ["value":protected]=>
     int(33)
   }
+}
+
+array(3) {
+  ["responses"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["topic"]=>
+      string(9) "caiwenhui"
+      ["partitionResponses"]=>
+      array(1) {
+        [0]=>
+        array(3) {
+          ["partition"]=>
+          int(0)
+          ["errorCode"]=>
+          int(3)
+          ["offsets"]=>
+          array(0) {
+          }
+        }
+      }
+    }
+  }
+  ["responseHeader"]=>
+  array(1) {
+    ["correlationId"]=>
+    int(2)
+  }
+  ["size"]=>
+  int(33)
 }
 */
 ```

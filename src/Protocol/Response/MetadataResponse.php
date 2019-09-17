@@ -6,9 +6,12 @@ namespace Kafka\Protocol\Response;
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Metadata\BrokerMetadata;
 use Kafka\Protocol\Response\Metadata\TopicMetadata;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 class MetadataResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * @var BrokerMetadata[] $broker
      */

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Metadata;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use \Kafka\Protocol\Type\Int32;
 use \Kafka\Protocol\Type\String16;
 
@@ -13,6 +14,8 @@ use \Kafka\Protocol\Type\String16;
  */
 class BrokerMetadata
 {
+    use ToArrayTrait;
+
     /** @var Int32 $nodeId */
    private $nodeId;
 

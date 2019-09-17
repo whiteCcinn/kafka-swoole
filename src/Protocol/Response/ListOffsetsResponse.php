@@ -10,6 +10,7 @@ use Kafka\Protocol\TraitStructure\ToArrayTrait;
 class ListOffsetsResponse extends AbstractResponse
 {
     use ToArrayTrait;
+
     /**
      * @var ResponsesListOffsets[] $responses
      */

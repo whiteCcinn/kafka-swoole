@@ -121,11 +121,11 @@ class StartCommand extends Command
                 $protocol->response->unpack($data);
                 /** @var ListOffsetsResponse $response */
                 $response = $protocol->response;
-                foreach ($response->getResponses() as $resp) {
-                    foreach ($resp->getPartitionResponses() as $resp2) {
-                        var_dump(ProtocolErrorEnum::getTextByCode($resp2->getErrorCode()->getValue()));
-                    }
-                }
+//                foreach ($response->getResponses() as $resp) {
+//                    foreach ($resp->getPartitionResponses() as $resp2) {
+//                        var_dump(ProtocolErrorEnum::getTextByCode($resp2->getErrorCode()->getValue()));
+//                    }
+//                }
 
                 var_dump($protocol->response->toArray());
                 var_dump($protocol->response);
