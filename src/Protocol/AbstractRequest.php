@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol;
 
+use Kafka\Enum\ProtocolEnum;
+use Kafka\Enum\ProtocolVersionEnum;
 use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Response\FetchResponse;
 use Kafka\Protocol\Response\ListOffsetsResponse;
 use Kafka\Protocol\TraitStructure\ValueTrait;
 use Kafka\Protocol\Type\Arrays32;
+use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 use ReflectionProperty;
@@ -34,13 +37,8 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
      */
     public function __construct()
     {
-        $refClass = new ReflectionClass(static::class);
-        $className = $refClass->getName();
-        $namespace = $refClass->getNamespaceName();
-        $requestName = Str::after($className, "{$namespace}\"");
-        $responseClass = str_replace('Request', 'Response', $requestName);
-
-        $this->response = new $responseClass();
+        $this->adJoinResponse();
+        $this->defaultPreDealwith();
     }
 
     /**
@@ -261,5 +259,37 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
         $value = $instance->{$getMethod}();
 
         return $value;
+    }
+
+    /**
+     * Attach a response object to the request object
+     */
+    private function adJoinResponse(): void
+    {
+        $refClass = new ReflectionClass(static::class);
+        $className = $refClass->getName();
+        $namespace = $refClass->getNamespaceName();
+        $requestName = Str::after($className, "{$namespace}\"");
+        $responseClass = str_replace('Request', 'Response', $requestName);
+
+        $this->response = new $responseClass();
+    }
+
+    /**
+     *
+     */
+    private function defaultPreDealwith()
+    {
+        $refClass = new ReflectionClass(static::class);
+        $className = $refClass->getName();
+        $namespace = $refClass->getNamespaceName();
+        $requestName = Str::after($className, "{$namespace}\"");
+        var_dump($requestName);exit;
+        $this->setRequestHeader(
+            (new RequestHeader())->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+                                 ->setClientId(String16::value('kafka-swoole'))
+                                 ->setCorrelationId(Int32::value(ProtocolEnum::LIST_OFFSETS))
+                                 ->setApiKey(Int16::value(ProtocolEnum::getCodeByText()))
+        );
     }
 }

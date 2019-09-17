@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request\Common;
 
+use Kafka\Enum\ProtocolEnum;
+use Kafka\Enum\ProtocolVersionEnum;
 use \Kafka\Protocol\Type\Int16;
 use \Kafka\Protocol\Type\Int32;
 use \Kafka\Protocol\Type\String16;
