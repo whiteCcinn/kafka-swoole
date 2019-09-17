@@ -24,7 +24,6 @@ use Kafka\Protocol\Type\String16;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Yaml\Yaml;
 
 class StartCommand extends Command
 {
@@ -39,7 +38,6 @@ class StartCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        var_dump(1);exit;
 
         $socket = new \Co\Socket(AF_INET, SOCK_STREAM, 0);
 

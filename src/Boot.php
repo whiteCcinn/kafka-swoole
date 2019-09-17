@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka;
 
+use App\App;
 use App\Command\StartCommand;
+use Kafka\Event\BootAfterEvent;
+use Kafka\Subscriber\BootSubscriber;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Dotenv\Dotenv;
 use Kafka\Exceptions\BaseException;
@@ -23,9 +26,11 @@ class Boot
      */
     public static function boot()
     {
-        $dispatcher = new EventDispatcher();
-
-        self::console();
+        App::$dispatcher = new EventDispatcher();
+        App::$application = new Application();
+        App::$dispatcher->addSubscriber(new BootSubscriber());
+        App::$dispatcher->dispatch(new BootAfterEvent(), BootAfterEvent::NAME);
+//        self::console();
     }
 
     /**
