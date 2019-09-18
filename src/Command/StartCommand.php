@@ -22,7 +22,9 @@ class StartCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
-        $server = KafkaCServer::getInstance()->getServer();
+        go(function () {
+            dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
+            $server = KafkaCServer::getInstance()->getServer();
+        });
     }
 }

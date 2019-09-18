@@ -21,6 +21,7 @@ class Kafka
 
     /**
      * @var array $partitions
+     * ['topicName'=>['partitionIndex']]
      */
     private $partitions;
 

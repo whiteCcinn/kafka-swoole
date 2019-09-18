@@ -69,11 +69,11 @@ class StartSubscriber implements EventSubscriberInterface
             foreach ($response->getTopics() as $topicMetadata) {
                 /** @var PartitionMetadata $partitionMetadata */
                 foreach ($topicMetadata->getPartitions() as $partitionMetadata) {
-                    $partitions[$topicMetadata->getName()->getValue()][] = $partitionMetadata->getPartitionIndex();
+                    $partitions[$topicMetadata->getName()->getValue()][] = $partitionMetadata->getPartitionIndex()
+                                                                                             ->getValue();
                 }
             }
             Kafka::getInstance()->setPartitions($partitions);
-            var_dump($partitions);exit;
             break;
         }
     }
