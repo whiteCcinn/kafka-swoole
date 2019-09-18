@@ -11,8 +11,10 @@ use App\Exception\InvalidConfigurationException;
  *
  * @package App\Config
  */
-class ConsumerConfig extends AbstractConfig
+class ConsumerConfig extends CommonConfig
 {
+    protected const FILE = 'consumer.yaml';
+
     /** @var int $refreshMetadataBackoffMs */
     private $refreshMetadataBackoffMs;
 

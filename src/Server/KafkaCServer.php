@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Kafka\Server;
 
+use App\Handler\HighLevelHandler;
+use Kafka\Enum\ClientApiModeEnum;
 use Swoole\Server;
 
 class KafkaCServer
@@ -28,7 +30,7 @@ class KafkaCServer
     private function __construct()
     {
         if (!$this->server instanceof Server) {
-            $this->server = new Server(env('SERVER_IP'), env('SERVER_PORT'), SWOOLE_PROCESS, SWOOLE_TCP);
+            $this->server = new Server(env('SERVER_IP'), (int)env('SERVER_PORT'), SWOOLE_PROCESS, SWOOLE_TCP);
             swoole_set_process_name($this->getMasterName());
             $this->callBackFunc = [
                 'ManagerStart' => [$this, 'onManagerStart'],

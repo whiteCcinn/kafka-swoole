@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Command\StartCommand;
-use App\Subscriber\StartSubscriber;
+use Kafka\Config\CommonConfig;
+use Kafka\Kafka;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Translation\Translator;
@@ -28,13 +28,16 @@ class App
     public static $translator;
 
     /**
+     * @var CommonConfig $commonConfig
+     */
+    public static $commonConfig;
+
+    /**
      * @throws \Exception
      */
     public static function boot()
     {
         if (!self::$once) {
-            self::registerAppCommand();
-            self::registerAppSubscriber();
             self::changeOnce();
         }
     }
@@ -44,14 +47,11 @@ class App
         self::$once = !self::$once;
     }
 
-    private static function registerAppCommand(): void
+    /**
+     * @return array
+     */
+    public static function getBroker()
     {
-        self::$application->add(new StartCommand());
-        self::$application->run();
-    }
-
-    private static function registerAppSubscriber(): void
-    {
-        self::$dispatcher->addSubscriber(new StartSubscriber());
+        return Kafka::getInstance()->getBrokers();
     }
 }

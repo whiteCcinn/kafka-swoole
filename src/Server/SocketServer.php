@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Kafka\Server;
+
 use Co\Socket;
 
 class SocketServer
@@ -12,7 +13,7 @@ class SocketServer
     private static $instance;
 
     /**
-     * @var
+     * @var Socket $socket
      */
     private static $socket;
 
@@ -34,10 +35,38 @@ class SocketServer
     }
 
     /**
-     * @return mixed
+     * @return Socket
      */
-    public function getServer()
+    public function getSocket()
     {
-        return $this->socket;
+        return self::$socket;
+    }
+
+    /**
+     * @param string   $host
+     * @param int      $port
+     * @param callable $fn1
+     * @param callable $fn2
+     * @param float    $timeout
+     *
+     * @return string
+     */
+    public function run(string $host, int $port, callable $fn1, callable $fn2, $timeout = 3.0)
+    {
+        $result = '';
+        $socket = self::getInstance()->getSocket();
+        $retval = $socket->connect($host, $port, $timeout);
+        if (!$retval) {
+            return false;
+        }
+        $payload = $fn1();
+        $length = $socket->send($payload);
+        $data = $socket->recv();
+        $result = $fn2($data);
+        if (empty($data)) {
+            $socket->close();
+        }
+
+        return $result;
     }
 }

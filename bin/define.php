@@ -10,3 +10,5 @@
     dirname(__DIR__) . DIRECTORY_SEPARATOR . 'low_level.yaml');
 !defined('KAFKA_SWOOLE_CONFIG_HIGH_PRODUCER_FILE') && define('KAFKA_SWOOLE_CONFIG_HIGH_PRODUCER_FILE',
     dirname(__DIR__) . DIRECTORY_SEPARATOR . 'producer.yaml');
+!defined('KAFKA_SWOOLE_CONFIG_COMMON_FILE') && define('KAFKA_SWOOLE_CONFIG_COMMON_FILE',
+    KAFKA_SWOOLE_CONFIG . DIRECTORY_SEPARATOR . 'common.yaml');

@@ -43,5 +43,5 @@ abstract class AbstractConfig
      *
      * @return mixed
      */
-    abstract function validate($config);
+    abstract public function validate($config);
 }

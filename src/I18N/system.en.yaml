@@ -1,3 +1,7 @@
 Symfony:
   is:
     great: hahaha
+
+  config:
+    validate:
+      MetadataBrokerList: metadataBrokerList : {0} , which is worng!

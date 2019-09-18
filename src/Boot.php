@@ -8,7 +8,6 @@ use Kafka\Event\BootAfterEvent;
 use Kafka\Event\BootBeforeEvent;
 use Kafka\Subscriber\BootSubscriber;
 use Symfony\Component\Console\Application;
-use Kafka\Exceptions\BaseException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**

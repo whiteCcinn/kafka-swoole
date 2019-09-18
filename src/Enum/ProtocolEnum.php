@@ -24,37 +24,37 @@ class ProtocolEnum extends AbstractEnum
     public const LIST_OFFSETS = 2;
 
     /**
-     * @message("")
+     * @message("Metadata")
      */
     public const METADATA = 3;
 
     /**
-     * @message("")
+     * @message("OffsetCommit")
      */
     public const OFFSET_COMMIT = 8;
 
     /**
-     * @message("")
+     * @message("OffsetFetch")
      */
     public const OFFSET_FETCH = 9;
 
     /**
-     * @message("")
+     * @message("FindCoordinator")
      */
     public const FIND_COORDINATOR = 10;
 
     /**
-     * @message("")
+     * @message("JoinGroup")
      */
     public const JOIN_GROUP = 11;
 
     /**
-     * @message("")
+     * @message("Heartbeat")
      */
     public const HEARTBEAT = 12;
 
     /**
-     * @message("")
+     * @message("SyncGroup")
      */
     public const SYNC_GROUP = 14;
 }

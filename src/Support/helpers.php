@@ -102,6 +102,29 @@ if (!function_exists('dispatch')) {
     }
 }
 
+if (!function_exists('toValue')) {
+
+    function toValue($data)
+    {
+        $result = [];
+        if (is_array($data)) {
+            foreach ($data as $k => $v) {
+                if (!$v instanceof \Kafka\Protocol\Type\AbstractType) {
+                    $result[$k] = $v->toArray();
+                } else {
+                    $result[$k] = $v->getValue();
+                }
+            }
+        } else {
+            if ($data instanceof \Kafka\Protocol\Type\AbstractType) {
+                return $data->getValue();
+            }
+        }
+
+        return $result;
+    }
+}
+
 if (!function_exists('object_get')) {
     /**
      * Get an item from an object using "dot" notation.

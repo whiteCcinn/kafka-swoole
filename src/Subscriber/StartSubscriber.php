@@ -3,8 +3,16 @@ declare(strict_types=1);
 
 namespace Kafka\Subscriber;
 
+use App\App;
+use Kafka\Config\CommonConfig;
 use Kafka\Event\StartAfterEvent;
 use Kafka\Event\StartBeforeEvent;
+use Kafka\Kafka;
+use Kafka\Protocol\Request\MetadataRequest;
+use Kafka\Protocol\Response\MetadataResponse;
+use Kafka\Protocol\Type\String16;
+use Kafka\Server\SocketServer;
+use Swoole\Coroutine\Channel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -27,20 +35,34 @@ class StartSubscriber implements EventSubscriberInterface
 
     public function onStartBefore(): void
     {
-        $socket = new \Co\Socket(AF_INET, SOCK_STREAM, 0);
+        // step1. get all broker info
+        App::$commonConfig = new CommonConfig();
+        foreach (explode(',', App::$commonConfig->getMetadataBrokerList()) as $hostPorts) {
+            [$host, $port] = explode(':', $hostPorts);
+            $protocol = new MetadataRequest();
+            $fn1 = function () use ($protocol) {
+                $protocol = new MetadataRequest();
+                $topics = App::$commonConfig->getTopicNames();
+                $topicNames = array_map(function ($item) {
+                    return String16::value($item);
+                }, explode(',', $topics));
+                $protocol->setTopicName($topicNames);
 
-        go(function () use ($socket) {
-            // 主进程逻辑（监控子进程/控制进程数）
-            $retval = $socket->connect('mkafka1', 9092);
-            while ($retval) {
-                if (empty($data)) {
-                    $socket->close();
-                    break;
-                }
-                \Co::sleep(10.0);
+                return $protocol->pack();
+            };
+            $fn2 = function (string $data) use ($protocol) {
+                $protocol->response->unpack($data);
+
+                return $protocol;
+            };
+            $ret = SocketServer::getInstance()->run($host, (int)$port, $fn1, $fn2);
+            if (!$ret) {
+                continue;
             }
-            var_dump($retval, $socket->errCode);
-        });
+            /** @var MetadataResponse $response */
+            $response = $protocol->response;
+            Kafka::getInstance()->setBrokers(toValue($response->getBrokers()));
+        }
     }
 
     public function onStartAfter(): void

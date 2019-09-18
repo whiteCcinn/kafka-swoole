@@ -7,10 +7,9 @@ use App\App;
 use Kafka\Command\StartCommand;
 use Kafka\Event\BootAfterEvent;
 use Kafka\Event\BootBeforeEvent;
-use Kafka\Exception\BaseException;
+use Kafka\Event\StartBeforeEvent;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Translation\Translator;
 
 /**
  * Class BootSubscriber
@@ -44,11 +43,10 @@ class BootSubscriber implements EventSubscriberInterface
      */
     public function onBootAfter(): void
     {
-        //
-        $this->registerCommand();
-        $this->registerSubscriber();
         // start App
         App::boot();
+        $this->registerSubscriber();
+        $this->registerCommand();
     }
 
     /**

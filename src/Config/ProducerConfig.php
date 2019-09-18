@@ -11,8 +11,10 @@ use App\Exception\InvalidConfigurationException;
  *
  * @package App\Config
  */
-class ProducerConfig extends AbstractConfig
+class ProducerConfig extends CommonConfig
 {
+    protected const FILE = 'producer.yaml';
+
     /** @var string $clientId */
     private $clientId;
 
