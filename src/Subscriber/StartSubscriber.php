@@ -9,10 +9,11 @@ use Kafka\Event\StartAfterEvent;
 use Kafka\Event\StartBeforeEvent;
 use Kafka\Kafka;
 use Kafka\Protocol\Request\MetadataRequest;
+use Kafka\Protocol\Response\Metadata\PartitionMetadata;
+use Kafka\Protocol\Response\Metadata\TopicMetadata;
 use Kafka\Protocol\Response\MetadataResponse;
 use Kafka\Protocol\Type\String16;
 use Kafka\Server\SocketServer;
-use Swoole\Coroutine\Channel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -62,6 +63,18 @@ class StartSubscriber implements EventSubscriberInterface
             /** @var MetadataResponse $response */
             $response = $protocol->response;
             Kafka::getInstance()->setBrokers(toValue($response->getBrokers()));
+            Kafka::getInstance()->setTopics(toValue($response->getTopics()));
+            $partitions = [];
+            /** @var TopicMetadata $topicMetadata */
+            foreach ($response->getTopics() as $topicMetadata) {
+                /** @var PartitionMetadata $partitionMetadata */
+                foreach ($topicMetadata->getPartitions() as $partitionMetadata) {
+                    $partitions[$topicMetadata->getName()->getValue()][] = $partitionMetadata->getPartitionIndex();
+                }
+            }
+            Kafka::getInstance()->setPartitions($partitions);
+            var_dump($partitions);exit;
+            break;
         }
     }
 
