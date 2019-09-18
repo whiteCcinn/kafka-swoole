@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Config;
+namespace Kafka\Config;
 
 use App\Exception\InvalidConfigurationException;
 use function preg_match;

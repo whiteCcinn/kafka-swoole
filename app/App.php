@@ -6,6 +6,7 @@ use App\Command\StartCommand;
 use App\Subscriber\StartSubscriber;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Translation\Translator;
 
 class App
 {
@@ -20,6 +21,11 @@ class App
      * @var Application $application
      */
     public static $application;
+
+    /**
+     * @var Translator $translator
+     */
+    public static $translator;
 
     /**
      * @throws \Exception

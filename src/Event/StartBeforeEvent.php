@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Event;
+namespace Kafka\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

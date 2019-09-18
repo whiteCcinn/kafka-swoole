@@ -2,11 +2,12 @@
 
 use Kafka\Support\Str;
 
-if (! function_exists('class_basename')) {
+if (!function_exists('class_basename')) {
     /**
      * Get the class "basename" of the given object / class.
      *
-     * @param  string|object  $class
+     * @param  string|object $class
+     *
      * @return string
      */
     function class_basename($class)
@@ -17,11 +18,12 @@ if (! function_exists('class_basename')) {
     }
 }
 
-if (! function_exists('class_uses_recursive')) {
+if (!function_exists('class_uses_recursive')) {
     /**
      * Returns all traits used by a class, its subclasses and trait of their traits.
      *
-     * @param  object|string  $class
+     * @param  object|string $class
+     *
      * @return array
      */
     function class_uses_recursive($class)
@@ -40,12 +42,13 @@ if (! function_exists('class_uses_recursive')) {
     }
 }
 
-if (! function_exists('env')) {
+if (!function_exists('env')) {
     /**
      * Gets the value of an environment variable.
      *
-     * @param  string  $key
-     * @param  mixed   $default
+     * @param  string $key
+     * @param  mixed  $default
+     *
      * @return mixed
      */
     function env($key, $default = null)
@@ -79,13 +82,34 @@ if (! function_exists('env')) {
     }
 }
 
-if (! function_exists('object_get')) {
+if (!function_exists('trans')) {
+
+    function trans($id, array $parameters = [], $domain = null, $locale = null)
+    {
+        return App\App::$translator->trans($id, $parameters, $domain, $locale);
+    }
+}
+
+if (!function_exists('dispatch')) {
+
+    function dispatch(\Symfony\Contracts\EventDispatcher\Event $event, string $eventName = null)
+    {
+        if ($eventName !== null) {
+            App\App::$dispatcher->dispatch($event, $eventName);
+        } else {
+            App\App::$dispatcher->dispatch($event);
+        }
+    }
+}
+
+if (!function_exists('object_get')) {
     /**
      * Get an item from an object using "dot" notation.
      *
-     * @param  object  $object
-     * @param  string  $key
-     * @param  mixed   $default
+     * @param  object $object
+     * @param  string $key
+     * @param  mixed  $default
+     *
      * @return mixed
      */
     function object_get($object, $key, $default = null)
@@ -95,7 +119,7 @@ if (! function_exists('object_get')) {
         }
 
         foreach (explode('.', $key) as $segment) {
-            if (! is_object($object) || ! isset($object->{$segment})) {
+            if (!is_object($object) || !isset($object->{$segment})) {
                 return value($default);
             }
 
@@ -106,13 +130,14 @@ if (! function_exists('object_get')) {
     }
 }
 
-if (! function_exists('preg_replace_array')) {
+if (!function_exists('preg_replace_array')) {
     /**
      * Replace a given pattern with each value in the array in sequentially.
      *
-     * @param  string  $pattern
-     * @param  array   $replacements
-     * @param  string  $subject
+     * @param  string $pattern
+     * @param  array  $replacements
+     * @param  string $subject
+     *
      * @return string
      */
     function preg_replace_array($pattern, array $replacements, $subject)
@@ -125,13 +150,14 @@ if (! function_exists('preg_replace_array')) {
     }
 }
 
-if (! function_exists('retry')) {
+if (!function_exists('retry')) {
     /**
      * Retry an operation a given number of times.
      *
-     * @param  int  $times
-     * @param  callable  $callback
-     * @param  int  $sleep
+     * @param  int      $times
+     * @param  callable $callback
+     * @param  int      $sleep
+     *
      * @return mixed
      *
      * @throws \Exception
@@ -144,7 +170,7 @@ if (! function_exists('retry')) {
         try {
             return $callback();
         } catch (Exception $e) {
-            if (! $times) {
+            if (!$times) {
                 throw $e;
             }
 
@@ -159,11 +185,12 @@ if (! function_exists('retry')) {
     }
 }
 
-if (! function_exists('trait_uses_recursive')) {
+if (!function_exists('trait_uses_recursive')) {
     /**
      * Returns all traits used by a trait and its traits.
      *
-     * @param  string  $trait
+     * @param  string $trait
+     *
      * @return array
      */
     function trait_uses_recursive($trait)
@@ -178,11 +205,12 @@ if (! function_exists('trait_uses_recursive')) {
     }
 }
 
-if (! function_exists('value')) {
+if (!function_exists('value')) {
     /**
      * Return the default value of the given value.
      *
-     * @param  mixed  $value
+     * @param  mixed $value
+     *
      * @return mixed
      */
     function value($value)
@@ -191,7 +219,7 @@ if (! function_exists('value')) {
     }
 }
 
-if (! function_exists('windows_os')) {
+if (!function_exists('windows_os')) {
     /**
      * Determine whether the current environment is Windows based.
      *
@@ -203,11 +231,12 @@ if (! function_exists('windows_os')) {
     }
 }
 
-if (! function_exists('with')) {
+if (!function_exists('with')) {
     /**
      * Return the given object. Useful for chaining.
      *
-     * @param  mixed  $object
+     * @param  mixed $object
+     *
      * @return mixed
      */
     function with($object)

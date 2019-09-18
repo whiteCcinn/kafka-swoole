@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Subscriber;
+namespace Kafka\Subscriber;
 
-use App\Event\StartAfterEvent;
-use App\Event\StartBeforeEvent;
+use Kafka\Event\StartAfterEvent;
+use Kafka\Event\StartBeforeEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -27,7 +27,20 @@ class StartSubscriber implements EventSubscriberInterface
 
     public function onStartBefore(): void
     {
-        // do something
+        $socket = new \Co\Socket(AF_INET, SOCK_STREAM, 0);
+
+        go(function () use ($socket) {
+            // 主进程逻辑（监控子进程/控制进程数）
+            $retval = $socket->connect('mkafka1', 9092);
+            while ($retval) {
+                if (empty($data)) {
+                    $socket->close();
+                    break;
+                }
+                \Co::sleep(10.0);
+            }
+            var_dump($retval, $socket->errCode);
+        });
     }
 
     public function onStartAfter(): void

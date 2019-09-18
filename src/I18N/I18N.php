@@ -25,7 +25,7 @@ class I18N
     public static function getInstance(): Translator
     {
         if (!self::$instance instanceof I18N) {
-            $translator = new Translator(I18NEnum::ZH_TRANSLATOR);
+            $translator = new Translator(env('APP_LANGUGE'));
             $translator->addLoader(self::$file, new YamlFileLoader());
             self::$instance = $translator;
 
