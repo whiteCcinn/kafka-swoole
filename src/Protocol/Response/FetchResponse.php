@@ -5,9 +5,12 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Fetch\ResponsesFetch;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 class FetchResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * null
      *

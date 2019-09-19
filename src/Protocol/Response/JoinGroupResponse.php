@@ -5,12 +5,15 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\JoinGroup\MembersJoinGroup;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
 class JoinGroupResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+    
     /**
      * The error code, or 0 if there was no error.
      *

@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 
 class LeaveGroupResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * The error code, or 0 if there was no error.
      *

@@ -3,7 +3,7 @@
 namespace App;
 
 use Kafka\Config\CommonConfig;
-use Kafka\Kafka;
+use Kafka\Manager;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Translation\Translator;

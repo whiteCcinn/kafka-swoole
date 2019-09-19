@@ -14,4 +14,25 @@ final class MetadataTest extends AbstractProtocolTest
         $this->protocol = new MetadataRequest();
         parent::setUp();
     }
+
+    public function testEncode(): void
+    {
+        try {
+            $test = $this->protocol->pack();
+        } catch (\Exception $e) {
+
+        }
+    }
+
+    public function testDecode(): void
+    {
+        $test = $this->protocol->response;
+
+        self::assertSame('00000013001200000000001200096b61666b612d706870', bin2hex($test));
+    }
+
+    public function testDynamic()
+    {
+
+    }
 }

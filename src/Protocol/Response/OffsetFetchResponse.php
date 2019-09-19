@@ -5,10 +5,13 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Fetch\ResponsesFetch;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 
 class OffsetFetchResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * Responses by topic for fetched offsets
      *

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Config;
 
-use App\Exception\InvalidConfigException;
+use Kafka\Exception\InvalidConfigException;
 use Kafka\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 

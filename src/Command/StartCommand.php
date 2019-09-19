@@ -1,13 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Kafka\Command;
 
 use Kafka\Event\StartBeforeEvent;
+use Kafka\Manager\MetadataManager;
 use Kafka\Server\KafkaCServer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Swoole\Server;
 
 class StartCommand extends Command
 {
@@ -22,9 +23,9 @@ class StartCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        go(function () {
-            dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
-            $server = KafkaCServer::getInstance()->getServer();
-        });
+        dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
+        $metadataManager = new MetadataManager();
+        $processNum = $metadataManager->calculationClientNum();
+        KafkaCServer::getInstance()->setProcess($processNum)->start();
     }
 }

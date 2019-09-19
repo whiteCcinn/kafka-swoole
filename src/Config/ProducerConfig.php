@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Kafka\Config;
 
-use App\Exception\InvalidConfigException;
-use App\Exception\InvalidConfigurationException;
+use Kafka\Exception\InvalidConfigException;
+use Kafka\Exception\InvalidConfigurationException;
 
 /**
  * Class ProducerConfig

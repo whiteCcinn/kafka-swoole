@@ -5,9 +5,12 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\OffsetCommit\TopicOffsetCommit;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 class OffsetCommitResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * @var TopicOffsetCommit[] $topics
      */

@@ -5,9 +5,12 @@ namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
 use Kafka\Protocol\Response\Produce\ResponsesProduce;
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 class ProduceResponse extends AbstractResponse
 {
+    use ToArrayTrait;
+
     /**
      * @var ResponsesProduce[] $responses
      */
