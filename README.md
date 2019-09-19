@@ -53,7 +53,7 @@ FILE: `config/producer.yaml`
 - [ ] ListGroups
 - [ ] SaslHandshake
 - [ ] ApiVersions
-- [ ] CreateTopics
+- [x] CreateTopics
 - [ ] DeleteTopics
 - [ ] DeleteRecords
 - [ ] InitProducerId
