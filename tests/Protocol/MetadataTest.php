@@ -11,11 +11,18 @@ use KafkaTest\AbstractProtocolTest;
 
 final class MetadataTest extends AbstractProtocolTest
 {
-    public function init()
+    /**
+     * @var MetadataRequest $protocol
+     */
+    private $protocol;
+
+    /**
+     * @before
+     */
+    public function newProtocol()
     {
         $this->protocol = new MetadataRequest();
     }
-
 
     /**
      * @author caiwenhui
