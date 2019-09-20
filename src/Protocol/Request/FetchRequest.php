@@ -33,7 +33,7 @@ class FetchRequest extends AbstractRequest
     /**
      * Topics to fetch in the order provided.
      *
-     * @var TopicFetch $topics
+     * @var TopicFetch[] $topics
      */
     private $topics;
 
@@ -98,19 +98,19 @@ class FetchRequest extends AbstractRequest
     }
 
     /**
-     * @return TopicFetch
+     * @return TopicFetch[]
      */
-    public function getTopics(): TopicFetch
+    public function getTopics(): array
     {
         return $this->topics;
     }
 
     /**
-     * @param TopicFetch $topics
+     * @param TopicFetch[] $topics
      *
      * @return FetchRequest
      */
-    public function setTopics(TopicFetch $topics): FetchRequest
+    public function setTopics(array $topics): FetchRequest
     {
         $this->topics = $topics;
 
