@@ -3,17 +3,15 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request\Metadata;
 
-use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
-use Kafka\Protocol\Type\String16;
 
 class PartitionsFetch
 {
     /**
      * Topic partition id
      *
-     * @var String16 $topic
+     * @var Int32 $topic
      */
     private $partition;
 
@@ -32,19 +30,19 @@ class PartitionsFetch
     private $partitionMaxBytes;
 
     /**
-     * @return String16
+     * @return Int32
      */
-    public function getPartition(): String16
+    public function getPartition(): Int32
     {
         return $this->partition;
     }
 
     /**
-     * @param String16 $partition
+     * @param Int32 $partition
      *
      * @return PartitionsFetch
      */
-    public function setPartition(String16 $partition): PartitionsFetch
+    public function setPartition(Int32 $partition): PartitionsFetch
     {
         $this->partition = $partition;
 
@@ -90,5 +88,4 @@ class PartitionsFetch
 
         return $this;
     }
-
 }
