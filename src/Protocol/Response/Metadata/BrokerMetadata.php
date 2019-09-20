@@ -17,13 +17,13 @@ class BrokerMetadata
     use ToArrayTrait;
 
     /** @var Int32 $nodeId */
-   private $nodeId;
+    private $nodeId;
 
-   /** @var String16 $host */
-   private $host;
+    /** @var String16 $host */
+    private $host;
 
-   /** @var Int32 $port */
-   private $port;
+    /** @var Int32 $port */
+    private $port;
 
     /**
      * @return Int32

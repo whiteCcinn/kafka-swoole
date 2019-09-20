@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Request;
 
 use Kafka\Protocol\AbstractRequest;
-use Kafka\Protocol\Request\Metadata\TopicDataProduce;
+use Kafka\Protocol\Request\Produce\TopicDataProduce;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 
@@ -19,7 +19,7 @@ class ProduceRequest extends AbstractRequest
     private $acks;
 
     /**
-     * timeout    The time to await a response in ms.
+     * timeout The time to await a response in ms.
      *
      * @var Int32 $timeout
      */

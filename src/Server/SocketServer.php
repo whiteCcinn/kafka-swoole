@@ -35,7 +35,7 @@ class SocketServer
      * @param callable $fn2
      * @param float    $timeout
      *
-     * @return string
+     * @return array| bool
      */
     public function run(string $host, int $port, callable $fn1, callable $fn2, $timeout = 3.0)
     {
@@ -51,6 +51,6 @@ class SocketServer
         $result = $fn2($data);
         $client->close();
 
-        return $result;
+        return [true, $result];
     }
 }

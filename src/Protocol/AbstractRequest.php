@@ -9,10 +9,11 @@ use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Response\FetchResponse;
 use Kafka\Protocol\Response\ListOffsetsResponse;
-use Kafka\Protocol\TraitStructure\ValueTrait;
 use Kafka\Protocol\Type\Arrays32;
+use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
+use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use ReflectionProperty;
 use ReflectionClass;
@@ -37,9 +38,11 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
      */
     public function __construct()
     {
-        $ref = new ReflectionClass(static::class);
-        $this->adJoinResponse($ref);
-        $this->defaultPreDealwith($ref);
+        if (static::class !== CommonRequest::class) {
+            $ref = new ReflectionClass(static::class);
+            $this->adJoinResponse($ref);
+            $this->defaultPreDealwith($ref);
+        }
     }
 
     /**
@@ -104,6 +107,10 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                     $protocolType);
 
                 if ($isArray) {
+                    if (method_exists($instance, $onMethod = Str::camel('on_' . $propertyName))) {
+                        $instance->{$onMethod}($protocol);
+                        continue;
+                    }
                     $protocolObjectArray = $this->getPropertyValue($instance, $propertyName);
                     $arrayCount = count($protocolObjectArray);
                     $protocol .= pack(Arrays32::getWrapperProtocol(), (string)$arrayCount);
@@ -114,51 +121,51 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                     } else {
                         $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
                         foreach ($protocolObjectArray as $protocolObject) {
-                            echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $protocolObject->getValue() . PHP_EOL;
+
+                            // todo debug
+//                            echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $protocolObject->getValue() . PHP_EOL;
+
                             $value = $protocolObject->getValue();
-                            if ($className === String16::class) {
+                            if (in_array($className, [String16::class, Bytes32::class])) {
                                 $protocol .= pack($wrapperProtocol, (string)strlen($value)) . $value;
                             } else {
-                                if ($wrapperProtocol == 'N2') {
-                                    $left = 0xffffffff00000000;
-                                    $right = 0x00000000ffffffff;
-
-                                    $l = ($value & $left) >> 32;
-                                    $r = $value & $right;
-
-                                    $protocol .= pack($wrapperProtocol, $l, $r);
-                                } else {
-                                    $protocol .= pack($wrapperProtocol, $value);
-                                }
+                                $this->IntTypePack($protocol, $wrapperProtocol, $value);
                             }
                         }
                     }
                 } else {
+                    if (method_exists($instance, $onMethod = Str::camel('on_' . $propertyName))) {
+                        $instance->{$onMethod}($protocol);
+                        continue;
+                    }
+
                     if ($className === RequestHeader::class) {
                         $protocol = $this->packProtocol($className, $this->getPropertyValue($instance, $propertyName),
                             $protocol);
                     } else {
-                        $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
-                        $value = (string)$this->getTypePropertyValue($instance, $propertyName, $protocol);
-                        echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . var_export($this->getTypePropertyValue($instance,
-                                $propertyName, $protocol),
-                                true) . PHP_EOL;
-                        if ($className === String16::class) {
-                            $protocol .= pack($wrapperProtocol, (string)strlen($value)) . $value;
+                        if (!Str::startsWith($className, $typeNamespace)) {
+                            $protocol = $this->packProtocol($className,
+                                $this->getPropertyValue($instance, $propertyName),
+                                $protocol);
                         } else {
-                            if ($instance instanceof AbstractRequest && $propertyName == 'size') {
-                                $protocol = pack($wrapperProtocol, (string)strlen($protocol)) . $protocol;
+                            $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
+                            if ($this->continueCallBack($instance, $className, $wrapperProtocol, $propertyName)) {
+                                continue;
+                            }
+                            $value = (string)$this->getTypePropertyValue($instance, $propertyName, $protocol);
+
+                            // todo debug
+//                            echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . var_export($this->getTypePropertyValue($instance,
+//                                    $propertyName, $protocol),
+//                                    true) . PHP_EOL;
+
+                            if (in_array($className, [String16::class, Bytes32::class])) {
+                                $protocol .= pack($wrapperProtocol, (string)strlen($value)) . $value;
                             } else {
-                                if ($wrapperProtocol == 'N2') {
-                                    $left = 0xffffffff00000000;
-                                    $right = 0x00000000ffffffff;
-
-                                    $l = ($value & $left) >> 32;
-                                    $r = $value & $right;
-
-                                    $protocol .= pack($wrapperProtocol, $l, $r);
+                                if ($instance instanceof AbstractRequest && $propertyName == 'size') {
+                                    $protocol = pack($wrapperProtocol, (string)strlen($protocol)) . $protocol;
                                 } else {
-                                    $protocol .= pack($wrapperProtocol, $value);
+                                    $this->IntTypePack($protocol, $wrapperProtocol, $value);
                                 }
                             }
                         }
@@ -170,6 +177,14 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
         }
 
         return $protocol;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function continueCallBack($instance, $className, $wrapperProtocol, $propertyName): bool
+    {
+        return false;
     }
 
     /**
@@ -290,5 +305,27 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
                                  ->setCorrelationId(Int32::value(ProtocolEnum::getCodeByText($protocolPreName)))
                                  ->setApiKey(Int16::value(ProtocolEnum::getCodeByText($protocolPreName)))
         );
+    }
+
+    /**
+     * @param $protocol
+     * @param $wrapperProtocol
+     * @param $value
+     *
+     * @throws ProtocolTypeException
+     */
+    private function IntTypePack(&$protocol, $wrapperProtocol, $value): void
+    {
+        if ($wrapperProtocol === Int64::getWrapperProtocol()) {
+            $left = 0xffffffff00000000;
+            $right = 0x00000000ffffffff;
+
+            $l = ($value & $left) >> 32;
+            $r = $value & $right;
+
+            $protocol .= pack($wrapperProtocol, $l, $r);
+        } else {
+            $protocol .= pack($wrapperProtocol, $value);
+        }
     }
 }

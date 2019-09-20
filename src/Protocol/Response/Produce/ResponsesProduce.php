@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Produce;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\String16;
 
 class ResponsesProduce
 {
+    use ToArrayTrait;
+
     /**
      * Name of topic
      *

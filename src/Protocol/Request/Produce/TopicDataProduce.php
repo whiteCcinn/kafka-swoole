@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\Metadata;
+namespace Kafka\Protocol\Request\Produce;
 
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\String16;
@@ -18,7 +18,7 @@ class TopicDataProduce
     /**
      * null
      *
-     * @var DataProduce[] $data;
+     * @var DataProduce[] $data ;
      */
     private $data;
 

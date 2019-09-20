@@ -1,11 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\Metadata;
+namespace Kafka\Protocol\Request\Produce;
 
+use Kafka\Protocol\CommonRequest;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
+/**
+ * Class DataProduce
+ *
+ *
+ * @package Kafka\Protocol\Request\Metadata
+ */
 class DataProduce
 {
     /**
@@ -16,11 +23,9 @@ class DataProduce
     private $partition;
 
     /**
-     * null todo
-     *
-     * @var String16[] $recordSet
+     * @var MessageSetProduce[] $messageSet
      */
-    private $recordSet;
+    private $messageSet;
 
     /**
      * @return Int32
@@ -40,5 +45,42 @@ class DataProduce
         $this->partition = $partition;
 
         return $this;
+    }
+
+    /**
+     * @return MessageSetProduce[]
+     */
+    public function getMessageSet(): array
+    {
+        return $this->messageSet;
+    }
+
+    /**
+     * @param MessageSetProduce[] $messageSet
+     *
+     * @return DataProduce
+     */
+    public function setMessageSet(array $messageSet): DataProduce
+    {
+        $this->messageSet = $messageSet;
+
+        return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
+     */
+    public function onMessageSet(&$protocol)
+    {
+        $commentRequest = new CommonRequest();
+        $data = '';
+        foreach ($this->getMessageSet() as $messageSet) {
+            $data .= $commentRequest->packProtocol(MessageSetProduce::class, $messageSet);
+        }
+
+        $protocol .= pack(Int32::getWrapperProtocol(), strlen($data)) . $data;
     }
 }

@@ -5,9 +5,7 @@ namespace Kafka\Protocol;
 
 use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Exception\ProtocolTypeException;
-use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Response\Common\ResponseHeader;
-use Kafka\Protocol\Type\Arrays32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use Kafka\Support\Str;

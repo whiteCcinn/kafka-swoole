@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Produce;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 
 class PartitionResponsesProduce
 {
+    use ToArrayTrait;
     /**
      * @var Int32 $partition
      */
