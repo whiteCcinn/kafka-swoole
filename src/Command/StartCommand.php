@@ -21,6 +21,13 @@ class StartCommand extends Command
             ->setHelp('This command allows Start Kafka-Swoole-Server...');
     }
 
+    /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
+     * @return int|null|void
+     * @throws \Kafka\Exception\InvalidEnvException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
