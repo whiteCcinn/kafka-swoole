@@ -15,13 +15,13 @@ class PartitionMetadata
     use ToArrayTrait;
 
     /** @var Int16 $errorCode */
-   private $errorCode;
+    private $errorCode;
 
-   /** @var Int32 $partitionIndex */
-   private $partitionIndex;
+    /** @var Int32 $partitionIndex */
+    private $partitionIndex;
 
-   /** @var Int32 $leaderId */
-   private $leaderId;
+    /** @var Int32 $leaderId */
+    private $leaderId;
 
     /** @var Int32[] $replicaNodes */
     private $replicaNodes;

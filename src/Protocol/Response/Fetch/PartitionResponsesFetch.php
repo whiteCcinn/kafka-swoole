@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Fetch;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
+
 class PartitionResponsesFetch
 {
+    use ToArrayTrait;
+
     /**
      * @var PartitionHeaderFetch $partitionHeader
      */

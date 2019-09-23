@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Fetch;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 
 class PartitionHeaderFetch
 {
+    use ToArrayTrait;
+
     /**
      * Topic partition id
      *
@@ -17,14 +20,14 @@ class PartitionHeaderFetch
     private $partition;
 
     /**
-     * 	Response error code
+     *    Response error code
      *
      * @var Int16 $errorCode
      */
     private $errorCode;
 
     /**
-     * 	Last committed offset.
+     *    Last committed offset.
      *
      * @var Int64 $highWatermark
      */

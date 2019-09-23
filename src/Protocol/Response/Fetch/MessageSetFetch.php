@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\Fetch;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 
 class MessageSetFetch
 {
+    use ToArrayTrait;
+
     /**
      * @var Int64 $offset
      */

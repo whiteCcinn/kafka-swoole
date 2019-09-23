@@ -6,6 +6,8 @@ namespace Kafka\Protocol;
 use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Response\Common\ResponseHeader;
+use Kafka\Protocol\Type\AbstractType;
+use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use Kafka\Support\Str;
@@ -41,25 +43,27 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 
     /**
      * @param string $protocol
+     * @param        $client
      *
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    public function unpack(string $protocol)
+    public function unpack(string $protocol, $client)
     {
         $decodeProtocol = $protocol;
-        $this->unpackProtocol(null, null, $decodeProtocol);
+        $this->unpackProtocol(null, null, $decodeProtocol, $client);
     }
 
     /**
      * @param null   $fullClassName
      * @param null   $instance
      * @param string $protocol
+     * @param null   $client
      *
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    private function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '')
+    private function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '', $client = null)
     {
         $fullClassName = $fullClassName ?? static::class;
         $instance = $instance ?? $this;
@@ -93,7 +97,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
                     $arrayCount = unpack($wrapperProtocol, $buffer);
                     $arrayCount = is_array($arrayCount) ? array_shift($arrayCount) : $arrayCount;
 //                    echo "{$propertyName} count : " . $arrayCount . PHP_EOL;
-                    while ($arrayCount > 0) {
+                    while ($arrayCount > 0 && !empty($protocol)) {
                         if (!Str::startsWith($className, $typeNamespace)) {
                             $value[] = $classNameInstance = $classNameRef->newInstanceWithoutConstructor();
                             $this->unpackProtocol($className, $classNameInstance, $protocol);
@@ -107,19 +111,47 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 //                            true) . PHP_EOL;
                     $this->setTypePropertyValue($instance, $propertyName, $value);
                 } else {
-                    if ($className === ResponseHeader::class) {
+                    if (!Str::startsWith($className, $typeNamespace)) {
                         $classNameInstance = $classNameRef->newInstanceWithoutConstructor();
                         $this->unpackProtocol($className, $classNameInstance, $protocol);
                         $this->setTypePropertyValue($instance, $propertyName, $classNameInstance);
                     } else {
-                        $valueInstance = $this->getValueInstance($protocol, $className);
+                        if ($className === ResponseHeader::class) {
+                            $classNameInstance = $classNameRef->newInstanceWithoutConstructor();
+                            $this->unpackProtocol($className, $classNameInstance, $protocol);
+                            $this->setTypePropertyValue($instance, $propertyName, $classNameInstance);
+                        } else {
+                            $valueInstance = $this->getValueInstance($protocol, $className);
+                            if ($propertyName === 'size') {
+                                $this->goOnReadBuffer($client, $valueInstance, $protocol);
+                            }
 
 //                        echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $value . PHP_EOL;
-                        $this->setTypePropertyValue($instance, $propertyName, $valueInstance);
+                            $this->setTypePropertyValue($instance, $propertyName, $valueInstance);
+                        }
                     }
                 }
             }
         }
+        end:
+    }
+
+    /**
+     * @param              $client
+     * @param AbstractType $classNameInstance
+     * @param string       $protocol
+     */
+    private function goOnReadBuffer($client, AbstractType $classNameInstance, string &$protocol)
+    {
+        $remainLen = $classNameInstance->getValue();
+        recv:
+        if ($remainLen > 0) {
+            $buffer = $client->recv($remainLen);
+            $remainLen = $remainLen - strlen($buffer);
+            $protocol .= $buffer;
+            goto recv;
+        }
+        $client->close();
     }
 
     /**
@@ -211,7 +243,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
             $data = unpack($wrapperProtocol, $buffer);
         }
         $data = is_array($data) ? array_shift($data) : $data;
-        if ($className === String16::class) {
+        if (in_array($className, [String16::class, Bytes32::class])) {
             $length = $data;
             $data = substr($protocol, 0, $length);
             $protocol = substr($protocol, $length);

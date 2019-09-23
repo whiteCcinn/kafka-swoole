@@ -7,6 +7,7 @@ use Kafka\Protocol\Request\MetadataRequest;
 use Kafka\Protocol\Type\String16;
 use Kafka\Server\SocketServer;
 use KafkaTest\AbstractProtocolTest;
+use Swoole\Client;
 
 
 final class MetadataTest extends AbstractProtocolTest
@@ -26,7 +27,7 @@ final class MetadataTest extends AbstractProtocolTest
 
     /**
      * @author caiwenhui
-     * @group encode
+     * @group  encode
      * @return string
      * @throws \Kafka\Exception\ProtocolTypeException
      * @throws \ReflectionException
@@ -47,6 +48,7 @@ final class MetadataTest extends AbstractProtocolTest
     /**
      * @author  caiwenhui
      * @depends testEncode
+     *
      * @param string $data
      */
     public function testSend(string $data)
@@ -56,8 +58,8 @@ final class MetadataTest extends AbstractProtocolTest
 
         SocketServer::getInstance()->run('mkafka1', 9092, function () use ($data) {
             return $data;
-        }, function (string $data) use ($protocol) {
-            $protocol->response->unpack($data);
+        }, function (string $data, Client $client) use ($protocol) {
+            $protocol->response->unpack($data, $client);
         });
 
         var_dump($protocol->response->toArray());

@@ -16,6 +16,7 @@ use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use Kafka\Server\SocketServer;
 use KafkaTest\AbstractProtocolTest;
+use Swoole\Client;
 
 
 final class ProduceTest extends AbstractProtocolTest
@@ -51,7 +52,7 @@ final class ProduceTest extends AbstractProtocolTest
                                                  (new DataProduce())->setPartition(Int32::value(0))
                                                                     ->setMessageSet([
                                                                         (new MessageSetProduce())->setOffset(Int64::value(0))
-                                                                                               ->setMessage(
+                                                                                                 ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test...'))
                                                                                                  ),
 
@@ -78,8 +79,8 @@ final class ProduceTest extends AbstractProtocolTest
         $protocol = $this->protocol;
         $data = SocketServer::getInstance()->run('mkafka4', 9092, function () use ($data) {
             return $data;
-        }, function (string $data) use ($protocol) {
-            $protocol->response->unpack($data);
+        }, function (string $data, Client $client) use ($protocol) {
+            $protocol->response->unpack($data, $client);
         });
 
         $this->assertIsArray($data);
@@ -108,11 +109,11 @@ final class ProduceTest extends AbstractProtocolTest
                                                  (new DataProduce())->setPartition(Int32::value(0))
                                                                     ->setMessageSet([
                                                                         (new MessageSetProduce())->setOffset(Int64::value(0))
-                                                                                               ->setMessage(
+                                                                                                 ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test1...'))
                                                                                                  ),
                                                                         (new MessageSetProduce())->setOffset(Int64::value(1))
-                                                                                               ->setMessage(
+                                                                                                 ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test2...'))
                                                                                                  ),
 
@@ -139,8 +140,8 @@ final class ProduceTest extends AbstractProtocolTest
         $protocol = $this->protocol;
         $data = SocketServer::getInstance()->run('mkafka4', 9092, function () use ($data) {
             return $data;
-        }, function (string $data) use ($protocol) {
-            $protocol->response->unpack($data);
+        }, function (string $data, Client $client) use ($protocol) {
+            $protocol->response->unpack($data, $client);
         });
 
         $this->assertIsArray($data);
