@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\Metadata;
+namespace Kafka\Protocol\Request\Fetch;
 
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\String16;
 
-class TopicFetch
+class TopicsFetch
 {
     /**
      * Name of topic
@@ -31,9 +31,9 @@ class TopicFetch
     /**
      * @param String16 $topic
      *
-     * @return TopicFetch
+     * @return TopicsFetch
      */
-    public function setTopic(String16 $topic): TopicFetch
+    public function setTopic(String16 $topic): TopicsFetch
     {
         $this->topic = $topic;
 
@@ -51,9 +51,9 @@ class TopicFetch
     /**
      * @param PartitionsFetch[] $partitions
      *
-     * @return TopicFetch
+     * @return TopicsFetch
      */
-    public function setPartitions(array $partitions): TopicFetch
+    public function setPartitions(array $partitions): TopicsFetch
     {
         $this->partitions = $partitions;
 

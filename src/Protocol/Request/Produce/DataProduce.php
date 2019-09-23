@@ -5,7 +5,6 @@ namespace Kafka\Protocol\Request\Produce;
 
 use Kafka\Protocol\CommonRequest;
 use Kafka\Protocol\Type\Int32;
-use Kafka\Protocol\Type\String16;
 
 /**
  * Class DataProduce

@@ -51,7 +51,7 @@ final class ProduceTest extends AbstractProtocolTest
                                                  (new DataProduce())->setPartition(Int32::value(0))
                                                                     ->setMessageSet([
                                                                         (new MessageSetProduce())->setOffset(Int64::value(0))
-                                                                                                 ->setMessage(
+                                                                                               ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test...'))
                                                                                                  ),
 
@@ -108,11 +108,11 @@ final class ProduceTest extends AbstractProtocolTest
                                                  (new DataProduce())->setPartition(Int32::value(0))
                                                                     ->setMessageSet([
                                                                         (new MessageSetProduce())->setOffset(Int64::value(0))
-                                                                                                 ->setMessage(
+                                                                                               ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test1...'))
                                                                                                  ),
                                                                         (new MessageSetProduce())->setOffset(Int64::value(1))
-                                                                                                 ->setMessage(
+                                                                                               ->setMessage(
                                                                                                      (new MessageProduce())->setValue(Bytes32::value('test2...'))
                                                                                                  ),
 

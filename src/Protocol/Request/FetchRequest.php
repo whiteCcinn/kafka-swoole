@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Request;
 
 use Kafka\Protocol\AbstractRequest;
-use Kafka\Protocol\Request\Metadata\TopicFetch;
+use Kafka\Protocol\Request\Fetch\TopicsFetch;
 use Kafka\Protocol\Type\Int32;
 
 class FetchRequest extends AbstractRequest
@@ -33,7 +33,7 @@ class FetchRequest extends AbstractRequest
     /**
      * Topics to fetch in the order provided.
      *
-     * @var TopicFetch[] $topics
+     * @var TopicsFetch[] $topics
      */
     private $topics;
 
@@ -98,7 +98,7 @@ class FetchRequest extends AbstractRequest
     }
 
     /**
-     * @return TopicFetch[]
+     * @return TopicsFetch[]
      */
     public function getTopics(): array
     {
@@ -106,7 +106,7 @@ class FetchRequest extends AbstractRequest
     }
 
     /**
-     * @param TopicFetch[] $topics
+     * @param TopicsFetch[] $topics
      *
      * @return FetchRequest
      */

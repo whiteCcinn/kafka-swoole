@@ -5,7 +5,6 @@ namespace Kafka\Protocol\Request\Produce;
 
 use Kafka\Protocol\CommonRequest;
 use Kafka\Protocol\Type\Int32;
-use Kafka\Protocol\Type\Int32String;
 use Kafka\Protocol\Type\Int64;
 
 class MessageSetProduce

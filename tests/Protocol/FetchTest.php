@@ -5,8 +5,8 @@ namespace KafkaTest\Protocol;
 
 use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Protocol\Request\FetchRequest;
-use Kafka\Protocol\Request\Metadata\PartitionsFetch;
-use Kafka\Protocol\Request\Metadata\TopicFetch;
+use Kafka\Protocol\Request\Fetch\PartitionsFetch;
+use Kafka\Protocol\Request\Fetch\TopicsFetch;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
@@ -40,21 +40,20 @@ final class FetchTest extends AbstractProtocolTest
         /** @var FetchRequest $protocol */
         $protocol = $this->protocol;
         $protocol->setReplicaId(Int32::value(-1))
-                 ->setMaxWaitTime(Int32::value(100))
-                 ->setMinBytes(Int32::value(64 * 1024))
+                 ->setMaxWaitTime(Int32::value(1000))
+                 ->setMinBytes(Int32::value(1000))
                  ->setTopics([
-                     (new TopicFetch())->setTopic(String16::value('caiwenhui'))
+                     (new TopicsFetch())->setTopic(String16::value('caiwenhui'))
                                        ->setPartitions([
                                            (new PartitionsFetch())->setPartition(Int32::value(0))
                                                                   ->setFetchOffset(Int64::value(0))
-                                                                  ->setPartitionMaxBytes(Int32::value(2 * 1024 * 1024))
+                                                                  ->setPartitionMaxBytes(Int32::value(128))
                                        ])
                  ]);
 
         $data = $protocol->pack();
-        var_dump($data);exit;
 
-        $expected = '000000580000000000000000000c6b61666b612d73776f6f6c650001000003e800000001000963616977656e6875690000000100000000000000210000000000000000000000153c1950a800000000000000000007746573742e2e2e';
+        $expected = '000000450001000000000001000c6b61666b612d73776f6f6c65ffffffff000003e8000003e800000001000963616977656e6875690000000100000000000000000000000000000080';
         $this->assertSame($expected, bin2hex($data));
 
         return $data;
@@ -84,13 +83,13 @@ final class FetchTest extends AbstractProtocolTest
         }
     }
 
-    /**
-     * @author  caiwenhui
-     * @group   decode
-     */
-    public function testDecode()
-    {
-
-    }
+//    /**
+//     * @author  caiwenhui
+//     * @group   decode
+//     */
+//    public function testDecode()
+//    {
+//
+//    }
 
 }
