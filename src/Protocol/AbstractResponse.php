@@ -14,6 +14,7 @@ use Kafka\Support\Str;
 use \ReflectionClass;
 use \ReflectionProperty;
 use \stdClass;
+use Swoole\Client;
 
 abstract class AbstractResponse extends AbstractRequestOrResponse
 {
@@ -56,15 +57,15 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
     }
 
     /**
-     * @param null   $fullClassName
-     * @param null   $instance
-     * @param string $protocol
-     * @param null   $client
+     * @param null|string                          $fullClassName
+     * @param null                                 $instance
+     * @param string                               $protocol
+     * @param Client|\Swoole\Coroutine\Client|null $client
      *
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    private function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '', $client = null)
+    private function unpackProtocol(?string $fullClassName = null, $instance = null, &$protocol = '', $client = null)
     {
         $fullClassName = $fullClassName ?? static::class;
         $instance = $instance ?? $this;
@@ -138,19 +139,19 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
     }
 
     /**
-     * @param              $client
-     * @param AbstractType $classNameInstance
-     * @param string       $protocol
+     * @param Client|\Swoole\Coroutine\Client $client
+     * @param AbstractType                    $classNameInstance
+     * @param string                          $protocol
      */
     private function goOnReadBuffer($client, AbstractType $classNameInstance, string &$protocol)
     {
         $remainLen = $classNameInstance->getValue();
-        recv:
+        receive:
         if ($remainLen > 0) {
             $buffer = $client->recv($remainLen);
             $remainLen = $remainLen - strlen($buffer);
             $protocol .= $buffer;
-            goto recv;
+            goto receive;
         }
         $client->close();
     }
