@@ -29,9 +29,9 @@ class ProtocolNameJoinGroup
     public function setAssignmentStrategy(String16 $assignmentStrategy): ProtocolNameJoinGroup
     {
         // The default sticky partition reduces the overhead of Rebalance
-//        if (!in_array($assignmentStrategy->getValue(), ProtocolPartitionAssignmentStrategyEnum::getAllText())) {
-//            $assignmentStrategy->setValue(ProtocolPartitionAssignmentStrategyEnum::getTextByCode(ProtocolPartitionAssignmentStrategyEnum::STICKY_ASSIGNOR));
-//        }
+        if (!in_array($assignmentStrategy->getValue(), ProtocolPartitionAssignmentStrategyEnum::getAllText())) {
+            $assignmentStrategy->setValue(ProtocolPartitionAssignmentStrategyEnum::getTextByCode(ProtocolPartitionAssignmentStrategyEnum::STICKY_ASSIGNOR));
+        }
         $this->assignmentStrategy = $assignmentStrategy;
 
         return $this;
