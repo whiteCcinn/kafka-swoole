@@ -13,6 +13,7 @@ use Kafka\Protocol\Type\String16;
 use Kafka\Support\Str;
 use \ReflectionClass;
 use \ReflectionProperty;
+use \stdClass;
 
 abstract class AbstractResponse extends AbstractRequestOrResponse
 {
@@ -122,7 +123,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
                             $this->setTypePropertyValue($instance, $propertyName, $classNameInstance);
                         } else {
                             $valueInstance = $this->getValueInstance($protocol, $className);
-                            if ($propertyName === 'size') {
+                            if ($propertyName === 'size' && $client instanceof stdClass) {
                                 $this->goOnReadBuffer($client, $valueInstance, $protocol);
                             }
 
