@@ -9,6 +9,7 @@ use Kafka\Exception\ProtocolTypeException;
 use Kafka\Protocol\Request\Common\RequestHeader;
 use Kafka\Protocol\Response\FetchResponse;
 use Kafka\Protocol\Response\ListOffsetsResponse;
+use Kafka\Protocol\Response\MetadataResponse;
 use Kafka\Protocol\Type\Arrays32;
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int16;
@@ -23,7 +24,7 @@ use function call_user_func;
 /**
  * Class AbstractRequest
  *
- * @property ListOffsetsResponse | FetchResponse $response
+ * @property ListOffsetsResponse | FetchResponse | MetadataResponse $response
  * @package Kafka\Protocol
  */
 abstract class AbstractRequest extends AbstractRequestOrResponse

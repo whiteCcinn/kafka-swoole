@@ -1,33 +1,37 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Protocol\Request\Metadata;
+namespace Kafka\Protocol\Request\JoinGroup;
 
-use Kafka\Protocol\Type\Bytes32;
-use Kafka\Protocol\Type\String16;
+use Kafka\Enum\ProtocolTypeEnum;
+use Kafka\Protocol\CommonRequest;
 
 class ProtocolsJoinGroup
 {
-    /** @var String16 $name */
+    /**
+     * @var ProtocolNameJoinGroup $name
+     */
     private $name;
 
-    /** @var Bytes32 $metadata */
+    /**
+     * @var ProtocolMetadataJoinGroup $metadata
+     */
     private $metadata;
 
     /**
-     * @return String16
+     * @return ProtocolNameJoinGroup
      */
-    public function getName(): String16
+    public function getName(): ProtocolNameJoinGroup
     {
         return $this->name;
     }
 
     /**
-     * @param String16 $name
+     * @param ProtocolNameJoinGroup $name
      *
      * @return ProtocolsJoinGroup
      */
-    public function setName(String16 $name): ProtocolsJoinGroup
+    public function setName(ProtocolNameJoinGroup $name): ProtocolsJoinGroup
     {
         $this->name = $name;
 
@@ -35,22 +39,35 @@ class ProtocolsJoinGroup
     }
 
     /**
-     * @return Bytes32
+     * @return ProtocolMetadataJoinGroup
      */
-    public function getMetadata(): Bytes32
+    public function getMetadata(): ProtocolMetadataJoinGroup
     {
         return $this->metadata;
     }
 
     /**
-     * @param Bytes32 $metadata
+     * @param ProtocolMetadataJoinGroup $metadata
      *
      * @return ProtocolsJoinGroup
      */
-    public function setMetadata(Bytes32 $metadata): ProtocolsJoinGroup
+    public function setMetadata(ProtocolMetadataJoinGroup $metadata): ProtocolsJoinGroup
     {
         $this->metadata = $metadata;
 
         return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
+     */
+    public function onMetadata(&$protocol)
+    {
+        $commentRequest = new CommonRequest();
+        $data = $commentRequest->packProtocol(ProtocolMetadataJoinGroup::class, $this->metadata);
+        $protocol .= pack(ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32), strlen($data)) . $data;
     }
 }

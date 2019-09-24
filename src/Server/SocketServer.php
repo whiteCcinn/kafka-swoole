@@ -20,18 +20,28 @@ class SocketServer
      */
     private $client;
 
+    private $needNewClient;
+
+    private $defaultCloseClient;
+
     private function __construct()
     {
     }
 
     /**
+     * @param bool $isNeedClient
+     * @param bool $defaultCloseClient
+     *
      * @return SocketServer
      */
-    public static function getInstance()
+    public static function getInstance(bool $isNeedClient = true, bool $defaultCloseClient = true)
     {
         if (!self::$instance instanceof SocketServer) {
             self::$instance = new self();
         }
+
+        self::$instance->setNeedNewClient($isNeedClient);
+        self::$instance->setDefaultCloseClient($defaultCloseClient);
 
         return self::$instance;
     }
@@ -53,20 +63,31 @@ class SocketServer
             $closeFn = [$this, 'onCloseClient'];
         }
 
-        $client = new Client(SWOOLE_SOCK_TCP);
-        $this->client = $client;
-        $result = '';
-        $retval = $client->connect($host, $port, $timeout);
-        if (!$retval) {
-            return false;
+        if ($this->needNewClient) {
+            $this->client = new Client(SWOOLE_SOCK_TCP);
+            $retval = $this->client->connect($host, $port, $timeout);
+            if (!$retval) {
+                return false;
+            }
         }
+        $result = '';
         $payload = $sendFn();
-        $length = $client->send($payload);
+        $length = $this->client->send($payload);
         $data = $this->recv(ProtocolTypeEnum::B32);
-        $result = $recvFn($data, $client);
-        call_user_func($closeFn, $client);
+        $result = $recvFn($data, $this->client);
+        call_user_func($closeFn, $this->client);
 
         return [true, $result];
+    }
+
+    public function setNeedNewClient(bool $isNeed = true)
+    {
+        $this->needNewClient = $isNeed;
+    }
+
+    public function setDefaultCloseClient(bool $isClose = true)
+    {
+        $this->defaultCloseClient = $isClose;
     }
 
     /**
@@ -99,7 +120,7 @@ class SocketServer
      */
     private function onCloseClient(Client $client)
     {
-        if ($client->isConnected()) {
+        if ($client->isConnected() && $this->defaultCloseClient) {
             $client->close();
         }
     }

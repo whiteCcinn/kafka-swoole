@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace KafkaTest\Protocol;
+namespace KafkaTest\ConnectedProtocol;
 
+use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Protocol\Request\Produce\DataProduce;
 use Kafka\Protocol\Request\Produce\MessageProduce;
 use Kafka\Protocol\Request\Produce\MessageSetProduce;
@@ -13,7 +14,10 @@ use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
+use Kafka\Server\SocketServer;
 use KafkaTest\AbstractProtocolTest;
+use Swoole\Client;
+
 
 final class ProduceTest extends AbstractProtocolTest
 {
@@ -64,6 +68,30 @@ final class ProduceTest extends AbstractProtocolTest
     }
 
     /**
+     * @author  caiwenhui
+     * @depends testEncode
+     *
+     * @param string $data
+     */
+    public function testSend(string $data)
+    {
+        /** @var ProduceRequest $protocol */
+        $protocol = $this->protocol;
+        $data = SocketServer::getInstance()->run('mkafka4', 9092, function () use ($data) {
+            return $data;
+        }, function (string $data, Client $client) use ($protocol) {
+            $protocol->response->unpack($data, $client);
+        });
+
+        $this->assertIsArray($data);
+        foreach ($protocol->response->getResponses() as $response) {
+            foreach ($response->getPartitionResponses() as $partitionResponse) {
+                $this->assertEquals(ProtocolErrorEnum::NO_ERROR, $partitionResponse->getErrorCode()->getValue());
+            }
+        }
+    }
+
+    /**
      * @author caiwenhui
      * @group  encode
      * @throws \Kafka\Exception\ProtocolTypeException
@@ -102,79 +130,25 @@ final class ProduceTest extends AbstractProtocolTest
 
     /**
      * @author  caiwenhui
-     * @group   decode
+     * @depends testMultiEncode
+     *
+     * @param string $data
      */
-    public function testDecode()
+    public function testSendMulti(string $data)
     {
         /** @var ProduceRequest $protocol */
         $protocol = $this->protocol;
-        $buffer = '000000250000000000000001000963616977656e687569000000010000000000000000000000000068';
+        $data = SocketServer::getInstance()->run('mkafka4', 9092, function () use ($data) {
+            return $data;
+        }, function (string $data, Client $client) use ($protocol) {
+            $protocol->response->unpack($data, $client);
+        });
 
-        $response = $protocol->response;
-        $response->unpack(hex2bin($buffer));
-
-        $expected = [
-            'responses'      =>
-                [
-                    0 =>
-                        [
-                            'topic'               => 'caiwenhui',
-                            'partition_responses' =>
-                                [
-                                    0 =>
-                                        [
-                                            'partition'  => 0,
-                                            'errorCode'  => 0,
-                                            'baseOffset' => 104,
-                                        ],
-                                ],
-                        ],
-                ],
-            'responseHeader' =>
-                [
-                    'correlationId' => 0,
-                ],
-            'size'           => 37,
-        ];
-        $this->assertEquals($expected, $response->toArray());
-    }
-
-    /**
-     * @author  caiwenhui
-     * @group   decode
-     */
-    public function testDecodeMulti()
-    {
-        /** @var ProduceRequest $protocol */
-        $protocol = $this->protocol;
-        $buffer = '000000250000000000000001000963616977656e687569000000010000000000000000000000000069';
-
-        $response = $protocol->response;
-        $response->unpack(hex2bin($buffer));
-
-        $expected = [
-            'responses'      =>
-                [
-                    0 =>
-                        [
-                            'topic'               => 'caiwenhui',
-                            'partition_responses' =>
-                                [
-                                    0 =>
-                                        [
-                                            'partition'  => 0,
-                                            'errorCode'  => 0,
-                                            'baseOffset' => 105,
-                                        ],
-                                ],
-                        ],
-                ],
-            'responseHeader' =>
-                [
-                    'correlationId' => 0,
-                ],
-            'size'           => 37,
-        ];
-        $this->assertEquals($expected, $response->toArray());
+        $this->assertIsArray($data);
+        foreach ($protocol->response->getResponses() as $response) {
+            foreach ($response->getPartitionResponses() as $partitionResponse) {
+                $this->assertEquals(ProtocolErrorEnum::NO_ERROR, $partitionResponse->getErrorCode()->getValue());
+            }
+        }
     }
 }

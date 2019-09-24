@@ -13,7 +13,7 @@ use Kafka\Protocol\Type\String16;
 class JoinGroupResponse extends AbstractResponse
 {
     use ToArrayTrait;
-    
+
     /**
      * The error code, or 0 if there was no error.
      *
@@ -50,7 +50,7 @@ class JoinGroupResponse extends AbstractResponse
     private $memberId;
 
     /**
-     * @var MembersJoinGroup $members
+     * @var MembersJoinGroup[] $members
      */
     private $members;
 
@@ -155,19 +155,19 @@ class JoinGroupResponse extends AbstractResponse
     }
 
     /**
-     * @return MembersJoinGroup
+     * @return MembersJoinGroup[]
      */
-    public function getMembers(): MembersJoinGroup
+    public function getMembers(): array
     {
         return $this->members;
     }
 
     /**
-     * @param MembersJoinGroup $members
+     * @param MembersJoinGroup[] $members
      *
      * @return JoinGroupResponse
      */
-    public function setMembers(MembersJoinGroup $members): JoinGroupResponse
+    public function setMembers(array $members): JoinGroupResponse
     {
         $this->members = $members;
 

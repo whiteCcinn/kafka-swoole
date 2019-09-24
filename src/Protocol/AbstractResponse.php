@@ -13,8 +13,8 @@ use Kafka\Protocol\Type\String16;
 use Kafka\Support\Str;
 use \ReflectionClass;
 use \ReflectionProperty;
-use \stdClass;
 use Swoole\Client;
+use Co\Client as CoClient;
 
 abstract class AbstractResponse extends AbstractRequestOrResponse
 {
@@ -50,22 +50,23 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    public function unpack(string $protocol, $client)
+    public function unpack(string $protocol, $client = null)
     {
         $decodeProtocol = $protocol;
+        $this->getCompleteProtocol($decodeProtocol);
         $this->unpackProtocol(null, null, $decodeProtocol, $client);
     }
 
     /**
-     * @param null|string                          $fullClassName
+     * @param                                      $fullClassName
      * @param null                                 $instance
      * @param string                               $protocol
-     * @param Client|\Swoole\Coroutine\Client|null $client
+     * @param Client|CoClient|null                 $client
      *
      * @throws ProtocolTypeException
      * @throws \ReflectionException
      */
-    private function unpackProtocol(?string $fullClassName = null, $instance = null, &$protocol = '', $client = null)
+    private function unpackProtocol($fullClassName = null, $instance = null, &$protocol = '', $client = null)
     {
         $fullClassName = $fullClassName ?? static::class;
         $instance = $instance ?? $this;
@@ -124,11 +125,9 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
                             $this->setTypePropertyValue($instance, $propertyName, $classNameInstance);
                         } else {
                             $valueInstance = $this->getValueInstance($protocol, $className);
-                            if ($propertyName === 'size' && $client instanceof stdClass) {
+                            if ($propertyName === 'size' && ($client instanceof Client || $client instanceof CoClient)) {
                                 $this->goOnReadBuffer($client, $valueInstance, $protocol);
                             }
-
-//                        echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . $value . PHP_EOL;
                             $this->setTypePropertyValue($instance, $propertyName, $valueInstance);
                         }
                     }
@@ -139,9 +138,23 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
     }
 
     /**
-     * @param Client|\Swoole\Coroutine\Client $client
-     * @param AbstractType                    $classNameInstance
-     * @param string                          $protocol
+     * @param string $protocol
+     *
+     * @return string
+     */
+    public function getCompleteProtocol(string $protocol = ''): string
+    {
+        static $completeProtocol = '';
+
+        $completeProtocol .= $protocol;
+
+        return $completeProtocol;
+    }
+
+    /**
+     * @param Client|CoClient $client
+     * @param AbstractType    $classNameInstance
+     * @param string          $protocol
      */
     private function goOnReadBuffer($client, AbstractType $classNameInstance, string &$protocol)
     {
@@ -153,8 +166,9 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
             $protocol .= $buffer;
             goto receive;
         }
-        $client->close();
+        $this->getCompleteProtocol($protocol);
     }
+
 
     /**
      * @param ReflectionClass $refClass

@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\JoinGroup;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\String16;
 
 class MembersJoinGroup
 {
+    use ToArrayTrait;
+
     /**
      * The group member ID.
      *
@@ -18,7 +21,7 @@ class MembersJoinGroup
     /**
      * The group member metadata.
      *
-     * @var Bytes32 $metadata
+     * @var ProtocolMetadataJoinGroup[] $metadata
      */
     private $metadata;
 
@@ -43,19 +46,19 @@ class MembersJoinGroup
     }
 
     /**
-     * @return Bytes32
+     * @return ProtocolMetadataJoinGroup[]
      */
-    public function getMetadata(): Bytes32
+    public function getMetadata(): array
     {
         return $this->metadata;
     }
 
     /**
-     * @param Bytes32 $metadata
+     * @param ProtocolMetadataJoinGroup[] $metadata
      *
      * @return MembersJoinGroup
      */
-    public function setMetadata(Bytes32 $metadata): MembersJoinGroup
+    public function setMetadata(array $metadata): MembersJoinGroup
     {
         $this->metadata = $metadata;
 

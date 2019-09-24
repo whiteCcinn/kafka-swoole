@@ -5,7 +5,7 @@ namespace Kafka\Protocol\Request;
 
 use Kafka\Protocol\AbstractRequest;
 
-use Kafka\Protocol\Request\Metadata\ProtocolsJoinGroup;
+use Kafka\Protocol\Request\JoinGroup\ProtocolsJoinGroup;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
@@ -43,7 +43,7 @@ class JoinGroupRequest extends AbstractRequest
     /**
      * The list of protocols that the member supports.
      *
-     * @var ProtocolsJoinGroup $protocols
+     * @var ProtocolsJoinGroup[] $protocols
      */
     private $protocols;
 
@@ -128,19 +128,19 @@ class JoinGroupRequest extends AbstractRequest
     }
 
     /**
-     * @return ProtocolsJoinGroup
+     * @return ProtocolsJoinGroup[]
      */
-    public function getProtocols(): ProtocolsJoinGroup
+    public function getProtocols(): array
     {
         return $this->protocols;
     }
 
     /**
-     * @param ProtocolsJoinGroup $protocols
+     * @param ProtocolsJoinGroup[] $protocols
      *
      * @return JoinGroupRequest
      */
-    public function setProtocols(ProtocolsJoinGroup $protocols): JoinGroupRequest
+    public function setProtocols(array $protocols): JoinGroupRequest
     {
         $this->protocols = $protocols;
 

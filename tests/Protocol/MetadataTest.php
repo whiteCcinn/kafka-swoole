@@ -5,10 +5,7 @@ namespace KafkaTest\Protocol;
 
 use Kafka\Protocol\Request\MetadataRequest;
 use Kafka\Protocol\Type\String16;
-use Kafka\Server\SocketServer;
 use KafkaTest\AbstractProtocolTest;
-use Swoole\Client;
-
 
 final class MetadataTest extends AbstractProtocolTest
 {
@@ -47,32 +44,79 @@ final class MetadataTest extends AbstractProtocolTest
 
     /**
      * @author  caiwenhui
-     * @depends testEncode
-     *
-     * @param string $data
+     * @group   decode
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
      */
-    public function testSend(string $data)
+    public function testDecode()
     {
+
         /** @var MetadataRequest $protocol */
         $protocol = $this->protocol;
+        $buffer = '0000007b0000000300000004000003eb00076d6b61666b613300002384000003ec00076d6b61666b613400002384000003e900076d6b61666b613100002384000003ea00076d6b61666b613200002384000000010000000963616977656e68756900000001000000000000000003ec00000001000003ec00000001000003ec';
 
-        SocketServer::getInstance()->run('mkafka1', 9092, function () use ($data) {
-            return $data;
-        }, function (string $data, Client $client) use ($protocol) {
-            $protocol->response->unpack($data, $client);
-        });
+        $response = $protocol->response;
+        $response->unpack(hex2bin($buffer));
 
-        var_dump($protocol->response->toArray());
-        exit;
-    }
-
-    public function testDecode(): void
-    {
-        $test = $this->protocol->response;
-    }
-
-    public function testDynamic()
-    {
-
+        $expected = [
+            'brokers'        =>
+                [
+                    0 =>
+                        [
+                            'nodeId' => 1003,
+                            'host'   => 'mkafka3',
+                            'port'   => 9092,
+                        ],
+                    1 =>
+                        [
+                            'nodeId' => 1004,
+                            'host'   => 'mkafka4',
+                            'port'   => 9092,
+                        ],
+                    2 =>
+                        [
+                            'nodeId' => 1001,
+                            'host'   => 'mkafka1',
+                            'port'   => 9092,
+                        ],
+                    3 =>
+                        [
+                            'nodeId' => 1002,
+                            'host'   => 'mkafka2',
+                            'port'   => 9092,
+                        ],
+                ],
+            'topics'         =>
+                [
+                    0 =>
+                        [
+                            'errorCode'  => 0,
+                            'name'       => 'caiwenhui',
+                            'partitions' =>
+                                [
+                                    0 =>
+                                        [
+                                            'errorCode'      => 0,
+                                            'partitionIndex' => 0,
+                                            'leaderId'       => 1004,
+                                            'replicaNodes'   =>
+                                                [
+                                                    0 => 1004,
+                                                ],
+                                            'isrNodes'       =>
+                                                [
+                                                    0 => 1004,
+                                                ],
+                                        ],
+                                ],
+                        ],
+                ],
+            'responseHeader' =>
+                [
+                    'correlationId' => 3,
+                ],
+            'size'           => 123,
+        ];
+        $this->assertEquals($expected, $response->toArray());
     }
 }
