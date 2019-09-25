@@ -1,20 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace KafkaTest\ConnectedProtocol;
+namespace KafkaTest\Protocol;
 
-use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Protocol\Request\ListOffsets\PartitionsListsOffsets;
 use Kafka\Protocol\Request\ListOffsets\TopicsListsOffsets;
 use Kafka\Protocol\Request\ListOffsetsRequest;
-use Kafka\Protocol\Response\ListOffsetsResponse;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
-use Kafka\Server\SocketServer;
 use KafkaTest\AbstractProtocolTest;
-use Swoole\Client;
-
 
 final class ListOffsetsTest extends AbstractProtocolTest
 {
@@ -24,6 +19,7 @@ final class ListOffsetsTest extends AbstractProtocolTest
     private $protocol;
 
     /**
+     *
      * @before
      */
     public function newProtocol()
@@ -33,7 +29,8 @@ final class ListOffsetsTest extends AbstractProtocolTest
 
     /**
      * @author caiwenhui
-     * @group  connectedEncode
+     * @group  encode
+     * @return string
      * @throws \Kafka\Exception\ProtocolTypeException
      * @throws \ReflectionException
      */
@@ -51,6 +48,7 @@ final class ListOffsetsTest extends AbstractProtocolTest
         ])->setReplicaId(Int32::value(-1));
 
         $data = $protocol->pack();
+
         $expected = '0000003d0002000000000002000c6b61666b612d73776f6f6c65ffffffff00000001000963616977656e6875690000000100000000ffffffffffffffff000186a0';
         $this->assertSame($expected, bin2hex($data));
 
@@ -59,29 +57,47 @@ final class ListOffsetsTest extends AbstractProtocolTest
 
     /**
      * @author  caiwenhui
-     * @depends testEncode
-     *
-     * @param string $data
+     * @group   decode
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
      */
-    public function testSend(string $data)
+    public function testDecode()
     {
+
         /** @var ListOffsetsRequest $protocol */
         $protocol = $this->protocol;
-        $data = SocketServer::getInstance()->run('mkafka4', 9092, function () use ($data) {
-            return $data;
-        }, function (string $data, Client $client) use ($protocol) {
-            $protocol->response->unpack($data, $client);
-        });
+        $buffer = '000000310000000200000001000963616977656e6875690000000100000000000000000002000000000000006b0000000000000000';
 
-        /** @var ListOffsetsResponse $response */
         $response = $protocol->response;
+        $response->unpack(hex2bin($buffer));
 
-        $this->assertIsArray($data);
-        foreach ($response->getResponses() as $response) {
-            foreach ($response->getPartitionResponses() as $partitionResponse) {
-                $this->assertEquals(ProtocolErrorEnum::NO_ERROR,
-                    $partitionResponse->getErrorCode()->getValue());
-            }
-        }
+        $expected = [
+            'responses'      =>
+                [
+                    0 =>
+                        [
+                            'topic'              => 'caiwenhui',
+                            'partitionResponses' =>
+                                [
+                                    0 =>
+                                        [
+                                            'partition' => 0,
+                                            'errorCode' => 0,
+                                            'offsets'   =>
+                                                [
+                                                    0 => 107,
+                                                    1 => 0,
+                                                ],
+                                        ],
+                                ],
+                        ],
+                ],
+            'responseHeader' =>
+                [
+                    'correlationId' => 2,
+                ],
+            'size'           => 49,
+        ];
+        $this->assertEquals($expected, $response->toArray());
     }
 }
