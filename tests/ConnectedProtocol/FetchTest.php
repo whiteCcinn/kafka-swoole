@@ -32,7 +32,7 @@ final class FetchTest extends AbstractProtocolTest
 
     /**
      * @author caiwenhui
-     * @group  encode
+     * @group  connectedEncode
      * @throws \Kafka\Exception\ProtocolTypeException
      * @throws \ReflectionException
      */

@@ -38,7 +38,7 @@ final class JoinGroupTest extends AbstractProtocolTest
 
     /**
      * @author caiwenhui
-     * @group  encode
+     * @group  connectedEncode
      * @return string
      * @throws \Kafka\Exception\ProtocolTypeException
      * @throws \ReflectionException
@@ -53,8 +53,7 @@ final class JoinGroupTest extends AbstractProtocolTest
                  ->setProtocolType(String16::value('consumer'))
                  ->setProtocols([
                      (new ProtocolsJoinGroup())->setName(
-//                    (new ProtocolNameJoinGroup())->setAssignmentStrategy(String16::value(ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR))
-                         (new ProtocolNameJoinGroup())->setAssignmentStrategy(String16::value('range'))
+                         (new ProtocolNameJoinGroup())->setAssignmentStrategy(String16::value(ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR))
                      )->setMetadata(
                          (new ProtocolMetadataJoinGroup())->setVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
                                                           ->setSubscription([

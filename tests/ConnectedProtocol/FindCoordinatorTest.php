@@ -38,7 +38,7 @@ final class FindCoordinatorTest extends AbstractProtocolTest
 
     /**
      * @author caiwenhui
-     * @group  encode
+     * @group  connectedEncode
      * @return string
      * @throws \Kafka\Exception\ProtocolTypeException
      * @throws \ReflectionException
