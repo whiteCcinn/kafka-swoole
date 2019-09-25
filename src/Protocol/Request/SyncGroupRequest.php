@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Request;
 
 use Kafka\Protocol\AbstractRequest;
-use Kafka\Protocol\Request\SyncGroup\AssignmentsSyncGroup;
+use Kafka\Protocol\Request\SyncGroup\GroupAssignmentsSyncGroup;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\String16;
 
@@ -34,7 +34,7 @@ class SyncGroupRequest extends AbstractRequest
     /**
      * Each assignment.
      *
-     * @var AssignmentsSyncGroup[] $assignments
+     * @var GroupAssignmentsSyncGroup[] $assignments
      */
     private $assignments;
 
@@ -99,7 +99,7 @@ class SyncGroupRequest extends AbstractRequest
     }
 
     /**
-     * @return AssignmentsSyncGroup[]
+     * @return GroupAssignmentsSyncGroup[]
      */
     public function getAssignments(): array
     {
@@ -107,7 +107,7 @@ class SyncGroupRequest extends AbstractRequest
     }
 
     /**
-     * @param AssignmentsSyncGroup[] $assignments
+     * @param GroupAssignmentsSyncGroup[] $assignments
      *
      * @return SyncGroupRequest
      */

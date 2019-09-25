@@ -81,7 +81,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
         foreach ($refProperties as $refProperty) {
             $propertyComment = $refProperty->getDocComment();
             $propertyName = $refProperty->getName();
-//            echo "开始解析 {$propertyName}, protocol size :" . strlen($protocol) . PHP_EOL;
+            echo "开始解析 {$propertyName}, protocol size :" . strlen($protocol) . PHP_EOL;
             if (preg_match('/.*@var\s+(?P<protocolType>\w+)(?P<isArray>\[\])?\s+.*/', $propertyComment,
                 $matches)) {
                 $isArray = isset($matches['isArray']) ? true : false;
@@ -91,24 +91,32 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
 
                 $classNameRef = new ReflectionClass($className);
 
+                if (method_exists($instance, $onMethod = Str::camel('on_' . $propertyName))) {
+                    if ($instance->{$onMethod}($protocol)) {
+                        continue;
+                    }
+                }
+
                 if ($isArray) {
                     $value = [];
-                    $wrapperProtocol = ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32);
-                    $bytes = ProtocolTypeEnum::B32;
-                    $buffer = substr($protocol, 0, $bytes);
-                    $protocol = substr($protocol, $bytes);
-                    $arrayCount = unpack($wrapperProtocol, $buffer);
-                    $arrayCount = is_array($arrayCount) ? array_shift($arrayCount) : $arrayCount;
-//                    echo "{$propertyName} count : " . $arrayCount . PHP_EOL;
-                    while ($arrayCount > 0 && !empty($protocol)) {
-                        if (!Str::startsWith($className, $typeNamespace)) {
-                            $value[] = $classNameInstance = $classNameRef->newInstanceWithoutConstructor();
-                            $this->unpackProtocol($className, $classNameInstance, $protocol);
-                        } else {
-                            $valueInstance = $this->getValueInstance($protocol, $className);
-                            $value[] = $valueInstance;
+                    if (!empty(strlen($protocol))) {
+                        $wrapperProtocol = ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32);
+                        $bytes = ProtocolTypeEnum::B32;
+                        $buffer = substr($protocol, 0, $bytes);
+                        $protocol = substr($protocol, $bytes);
+                        $arrayCount = unpack($wrapperProtocol, $buffer);
+                        $arrayCount = is_array($arrayCount) ? array_shift($arrayCount) : $arrayCount;
+//                        echo "{$propertyName} count : " . $arrayCount . PHP_EOL;
+                        while ($arrayCount > 0 && !empty($protocol)) {
+                            if (!Str::startsWith($className, $typeNamespace)) {
+                                $value[] = $classNameInstance = $classNameRef->newInstanceWithoutConstructor();
+                                $this->unpackProtocol($className, $classNameInstance, $protocol);
+                            } else {
+                                $valueInstance = $this->getValueInstance($protocol, $className);
+                                $value[] = $valueInstance;
+                            }
+                            $arrayCount--;
                         }
-                        $arrayCount--;
                     }
 //                    echo "[-] {$className}\twrapperProtocol : {$wrapperProtocol}, name: {$propertyName}, value : " . var_export($value,
 //                            true) . PHP_EOL;
@@ -248,23 +256,27 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
      */
     private function getValueInstance(string &$protocol, string $className)
     {
-        $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
-        $bytes = ProtocolTypeEnum::getCodeByText($wrapperProtocol);
-        $buffer = substr($protocol, 0, $bytes);
-        $protocol = substr($protocol, $bytes);
-        if ($className === Int64::class) {
-            $set = unpack($wrapperProtocol, $buffer);
-            $data = ($set[1] & 0xFFFFFFFF) << 32 | ($set[2] & 0xFFFFFFFF);
+        if (empty(strlen($protocol))) {
+            $valueInstance = call_user_func([$className, 'value'], null);
         } else {
-            $data = unpack($wrapperProtocol, $buffer);
+            $wrapperProtocol = call_user_func([$className, 'getWrapperProtocol']);
+            $bytes = ProtocolTypeEnum::getCodeByText($wrapperProtocol);
+            $buffer = substr($protocol, 0, $bytes);
+            $protocol = substr($protocol, $bytes);
+            if ($className === Int64::class) {
+                $set = unpack($wrapperProtocol, $buffer);
+                $data = ($set[1] & 0xFFFFFFFF) << 32 | ($set[2] & 0xFFFFFFFF);
+            } else {
+                $data = unpack($wrapperProtocol, $buffer);
+            }
+            $data = is_array($data) ? array_shift($data) : $data;
+            if (in_array($className, [String16::class, Bytes32::class])) {
+                $length = $data;
+                $data = substr($protocol, 0, $length);
+                $protocol = substr($protocol, $length);
+            }
+            $valueInstance = call_user_func([$className, 'value'], $data);
         }
-        $data = is_array($data) ? array_shift($data) : $data;
-        if (in_array($className, [String16::class, Bytes32::class])) {
-            $length = $data;
-            $data = substr($protocol, 0, $length);
-            $protocol = substr($protocol, $length);
-        }
-        $valueInstance = call_user_func([$className, 'value'], $data);
 
         return $valueInstance;
     }

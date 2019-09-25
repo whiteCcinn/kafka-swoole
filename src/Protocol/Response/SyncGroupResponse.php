@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response;
 
+use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Protocol\AbstractResponse;
+use Kafka\Protocol\Response\SyncGroup\MemberAssignmentsSyncGroup;
 use Kafka\Protocol\TraitStructure\ToArrayTrait;
-use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int16;
 
 class SyncGroupResponse extends AbstractResponse
@@ -22,7 +23,7 @@ class SyncGroupResponse extends AbstractResponse
     /**
      * The member assignment.
      *
-     * @var Bytes32 $assignment
+     * @var MemberAssignmentsSyncGroup $assignment
      */
     private $assignment;
 
@@ -47,22 +48,38 @@ class SyncGroupResponse extends AbstractResponse
     }
 
     /**
-     * @return Bytes32
+     * @return MemberAssignmentsSyncGroup
      */
-    public function getAssignment(): Bytes32
+    public function getAssignment(): MemberAssignmentsSyncGroup
     {
         return $this->assignment;
     }
 
     /**
-     * @param Bytes32 $assignment
+     * @param MemberAssignmentsSyncGroup $assignment
      *
      * @return SyncGroupResponse
      */
-    public function setAssignment(Bytes32 $assignment): SyncGroupResponse
+    public function setAssignment(MemberAssignmentsSyncGroup $assignment): SyncGroupResponse
     {
         $this->assignment = $assignment;
 
         return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @return bool
+     */
+    public function onAssignment(&$protocol): bool
+    {
+        $data = unpack(ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32),
+            substr($protocol, 0, ProtocolTypeEnum::B32));
+        $data = is_array($data) ? array_shift($data) : $data;
+        $length = $data;
+        $protocol = substr($protocol, ProtocolTypeEnum::B32, $length);
+
+        return false;
     }
 }

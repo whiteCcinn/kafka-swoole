@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Server;
+namespace Kafka\Server\dd;
 
 use Kafka\Enum\ProtocolTypeEnum;
 use Swoole\Client;

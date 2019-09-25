@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Request\SyncGroup;
 
+use Kafka\Protocol\CommonRequest;
 use Kafka\Protocol\Type\String16;
 
 class AssignmentsSyncGroup
@@ -15,9 +16,9 @@ class AssignmentsSyncGroup
     private $memberId;
 
     /**
-     * 	The member assignment.
+     * The member assignment.
      *
-     * @var GroupAssignmentsSyncGroup[] $assignment
+     * @var GroupAssignmentsSyncGroup $assignment
      */
     private $assignment;
 
@@ -59,5 +60,19 @@ class AssignmentsSyncGroup
         $this->assignment = $assignment;
 
         return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
+     */
+    public function onAssignment(&$protocol)
+    {
+        $commentRequest = new CommonRequest();
+        $data = $commentRequest->packProtocol(MessageProduce::class, $this->message);
+        $this->setMessageSetSize(Int32::value(strlen($data)));
+        $protocol .= pack(Int32::getWrapperProtocol(), $this->getMessageSetSize()->getValue());
     }
 }
