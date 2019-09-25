@@ -81,7 +81,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
         foreach ($refProperties as $refProperty) {
             $propertyComment = $refProperty->getDocComment();
             $propertyName = $refProperty->getName();
-            echo "开始解析 {$propertyName}, protocol size :" . strlen($protocol) . PHP_EOL;
+//            echo "开始解析 {$propertyName}, protocol size :" . strlen($protocol) . PHP_EOL;
             if (preg_match('/.*@var\s+(?P<protocolType>\w+)(?P<isArray>\[\])?\s+.*/', $propertyComment,
                 $matches)) {
                 $isArray = isset($matches['isArray']) ? true : false;
