@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\OffsetFetch;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
@@ -15,6 +16,7 @@ use Kafka\Protocol\Type\String16;
  */
 class PartitionsResponsesOffsetFetch
 {
+    use ToArrayTrait;
     /**
      * Topic partition id
      *

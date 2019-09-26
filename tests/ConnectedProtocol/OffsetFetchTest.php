@@ -7,6 +7,7 @@ use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Protocol\Request\OffsetFetchRequest;
 use Kafka\Protocol\Request\OffsetFetch\PartitionsOffsetFetch;
 use Kafka\Protocol\Request\OffsetFetch\TopicsOffsetFetch;
+use Kafka\Protocol\Response\OffsetFetchResponse;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
@@ -44,12 +45,12 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
                  ->setTopics([
                      (new TopicsOffsetFetch())->setTopic(String16::value('caiwenhui'))
                                               ->setPartitions([
-                                                  (new PartitionsOffsetFetch())->setPartition(Int32::value('0'))
+                                                  (new PartitionsOffsetFetch())->setPartition(Int32::value(0))
                                               ])
                  ]);
 
         $data = $protocol->pack();
-        $expected = '000000450001000000000001000c6b61666b612d73776f6f6c65ffffffff00000064000003e800000001000963616977656e6875690000000100000000000000000000000000010000';
+        $expected = '0000003b0009000000000009000c6b61666b612d73776f6f6c65000c6b61666b612d73776f6f6c6500000001000963616977656e6875690000000100000000';
         $this->assertSame($expected, bin2hex($data));
 
         return $data;
@@ -71,15 +72,14 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
             $protocol->response->unpack($data, $client);
         });
 
-        var_dump(bin2hex($protocol->response->getCompleteProtocol()));
-        var_export($protocol->response->toArray());
-
-//        $this->assertIsArray($data);
-//        foreach ($protocol->response->getResponses() as $response) {
-//            foreach ($response->getPartitionResponses() as $partitionResponse) {
-//                $this->assertEquals(ProtocolErrorEnum::NO_ERROR,
-//                    $partitionResponse->getPartitionHeader()->getErrorCode()->getValue());
-//            }
-//        }
+        /** @var OffsetFetchResponse $resp */
+        $resp = $protocol->response;
+        $this->assertIsArray($data);
+        foreach ($resp->getResponses() as $response) {
+            foreach ($response->getPartitionResponses() as $partitionResponse) {
+                $this->assertEquals(ProtocolErrorEnum::NO_ERROR,
+                    $partitionResponse->getErrorCode()->getValue());
+            }
+        }
     }
 }
