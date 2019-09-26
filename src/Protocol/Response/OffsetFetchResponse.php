@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Protocol\Response;
 
 use Kafka\Protocol\AbstractResponse;
-use Kafka\Protocol\Response\Fetch\ResponsesFetch;
+use Kafka\Protocol\Response\OffsetFetch\ResponsesOffsetFetch;
 use Kafka\Protocol\TraitStructure\ToArrayTrait;
 
 
@@ -15,12 +15,12 @@ class OffsetFetchResponse extends AbstractResponse
     /**
      * Responses by topic for fetched offsets
      *
-     * @var ResponsesFetch[] $responses
+     * @var ResponsesOffsetFetch[] $responses
      */
     private $responses;
 
     /**
-     * @return ResponsesFetch[]
+     * @return ResponsesOffsetFetch[]
      */
     public function getResponses(): array
     {
@@ -28,7 +28,7 @@ class OffsetFetchResponse extends AbstractResponse
     }
 
     /**
-     * @param ResponsesFetch[] $responses
+     * @param ResponsesOffsetFetch[] $responses
      *
      * @return OffsetFetchResponse
      */

@@ -22,7 +22,7 @@ class ResponsesOffsetFetch
     /**
      * Responses by partition for fetched offsets
      *
-     * @var PartitionsResponsesListOffsets[] $partitionResponses
+     * @var PartitionsResponsesOffsetFetch[] $partitionResponses
      */
     private $partitionResponses;
 
@@ -37,9 +37,9 @@ class ResponsesOffsetFetch
     /**
      * @param String16 $topic
      *
-     * @return ResponsesListOffsets
+     * @return ResponsesOffsetFetch
      */
-    public function setTopic(String16 $topic): ResponsesListOffsets
+    public function setTopic(String16 $topic): ResponsesOffsetFetch
     {
         $this->topic = $topic;
 
@@ -47,7 +47,7 @@ class ResponsesOffsetFetch
     }
 
     /**
-     * @return PartitionsResponsesListOffsets[]
+     * @return PartitionsResponsesOffsetFetch[]
      */
     public function getPartitionResponses(): array
     {
@@ -55,11 +55,11 @@ class ResponsesOffsetFetch
     }
 
     /**
-     * @param PartitionsResponsesListOffsets[] $partitionResponses
+     * @param PartitionsResponsesOffsetFetch[] $partitionResponses
      *
-     * @return ResponsesListOffsets
+     * @return ResponsesOffsetFetch
      */
-    public function setPartitionResponses(array $partitionResponses): ResponsesListOffsets
+    public function setPartitionResponses(array $partitionResponses): ResponsesOffsetFetch
     {
         $this->partitionResponses = $partitionResponses;
 

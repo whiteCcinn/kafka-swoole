@@ -16,14 +16,14 @@ use Kafka\Protocol\Type\String16;
 class PartitionsResponsesOffsetFetch
 {
     /**
-     * 	Topic partition id
+     * Topic partition id
      *
      * @var Int32 $partition
      */
     private $partition;
 
     /**
-     * 	Message offset to be committed
+     * Message offset to be committed
      *
      * @var Int64 $offset
      */
@@ -54,9 +54,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int32 $partition
      *
-     * @return PartitionsResponsesListOffsets
+     * @return PartitionsResponsesOffsetFetch
      */
-    public function setPartition(Int32 $partition): PartitionsResponsesListOffsets
+    public function setPartition(Int32 $partition): PartitionsResponsesOffsetFetch
     {
         $this->partition = $partition;
 
@@ -74,9 +74,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int64 $offset
      *
-     * @return PartitionsResponsesListOffsets
+     * @return PartitionsResponsesOffsetFetch
      */
-    public function setOffset(Int64 $offset): PartitionsResponsesListOffsets
+    public function setOffset(Int64 $offset): PartitionsResponsesOffsetFetch
     {
         $this->offset = $offset;
 
@@ -94,9 +94,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param String16 $metadata
      *
-     * @return PartitionsResponsesListOffsets
+     * @return PartitionsResponsesOffsetFetch
      */
-    public function setMetadata(String16 $metadata): PartitionsResponsesListOffsets
+    public function setMetadata(String16 $metadata): PartitionsResponsesOffsetFetch
     {
         $this->metadata = $metadata;
 
@@ -114,9 +114,9 @@ class PartitionsResponsesOffsetFetch
     /**
      * @param Int16 $errorCode
      *
-     * @return PartitionsResponsesListOffsets
+     * @return PartitionsResponsesOffsetFetch
      */
-    public function setErrorCode(Int16 $errorCode): PartitionsResponsesListOffsets
+    public function setErrorCode(Int16 $errorCode): PartitionsResponsesOffsetFetch
     {
         $this->errorCode = $errorCode;
 
