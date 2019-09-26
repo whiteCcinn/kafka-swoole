@@ -193,6 +193,27 @@ array(3) {
 */
 ```
 
+## Unit-test
+
+Take the project directory as the root directory.
+
+```
+php vendor/bin/phpunit tests/Protocol/
+```
+
+```sh
+PHPUnit 7.5.16 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 7.1.28
+Configuration: /www5/kafka-swoole/phpunit.xml.dist
+
+......................                                            22 / 22 (100%)
+
+Time: 64 ms, Memory: 6.00 MB
+
+OK (22 tests, 22 assertions)
+```
+
 ## References
 
 - [Apache.kafka.protocol](http://kafka.apache.org/protocol.html)

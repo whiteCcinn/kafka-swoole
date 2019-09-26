@@ -19,7 +19,7 @@ class OffsetCommitRequest extends AbstractRequest
     /**
      * The topics to commit offsets for.
      *
-     * @var TopicsOffsetCommit $topics
+     * @var TopicsOffsetCommit[] $topics
      */
     private $topics;
 
@@ -44,19 +44,19 @@ class OffsetCommitRequest extends AbstractRequest
     }
 
     /**
-     * @return TopicsOffsetCommit
+     * @return TopicsOffsetCommit[]
      */
-    public function getTopics(): TopicsOffsetCommit
+    public function getTopics(): array
     {
         return $this->topics;
     }
 
     /**
-     * @param TopicsOffsetCommit $topics
+     * @param TopicsOffsetCommit[] $topics
      *
      * @return OffsetCommitRequest
      */
-    public function setTopics(TopicsOffsetCommit $topics): OffsetCommitRequest
+    public function setTopics(array $topics): OffsetCommitRequest
     {
         $this->topics = $topics;
 

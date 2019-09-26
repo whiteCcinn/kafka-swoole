@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\OffsetCommit;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\String16;
 
 /**
@@ -12,6 +13,7 @@ use Kafka\Protocol\Type\String16;
  */
 class TopicOffsetCommit
 {
+    use ToArrayTrait;
     /**
      * The topic name.
      *
@@ -22,7 +24,7 @@ class TopicOffsetCommit
     /**
      * The responses for each partition in the topic.
      *
-     * @var PartitionsOffsetFetch $partitions
+     * @var PartitionsOffsetCommit[] $partitions
      */
     private $partitions;
 
@@ -37,9 +39,9 @@ class TopicOffsetCommit
     /**
      * @param String16 $name
      *
-     * @return TopicOffsetFetch
+     * @return TopicOffsetCommit
      */
-    public function setName(String16 $name): TopicOffsetFetch
+    public function setName(String16 $name): TopicOffsetCommit
     {
         $this->name = $name;
 
@@ -47,19 +49,19 @@ class TopicOffsetCommit
     }
 
     /**
-     * @return PartitionsOffsetFetch
+     * @return PartitionsOffsetCommit[]
      */
-    public function getPartitions(): PartitionsOffsetFetch
+    public function getPartitions(): array
     {
         return $this->partitions;
     }
 
     /**
-     * @param PartitionsOffsetFetch $partitions
+     * @param PartitionsOffsetCommit[] $partitions
      *
-     * @return TopicOffsetFetch
+     * @return TopicOffsetCommit
      */
-    public function setPartitions(PartitionsOffsetFetch $partitions): TopicOffsetFetch
+    public function setPartitions(array $partitions): TopicOffsetCommit
     {
         $this->partitions = $partitions;
 

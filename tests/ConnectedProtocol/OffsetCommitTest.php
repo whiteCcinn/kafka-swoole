@@ -4,12 +4,10 @@ declare(strict_types=1);
 namespace KafkaTest\ConnectedProtocol;
 
 use Kafka\Enum\ProtocolErrorEnum;
-use Kafka\Enum\ProtocolVersionEnum;
-use Kafka\Protocol\Request\OffsetFetchRequest;
-use Kafka\Protocol\Request\OffsetFetch\PartitionsOffsetFetch;
-use Kafka\Protocol\Request\OffsetFetch\TopicsOffsetFetch;
-use Kafka\Protocol\Response\OffsetFetchResponse;
-use Kafka\Protocol\Type\Int16;
+use Kafka\Protocol\Request\OffsetCommit\PartitionsOffsetCommit;
+use Kafka\Protocol\Request\OffsetCommit\TopicsOffsetCommit;
+use Kafka\Protocol\Request\OffsetCommitRequest;
+use Kafka\Protocol\Response\OffsetCommitResponse;
 use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
@@ -18,10 +16,10 @@ use KafkaTest\AbstractProtocolTest;
 use Swoole\Client;
 
 
-final class OffsetOffsetFetchTest extends AbstractProtocolTest
+final class OffsetCommitTest extends AbstractProtocolTest
 {
     /**
-     * @var OffsetFetchRequest $protocol
+     * @var OffsetCommitRequest $protocol
      */
     private $protocol;
 
@@ -30,7 +28,7 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
      */
     public function newProtocol()
     {
-        $this->protocol = new OffsetFetchRequest();
+        $this->protocol = new OffsetCommitRequest();
     }
 
     /**
@@ -41,19 +39,19 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
      */
     public function testEncode()
     {
-        /** @var OffsetFetchRequest $protocol */
+        /** @var OffsetCommitRequest $protocol */
         $protocol = $this->protocol;
         $protocol->setGroupId(String16::value('kafka-swoole'))
                  ->setTopics([
-                     (new TopicsOffsetFetch())->setTopic(String16::value('caiwenhui'))
-                                              ->setPartitions([
-                                                  (new PartitionsOffsetFetch())->setPartition(Int32::value(0))
-                                              ])
+                     (new TopicsOffsetCommit())->setName(String16::value('caiwenhui'))
+                                               ->setPartitions([
+                                                   (new PartitionsOffsetCommit())->setPartitionIndex(Int32::value(0))
+                                                                                 ->setCommittedMetadata(String16::value(''))
+                                                                                 ->setCommittedOffset(Int64::value(100))
+                                               ])
                  ]);
-        $protocol->getRequestHeader()->setApiVersion(Int16::value(ProtocolVersionEnum::API_VERSION_1));
-
         $data = $protocol->pack();
-        $expected = '0000003b0009000100000009000c6b61666b612d73776f6f6c65000c6b61666b612d73776f6f6c6500000001000963616977656e6875690000000100000000';
+        $expected = '000000450008000000000008000c6b61666b612d73776f6f6c65000c6b61666b612d73776f6f6c6500000001000963616977656e687569000000010000000000000000000000640000';
         $this->assertSame($expected, bin2hex($data));
 
         return $data;
@@ -67,7 +65,7 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
      */
     public function testSend(string $data)
     {
-        /** @var OffsetFetchRequest $protocol */
+        /** @var OffsetCommitRequest $protocol */
         $protocol = $this->protocol;
         $data = SocketServer::getInstance()->run('mkafka2', 9092, function () use ($data) {
             return $data;
@@ -75,13 +73,13 @@ final class OffsetOffsetFetchTest extends AbstractProtocolTest
             $protocol->response->unpack($data, $client);
         });
 
-        /** @var OffsetFetchResponse $resp */
+        /** @var OffsetCommitResponse $resp */
         $resp = $protocol->response;
         $this->assertIsArray($data);
-        foreach ($resp->getResponses() as $response) {
-            foreach ($response->getPartitionResponses() as $partitionResponse) {
+        foreach ($resp->getTopics() as $topic) {
+            foreach ($topic->getPartitions() as $partition) {
                 $this->assertEquals(ProtocolErrorEnum::NO_ERROR,
-                    $partitionResponse->getErrorCode()->getValue());
+                    $partition->getErrorCode()->getValue());
             }
         }
     }

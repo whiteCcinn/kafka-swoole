@@ -45,8 +45,7 @@ final class OffsetFetchTest extends AbstractProtocolTest
                  ]);
 
         $data = $protocol->pack();
-        var_dump(bin2hex($data));exit;
-        $expected = '000000450001000000000001000c6b61666b612d73776f6f6c65ffffffff00000064000003e800000001000963616977656e6875690000000100000000000000000000005500010000';
+        $expected = '0000003b0009000000000009000c6b61666b612d73776f6f6c65000c6b61666b612d73776f6f6c6500000001000963616977656e6875690000000100000000';
         $this->assertSame($expected, bin2hex($data));
 
         return $data;

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\OffsetCommit;
 
+use Kafka\Protocol\TraitStructure\ToArrayTrait;
 use Kafka\Protocol\Type\Int16;
 use Kafka\Protocol\Type\Int32;
 
@@ -13,6 +14,7 @@ use Kafka\Protocol\Type\Int32;
  */
 class PartitionsOffsetCommit
 {
+    use ToArrayTrait;
     /**
      * The partition index.
      *
@@ -38,9 +40,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int32 $partitionIndex
      *
-     * @return PartitionsOffsetFetch
+     * @return PartitionsOffsetCommit
      */
-    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetFetch
+    public function setPartitionIndex(Int32 $partitionIndex): PartitionsOffsetCommit
     {
         $this->partitionIndex = $partitionIndex;
 
@@ -58,9 +60,9 @@ class PartitionsOffsetCommit
     /**
      * @param Int16 $errorCode
      *
-     * @return PartitionsOffsetFetch
+     * @return PartitionsOffsetCommit
      */
-    public function setErrorCode(Int16 $errorCode): PartitionsOffsetFetch
+    public function setErrorCode(Int16 $errorCode): PartitionsOffsetCommit
     {
         $this->errorCode = $errorCode;
 
