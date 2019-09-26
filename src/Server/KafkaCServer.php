@@ -5,6 +5,9 @@ namespace Kafka\Server;
 
 use App\Handler\HighLevelHandler;
 use Kafka\Enum\ClientApiModeEnum;
+use Kafka\Event\CoreLogicAfterEvent;
+use Kafka\Event\CoreLogicBeforeEvent;
+use Kafka\Event\CoreLogicEvent;
 use Swoole\Process;
 use Swoole\Server;
 use \co;
@@ -148,16 +151,19 @@ class KafkaCServer
             go(function () use ($process) {
                 while (true) {
                     $this->checkMasterPid($process);
-                    co::sleep(1);
+                    co::sleep(3);
                 }
             });
 
             // Core Logic
             go(function () use ($index) {
+                dispatch(new CoreLogicBeforeEvent(), CoreLogicBeforeEvent::NAME);
                 while (true) {
-                    var_dump('loop-' . $index);
+                    var_dump('ping-pong');
                     co::sleep(1);
+                    dispatch(new CoreLogicEvent(), CoreLogicEvent::NAME);
                 }
+                dispatch(new CoreLogicAfterEvent(), CoreLogicAfterEvent::NAME);
             });
         }, false, 1, true);
 
@@ -199,13 +205,13 @@ class KafkaCServer
      */
     public function processWait()
     {
-        while(1) {
-            if(count($this->processes)){
+        while (1) {
+            if (count($this->processes)) {
                 $ret = Process::wait();
                 if ($ret) {
                     $this->rebootProcess($ret);
                 }
-            }else{
+            } else {
                 break;
             }
         }

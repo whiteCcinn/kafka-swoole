@@ -2,12 +2,11 @@
 
 namespace Kafka;
 
+use Kafka\Support\SingletonTrait;
+
 class Kafka
 {
-    /**
-     * @var Kafka $instance
-     */
-    private static $instance;
+    use SingletonTrait;
 
     /**
      * @var array $brokers
@@ -24,26 +23,6 @@ class Kafka
      * ['topicName'=>['partitionIndex']]
      */
     private $partitions;
-
-    private function __construct()
-    {
-    }
-
-    private function __clone()
-    {
-    }
-
-    /**
-     * @return Kafka
-     */
-    public static function getInstance()
-    {
-        if (!self::$instance instanceof Kafka) {
-            self::$instance = new self;
-        }
-
-        return self::$instance;
-    }
 
     /**
      * @return array
@@ -103,5 +82,16 @@ class Kafka
         $this->partitions = $partitions;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRandBroker(): array
+    {
+        $array = $this->getBrokers();
+        shuffle($array);
+
+        return array_pop($array);
     }
 }

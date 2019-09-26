@@ -61,5 +61,6 @@ class BootSubscriber implements EventSubscriberInterface
     private function registerSubscriber(): void
     {
         App::$dispatcher->addSubscriber(new StartSubscriber());
+        App::$dispatcher->addSubscriber(new CoreSubscriber());
     }
 }

@@ -25,10 +25,13 @@ class StartSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
+     */
     public function onStartBefore(): void
     {
-        $metadataManager = new MetadataManager();
-        $metadataManager->registerMetadataInfo();
+        MetadataManager::getInstance()->registerConfig()->registerMetadataInfo();
     }
 
     public function onStartAfter(): void

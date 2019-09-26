@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Kafka\Config;
 
+use Kafka\Enum\ProtocolPartitionAssignmentStrategyEnum;
 use Kafka\Exception\InvalidConfigException;
+use Kafka\Support\SingletonTrait;
 use Kafka\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 
@@ -25,11 +27,34 @@ class CommonConfig extends AbstractConfig
     protected $topicMetadataRefreshIntervalMs = 600000;
 
     /**
+     * @var string $groupId
+     */
+    protected $groupId;
+
+    /**
      * @var string $topicNames
      */
     protected $topicNames;
 
-    public function __construct()
+    /**
+     * @var int $heartbeatIntervalMs
+     */
+    protected $heartbeatIntervalMs;
+
+    /**
+     * @var int $groupKeepSessionMaxMs
+     */
+    protected $groupKeepSessionMaxMs;
+
+    /**
+     * @var string $partitionAssignmentStrategy
+     */
+    protected $partitionAssignmentStrategy;
+
+    /**
+     * CommonConfig constructor.
+     */
+    protected function __construct()
     {
         $this->loadConfig();
         parent::__construct();
@@ -53,8 +78,19 @@ class CommonConfig extends AbstractConfig
     public function validate($config)
     {
         $this->validateMetadataBrokerList($config->metadataBrokerList);
+        $this->validateHeartbeatAndGroupKeepTime(
+            $config->getHeartbeatIntervalMs(),
+            $config->getGroupKeepSessionMaxMs()
+        );
+        $this->validatePartitionAssignmentStrategy($config->getPartitionAssignmentStrategy());
     }
 
+    /**
+     * @param string $metadataBrokerList
+     *
+     * @return bool
+     * @throws InvalidConfigException
+     */
     private function validateMetadataBrokerList(string $metadataBrokerList): bool
     {
         if (!empty($metadataBrokerList)) {
@@ -70,6 +106,25 @@ class CommonConfig extends AbstractConfig
         }
 
         throw new InvalidConfigException(trans("config.validate.MetadataBrokerList", [$metadataBrokerList]));
+    }
+
+    /**
+     * @param int $heartbeatIntervalMs
+     * @param int $groupKeepSessionMaxMs
+     *
+     * @throws InvalidConfigException
+     */
+    private function validateHeartbeatAndGroupKeepTime(int $heartbeatIntervalMs, int $groupKeepSessionMaxMs)
+    {
+        if ($heartbeatIntervalMs > $groupKeepSessionMaxMs)
+            throw new InvalidConfigException("heartbeat.interval.ms = " . $heartbeatIntervalMs . " can't be larger than group.keep.session.max.ms size = " . $groupKeepSessionMaxMs);
+    }
+
+    private function validatePartitionAssignmentStrategy(string $strategy)
+    {
+        if (!in_array($strategy, ProtocolPartitionAssignmentStrategyEnum::getAllText())) {
+            throw new InvalidConfigException('partition.assignment.strategy Illegal value：' . $strategy . ' Please See ProtocolPartitionAssignmentStrategyEnum::class');
+        }
     }
 
     /**
@@ -94,5 +149,37 @@ class CommonConfig extends AbstractConfig
     public function getTopicNames(): string
     {
         return $this->topicNames;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupId(): string
+    {
+        return $this->groupId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getHeartbeatIntervalMs(): int
+    {
+        return $this->heartbeatIntervalMs;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGroupKeepSessionMaxMs(): int
+    {
+        return $this->groupKeepSessionMaxMs;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPartitionAssignmentStrategy(): string
+    {
+        return $this->partitionAssignmentStrategy;
     }
 }

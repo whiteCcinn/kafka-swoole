@@ -4,7 +4,10 @@ namespace Kafka\Manager;
 
 use App\App;
 use Kafka\Config\CommonConfig;
+use Kafka\Config\ConsumerConfig;
+use Kafka\Config\ProducerConfig;
 use Kafka\Exception\InvalidEnvException;
+use Kafka\Exception\Socket\NormalSocketConnectException;
 use Kafka\Kafka;
 use Kafka\Protocol\Request\MetadataRequest;
 use Kafka\Protocol\Response\Metadata\PartitionMetadata;
@@ -12,39 +15,44 @@ use Kafka\Protocol\Response\Metadata\TopicMetadata;
 use Kafka\Protocol\Response\MetadataResponse;
 use Kafka\Protocol\Type\String16;
 use Kafka\Server\SocketServer;
+use Kafka\Socket\NormalSocket;
+use Kafka\Socket\Socket;
+use Kafka\Support\SingletonTrait;
 
 class MetadataManager
 {
+    use SingletonTrait;
+
     /**
-     * register metadata info
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
      */
     public function registerMetadataInfo()
     {
-        App::$commonConfig = new CommonConfig();
         foreach (explode(',', App::$commonConfig->getMetadataBrokerList()) as $hostPorts) {
             [$host, $port] = explode(':', $hostPorts);
-            $protocol = new MetadataRequest();
-            $fn1 = function () use ($protocol) {
-                $protocol = new MetadataRequest();
-                $topics = App::$commonConfig->getTopicNames();
-                $topicNames = array_map(function ($item) {
-                    return String16::value($item);
-                }, explode(',', $topics));
-                $protocol->setTopicName($topicNames);
 
-                return $protocol->pack();
-            };
-            $fn2 = function (string $data) use ($protocol) {
-                $protocol->response->unpack($data);
+            // Get metadata information...
+            $metadataRequest = new MetadataRequest();
+            $topics = App::$commonConfig->getTopicNames();
+            $topicNames = array_map(function ($item) {
+                return String16::value($item);
+            }, explode(',', $topics));
+            $metadataRequest->setTopicName($topicNames);
+            $data = $metadataRequest->pack();
 
-                return $protocol;
-            };
-            $ret = SocketServer::getInstance()->run($host, (int)$port, $fn1, $fn2);
-            if (!$ret) {
+            // Initiate socket request for data transfer...
+            $socket = new Socket();
+            try {
+                $socket->connect($host, $port)->send($data);
+            } catch (NormalSocketConnectException $e) {
                 continue;
             }
+            $socket->revcByKafka($metadataRequest);
+            $socket->close();
+
             /** @var MetadataResponse $response */
-            $response = $protocol->response;
+            $response = $metadataRequest->response;
             Kafka::getInstance()->setBrokers(toValue($response->getBrokers()));
             Kafka::getInstance()->setTopics(toValue($response->getTopics()));
             $partitions = [];
@@ -59,6 +67,13 @@ class MetadataManager
             Kafka::getInstance()->setPartitions($partitions);
             break;
         }
+
+        if (count(Kafka::getInstance()->getBrokers()) === 0) {
+            throw new \Exception(sprintf('MetadataBrokerList can\'t connect: %s',
+                App::$commonConfig->getMetadataBrokerList()));
+        }
+
+        return self::getInstance();
     }
 
     /**
@@ -88,5 +103,17 @@ class MetadataManager
         }
 
         return $num;
+    }
+
+    /**
+     * @return MetadataManager
+     */
+    public function registerConfig(): self
+    {
+        App::$commonConfig = CommonConfig::getInstance();
+//        App::$consumerConfig = new ConsumerConfig();
+//        App::$producerConfig = new ProducerConfig();
+
+        return self::getInstance();
     }
 }

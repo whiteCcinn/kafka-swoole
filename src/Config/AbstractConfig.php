@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace Kafka\Config;
 
-use App\Exception\InvalidConfigurationException;
+use Kafka\Exception\InvalidConfigurationException;
+use Kafka\Support\SingletonTrait;
 use function preg_match;
+
 /**
  * Class AbstractConfig
  *
@@ -12,10 +14,12 @@ use function preg_match;
  */
 abstract class AbstractConfig
 {
+    use SingletonTrait;
+
     /**
      * AbstractConfig constructor.
      */
-    public function __construct()
+    protected function __construct()
     {
         $this->validate($this);
     }

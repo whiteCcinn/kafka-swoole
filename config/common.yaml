@@ -3,7 +3,7 @@
 # will be established based on the broker information returned in the metadata. The
 # format is host1:port1,host2:port2, and the list can be a subset of brokers or
 # a VIP pointing to a subset of brokers.
-metadata.broker.list: mkafka1:9092,mkafka2:9092
+metadata.broker.list: "mkafka1:9092,mkafka2:9092,mkafka3:9092,mkafka4:9092"
 
 # The producer generally refreshes the topic metadata from brokers when there is a failure
 # (partition missing, leader not available...). It will also poll regularly (default: every 10min
@@ -13,4 +13,19 @@ metadata.broker.list: mkafka1:9092,mkafka2:9092
 # a message the metadata is never refreshed
 topic.metadata.refresh.interval.ms: 600000
 
-topic.names: caiwenhui
+# a string that uniquely identifies a set of consumers within the same consumer group
+group.id: "kafka-swoole"
+
+# Which you want to operation
+# Example: topic1,topic2,topic3,topic4,topic5
+topic.names: "caiwenhui"
+
+# The periodic time the heartbeat request is sent to tell kafka that the client still exists
+heartbeat.interval.ms: 10000
+
+# The maximum allowed time within a group for which no heartbeat is sent
+# So this value must be greater than the heartbeat sending cycle：heartbeat.interval.ms
+group.keep.session.max.ms: 30000
+
+# Select a strategy for assigning partitions to consumer streams. See ProtocolPartitionAssignmentStrategyEnum::class
+partition.assignment.strategy: "range"

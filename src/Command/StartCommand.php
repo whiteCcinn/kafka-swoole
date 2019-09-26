@@ -31,8 +31,7 @@ class StartCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
-        $metadataManager = new MetadataManager();
-        $processNum = $metadataManager->calculationClientNum();
+        $processNum = MetadataManager::getInstance()->calculationClientNum();
         KafkaCServer::getInstance()->setProcess($processNum)->start();
     }
 }

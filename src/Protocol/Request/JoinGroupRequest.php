@@ -112,6 +112,10 @@ class JoinGroupRequest extends AbstractRequest
      */
     public function getProtocolType(): String16
     {
+        if ($this->protocolType === null) {
+            $this->setProtocolType(String16::value('consumer'));
+        }
+
         return $this->protocolType;
     }
 

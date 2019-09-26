@@ -5,6 +5,8 @@ namespace Kafka\Config;
 
 use Kafka\Exception\InvalidConfigException;
 use Kafka\Exception\InvalidConfigurationException;
+use Kafka\Support\Str;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ConsumerConfig
@@ -60,12 +62,26 @@ class ConsumerConfig extends CommonConfig
     /** @var string $partitionAssignmentStrategy */
     private $partitionAssignmentStrategy;
 
+    public function __construct()
+    {
+        $this->loadConfig();
+        parent::__construct();
+    }
+
+    private function loadConfig()
+    {
+        $values = Yaml::parseFile(KAFKA_SWOOLE_CON);
+        foreach ($values as $var => $value) {
+            $var = Str::camel($var);
+            $this->{$var} = $value;
+        }
+    }
+
     /**
      * @param ConsumerConfig $config
      *
      * @return mixed|void
      * @throws InvalidConfigException
-     * @throws InvalidConfigurationException
      */
     public function validate($config): void
     {
@@ -78,8 +94,6 @@ class ConsumerConfig extends CommonConfig
 
     /**
      * @param string $clientId
-     *
-     * @throws \App\Exception\InvalidConfigurationException
      */
     public function validateClientId(string $clientId): void
     {
@@ -88,8 +102,6 @@ class ConsumerConfig extends CommonConfig
 
     /**
      * @param string $groupId
-     *
-     * @throws \App\Exception\InvalidConfigurationException
      */
     public function validateGroupId(string $groupId): void
     {

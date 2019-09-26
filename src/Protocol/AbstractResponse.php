@@ -10,6 +10,7 @@ use Kafka\Protocol\Type\AbstractType;
 use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
+use Kafka\Socket\Socket;
 use Kafka\Support\Str;
 use \ReflectionClass;
 use \ReflectionProperty;
@@ -133,7 +134,7 @@ abstract class AbstractResponse extends AbstractRequestOrResponse
                             $this->setTypePropertyValue($instance, $propertyName, $classNameInstance);
                         } else {
                             $valueInstance = $this->getValueInstance($protocol, $className);
-                            if ($propertyName === 'size' && ($client instanceof Client || $client instanceof CoClient)) {
+                            if ($propertyName === 'size' && ($client instanceof Client || $client instanceof CoClient || $client instanceof Socket)) {
                                 $this->goOnReadBuffer($client, $valueInstance, $protocol);
                             }
                             $this->setTypePropertyValue($instance, $propertyName, $valueInstance);

@@ -3,7 +3,8 @@
 namespace App;
 
 use Kafka\Config\CommonConfig;
-use Kafka\Manager;
+use Kafka\Config\ConsumerConfig;
+use Kafka\Config\ProducerConfig;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Translation\Translator;
@@ -31,6 +32,16 @@ class App
      * @var CommonConfig $commonConfig
      */
     public static $commonConfig;
+
+    /**
+     * @var ConsumerConfig $consumerConfig
+     */
+    public static $consumerConfig;
+
+    /**
+     * @var ProducerConfig $producerConfig
+     */
+    public static $producerConfig;
 
     /**
      * @throws \Exception

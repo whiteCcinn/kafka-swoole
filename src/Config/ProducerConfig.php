@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Kafka\Config;
 
 use Kafka\Exception\InvalidConfigException;
-use Kafka\Exception\InvalidConfigurationException;
 
 /**
  * Class ProducerConfig
@@ -32,7 +31,6 @@ class ProducerConfig extends CommonConfig
      *
      * @return mixed|void
      * @throws InvalidConfigException
-     * @throws InvalidConfigurationException
      */
     public function validate($config): void
     {
@@ -43,8 +41,6 @@ class ProducerConfig extends CommonConfig
 
     /**
      * @param string $clientId
-     *
-     * @throws \App\Exception\InvalidConfigurationException
      */
     public function validateClientId(string $clientId): void
     {

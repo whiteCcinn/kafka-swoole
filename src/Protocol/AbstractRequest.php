@@ -68,8 +68,6 @@ abstract class AbstractRequest extends AbstractRequestOrResponse
 
     /**
      * @return string
-     * @throws ProtocolTypeException
-     * @throws \ReflectionException
      */
     public function pack(): string
     {

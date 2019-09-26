@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Server\dd;
+namespace Kafka\Server;
 
 use Kafka\Enum\ProtocolTypeEnum;
 use Swoole\Client;
 
-class SocketServer1
+class SocketServer2
 {
     /**
      * @var SocketServer $instance
