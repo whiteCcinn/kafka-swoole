@@ -28,4 +28,4 @@ heartbeat.interval.ms: 10000
 group.keep.session.max.ms: 30000
 
 # Select a strategy for assigning partitions to consumer streams. See ProtocolPartitionAssignmentStrategyEnum::class
-partition.assignment.strategy: "range"
+partition.assignment.strategy: "Range"

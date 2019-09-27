@@ -47,19 +47,19 @@ class ProtocolMetadataJoinGroup
     }
 
     /**
-     * @return mixed
+     * @return TopicJoinGroup[]
      */
-    public function getSubscription()
+    public function getSubscription(): array
     {
         return $this->subscription;
     }
 
     /**
-     * @param mixed $subscription
+     * @param TopicJoinGroup[] $subscription
      *
      * @return ProtocolMetadataJoinGroup
      */
-    public function setSubscription($subscription)
+    public function setSubscription(array $subscription): ProtocolMetadataJoinGroup
     {
         $this->subscription = $subscription;
 
