@@ -26,6 +26,34 @@ class ClientKafka
     ];
 
     /**
+     * @var array $topicPartitionSocket
+     */
+    private $topicPartitionSocket = [
+        'topic' => [
+            0 => null
+        ]
+    ];
+
+    /**
+     * @var array $topicPartitionSocket
+     */
+    private $topicPartitionListOffsets = [
+        'topic' => [
+            0 => [
+                'offset'        => 0,
+                'highWatermark' => 0
+            ]
+        ]
+    ];
+
+    /**
+     * @var array
+     */
+    private $selfLeaderTopicPartition = [
+        'leaderId' => ['topic' => ['partition']]
+    ];
+
+    /**
      * @var int $generationId
      */
     private $generationId;
@@ -51,19 +79,37 @@ class ClientKafka
     private $isLeader;
 
     /**
+     * Just leader has
+     *
      * @var MembersJoinGroup[] $members
      */
     private $members = [];
 
     /**
+     * Just leader has
+     *
      * @var array
      */
     private $topicMemberIds = [];
 
     /**
+     * Just leader has
+     *
      * @var array
      */
     private $memberIdTopics = [];
+
+    /**
+     * @var array
+     * ['topic'=>[partition,...]]
+     */
+    private $selfTopicPartition = [];
+
+    /**
+     * @var array
+     * ['topic'=>['partition'=>offset]]
+     */
+    private $topicPartitionOffset = [];
 
     /**
      * @param int $nodeId
@@ -303,5 +349,125 @@ class ClientKafka
         $this->isLeader = $isLeader;
 
         return self::getInstance();
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelfTopicPartition(): array
+    {
+        return $this->selfTopicPartition;
+    }
+
+    /**
+     * @param array $selfTopicPartition
+     *
+     * @return ClientKafka
+     */
+    public function setSelfTopicPartition(array $selfTopicPartition): ClientKafka
+    {
+        $this->selfTopicPartition = $selfTopicPartition;
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     * @param Socket $socket
+     *
+     * @return ClientKafka
+     */
+    public function setTopicPartitionSocket(string $topic, int $partition, Socket $socket): self
+    {
+        $this->topicPartitionSocket[$topic][$partition] = $socket;
+
+        return self::getInstance();
+    }
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     *
+     * @return Socket
+     */
+    public function getSocketByTopicPartition(string $topic, int $partition): Socket
+    {
+        return $this->topicPartitionSocket[$topic][$partition];
+    }
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     *
+     * @return array
+     */
+    public function getTopicPartitionListOffsets(string $topic, int $partition): array
+    {
+        return $this->topicPartitionListOffsets[$topic][$partition];
+    }
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     * @param int    $offset
+     * @param int    $highWatermark
+     *
+     * @return ClientKafka
+     */
+    public function setTopicPartitionListOffsets(string $topic, int $partition, int $offset, int $highWatermark): self
+    {
+        $this->topicPartitionListOffsets[$topic][$partition] = [
+            'offset'        => $offset,
+            'highWatermark' => $highWatermark
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     *
+     * @return int
+     */
+    public function getTopicPartitionOffsetByTopicPartition(string $topic, int $partition): int
+    {
+        return $this->topicPartitionOffset[$topic][$partition];
+    }
+
+    /**
+     * @param string $topic
+     * @param int    $partition
+     * @param int    $offset
+     *
+     * @return ClientKafka
+     */
+    public function setTopicPartitionOffset(string $topic, int $partition, int $offset): self
+    {
+        $this->topicPartitionOffset[$topic][$partition] = $offset;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelfLeaderTopicPartition(): array
+    {
+        return $this->selfLeaderTopicPartition;
+    }
+
+    /**
+     * @param array $selfLeaderTopicPartition
+     *
+     * @return ClientKafka
+     */
+    public function setSelfLeaderTopicPartition(array $selfLeaderTopicPartition): ClientKafka
+    {
+        $this->selfLeaderTopicPartition = $selfLeaderTopicPartition;
+
+        return $this;
     }
 }

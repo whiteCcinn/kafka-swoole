@@ -25,7 +25,7 @@ class PartitionsListsOffsets
     /**
      * Maximum offsets to return.
      *
-     * @var Int32 $maxNumOffsetss
+     * @var Int32 $maxNumOffsets
      */
     private $maxNumOffsets;
 
@@ -74,6 +74,10 @@ class PartitionsListsOffsets
      */
     public function getMaxNumOffsets(): Int32
     {
+        if ($this->maxNumOffsets === null) {
+            $this->setMaxNumOffsets(Int32::value(99999999));
+        }
+
         return $this->maxNumOffsets;
     }
 

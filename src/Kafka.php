@@ -2,6 +2,7 @@
 
 namespace Kafka;
 
+use Kafka\Socket\Socket;
 use Kafka\Support\SingletonTrait;
 
 class Kafka
@@ -23,6 +24,18 @@ class Kafka
      * ['topicName'=>['partitionIndex']]
      */
     private $partitions;
+
+    /**
+     * @var array $topicsPartitionLeader
+     * ['topicName'=>['partitionIndex' =>'leaderId']]
+     */
+    private $topicsPartitionLeader;
+
+    /**
+     * @var array $leaderTopicPartition
+     * ['leaderId'=>['topicName' =>'partitionIndex']]
+     */
+    private $leaderTopicPartition;
 
     /**
      * @return array
@@ -85,6 +98,74 @@ class Kafka
     }
 
     /**
+     * @param string $topic
+     * @param int    $partition
+     *
+     * @return int
+     */
+    public function getLeaderByTopicPartition(string $topic, int $partition)
+    {
+        static $staticLeaderByTopicPartition;
+
+        if (is_array($staticLeaderByTopicPartition) && isset($staticLeaderByTopicPartition[$topic][$partition])) {
+            return $staticLeaderByTopicPartition[$topic][$partition];
+        }
+        foreach ($this->topicsPartitionLeader as $topicName => $partitionLeader) {
+            if ($topic === $topicName) {
+                foreach ($partitionLeader as $partitionIndex => $leader) {
+                    if ($partitionIndex === $partition) {
+                        $staticLeaderByTopicPartition[$topicName][$partitionIndex] = $leader;
+
+                        return $leader;
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTopicsPartitionLeader(): array
+    {
+        return $this->topicsPartitionLeader;
+    }
+
+    /**
+     * @param array $topicsPartitionLeader
+     *
+     * @return Kafka
+     */
+    public function setTopicsPartitionLeader(array $topicsPartitionLeader): Kafka
+    {
+        $this->topicsPartitionLeader = $topicsPartitionLeader;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLeaderTopicPartition(): array
+    {
+        return $this->leaderTopicPartition;
+    }
+
+    /**
+     * @param array $leaderTopicPartition
+     *
+     * @return Kafka
+     */
+    public function setLeaderTopicPartition(array $leaderTopicPartition): Kafka
+    {
+        $this->leaderTopicPartition = $leaderTopicPartition;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getRandBroker(): array
@@ -93,5 +174,45 @@ class Kafka
         shuffle($array);
 
         return array_pop($array);
+    }
+
+    /**
+     * @param int $nodeId
+     *
+     * @return array|mixed
+     */
+    public function getBrokerInfoByNodeId(int $nodeId)
+    {
+        static $staticBroker;
+
+        if (is_array($staticBroker) && isset($staticBroker[$nodeId])) {
+            return $staticBroker[$nodeId];
+        }
+
+        foreach ($this->brokers as $broker) {
+            if ($broker['nodeId'] === $nodeId) {
+                $staticBroker[$nodeId] = $broker;
+
+                return $broker;
+            }
+        }
+
+        return [];
+    }
+
+    public function getSocketByNodeId(int $nodeId)
+    {
+        static $staticSocket;
+
+        if (is_array($staticSocket) && isset($staticSocket[$nodeId])) {
+            return $staticSocket[$nodeId];
+        }
+
+        ['host' => $host, 'port' => $port] = $this->getBrokerInfoByNodeId($nodeId);
+        $socket = new Socket();
+        $socket->connect($host, $port);
+        $staticSocket[$nodeId] = $socket;
+
+        return $socket;
     }
 }

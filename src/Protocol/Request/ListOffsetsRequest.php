@@ -32,6 +32,10 @@ class ListOffsetsRequest extends AbstractRequest
      */
     public function getReplicaId(): Int32
     {
+        if ($this->replicaId === null) {
+            $this->setReplicaId(Int32::value(-1));
+        }
+
         return $this->replicaId;
     }
 

@@ -151,6 +151,7 @@ class KafkaCServer
             go(function () use ($process) {
                 while (true) {
                     $this->checkMasterPid($process);
+                    echo sprintf('Check if the service master process exists every %s seconds...' . PHP_EOL, 3);
                     co::sleep(3);
                 }
             });
@@ -158,11 +159,8 @@ class KafkaCServer
             // Core Logic
             go(function () use ($index) {
                 dispatch(new CoreLogicBeforeEvent(), CoreLogicBeforeEvent::NAME);
-                while (true) {
-                    var_dump('ping-pong');
-                    co::sleep(1);
-                    dispatch(new CoreLogicEvent(), CoreLogicEvent::NAME);
-                }
+                echo 'CoreLogic' . PHP_EOL;
+                dispatch(new CoreLogicEvent(), CoreLogicEvent::NAME);
                 dispatch(new CoreLogicAfterEvent(), CoreLogicAfterEvent::NAME);
             });
         }, false, 1, true);
@@ -175,7 +173,6 @@ class KafkaCServer
 
     public function checkMasterPid(Process $process)
     {
-        echo 'ping-pong' . PHP_EOL;
         if (!Process::kill($this->masterPid, 0)) {
             $process->exit();
         }

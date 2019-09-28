@@ -153,12 +153,12 @@ final class SyncGroupTest extends AbstractProtocolTest
             $coordinatorResponse->getPort()->getValue(), function () use ($data) {
                 return $data;
             }, function (string $data, Client $client) use ($protocol) {
-                var_dump(bin2hex($data));
                 $protocol->response->unpack($data, $client);
             });
 
         /** @var SyncGroupResponse $syncGroupResponse */
         $syncGroupResponse = $protocol->response;
+        var_dump($syncGroupResponse->toArray());
         $this->assertEquals(ProtocolErrorEnum::NO_ERROR, $syncGroupResponse->getErrorCode()->getValue());
     }
 }

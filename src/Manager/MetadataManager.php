@@ -56,15 +56,25 @@ class MetadataManager
             Kafka::getInstance()->setBrokers(toValue($response->getBrokers()));
             Kafka::getInstance()->setTopics(toValue($response->getTopics()));
             $partitions = [];
+            $topicsPartitionLeader = $leaderTopicPartition = [];
             /** @var TopicMetadata $topicMetadata */
             foreach ($response->getTopics() as $topicMetadata) {
                 /** @var PartitionMetadata $partitionMetadata */
                 foreach ($topicMetadata->getPartitions() as $partitionMetadata) {
                     $partitions[$topicMetadata->getName()->getValue()][] = $partitionMetadata->getPartitionIndex()
                                                                                              ->getValue();
+                    $topicsPartitionLeader[$topicMetadata->getName()
+                                                         ->getValue()][$partitionMetadata->getPartitionIndex()
+                                                                                         ->getValue()] = $partitionMetadata->getLeaderId()
+                                                                                                                           ->getValue();
+                    $leaderTopicPartition[$partitionMetadata->getLeaderId()->getValue()][$topicMetadata->getName()
+                                                                                                       ->getValue()][] = $partitionMetadata->getPartitionIndex()
+                                                                                                                                           ->getValue();
                 }
             }
-            Kafka::getInstance()->setPartitions($partitions);
+            Kafka::getInstance()->setPartitions($partitions)
+                 ->setTopicsPartitionLeader($topicsPartitionLeader)
+                 ->setLeaderTopicPartition($leaderTopicPartition);
             break;
         }
 

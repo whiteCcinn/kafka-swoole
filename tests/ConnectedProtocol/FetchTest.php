@@ -77,7 +77,7 @@ final class FetchTest extends AbstractProtocolTest
 
         $this->assertIsArray($data);
         foreach ($protocol->response->getResponses() as $response) {
-            foreach ($response->getPartitionResponses() as $partitionResponse) {
+            foreach ($response->getPartitionResponses() as $partitionResponse){
                 $this->assertEquals(ProtocolErrorEnum::NO_ERROR, $partitionResponse->getPartitionHeader()->getErrorCode()->getValue());
             }
         }
