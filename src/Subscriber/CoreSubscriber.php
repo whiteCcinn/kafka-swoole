@@ -14,6 +14,7 @@ use Kafka\Enum\ProtocolVersionEnum;
 use Kafka\Event\CoreLogicAfterEvent;
 use Kafka\Event\CoreLogicBeforeEvent;
 use Kafka\Event\CoreLogicEvent;
+use Kafka\Event\FetchMessageEvent;
 use Kafka\Event\HeartbeatEvent;
 use Kafka\Exception\ClientException;
 use Kafka\Exception\RequestException\FetchRequestException;
@@ -87,7 +88,6 @@ class CoreSubscriber implements EventSubscriberInterface
             });
             $heartbeatIntervalMs = App::$commonConfig->getHeartbeatIntervalMs();
             $sleepTime = $heartbeatIntervalMs / 1000;
-            ['host' => $host, 'port' => $port] = Kafka::getInstance()->getRandBroker();
             $socket = new Socket();
             while (true) {
                 try {
@@ -97,7 +97,7 @@ class CoreSubscriber implements EventSubscriberInterface
                                      ->setGenerationId(Int32::value(ClientKafka::getInstance()->getGenerationId()));
 
                     $data = $heartbeatRequest->pack();
-                    $socket->connect($host, $port)->send($data);
+                    $socket->connect(ClientKafka::getInstance()->getOffsetConnectHost(), ClientKafka::getInstance()->getOffsetConnectPort())->send($data);
                     $socket->revcByKafka($heartbeatRequest);
 
                     /** @var HeartbeatResponse $response */
@@ -489,7 +489,7 @@ class CoreSubscriber implements EventSubscriberInterface
             defer(function () {
                 throw new ClientException('Fetch request coroutine aborted unexpectedly');
             });
-            while(true) {
+            while (true) {
                 // fetch data
                 $fetchRequest = new FetchRequest();
                 $setTopics = [];
@@ -523,25 +523,29 @@ class CoreSubscriber implements EventSubscriberInterface
 
                     /** @var FetchResponse $response */
                     $response = $fetchRequest->response;
+                    $messages = [];
                     foreach ($response->getResponses() as $response) {
                         foreach ($response->getPartitionResponses() as $partitionResponse) {
                             if ($partitionResponse->getPartitionHeader()
-                                                  ->getErrorCode() !== ProtocolErrorEnum::NO_ERROR) {
+                                                  ->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
                                 throw new FetchRequestException(sprintf('FetchRequest request error, the error message is: %s',
                                     ProtocolErrorEnum::getTextByCode($partitionResponse->getPartitionHeader()
-                                                                                       ->getErrorCode())));
+                                                                                       ->getErrorCode()->getValue())));
                             }
 
                             foreach ($partitionResponse->getRecordSet() as $recordSet) {
-                                $message[] = [
+                                $messages[] = [
                                     'offset'  => $recordSet->getOffset()->getValue(),
-                                    'message' => $recordSet->getMessage()->getValue()
+                                    'message' => $recordSet->getMessage()->getValue()->getValue()
                                 ];
                             }
                         }
                     }
 
-                    // 开始消费数据...
+                    foreach ($messages as $item) {
+                        ['offset' => $offset, 'message' => $message] = $item;
+                        dispatch(new FetchMessageEvent($offset, $message), FetchMessageEvent::NAME);
+                    }
                 }
             }
         });

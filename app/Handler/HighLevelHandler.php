@@ -7,6 +7,6 @@ class HighLevelHandler implements ConsumerInterface
 {
     public function handler(string $message)
     {
-        // TODO: Implement handler() method.
+        var_dump($message);
     }
 }
