@@ -4,7 +4,7 @@ namespace Kafka;
 
 use Kafka\Socket\Socket;
 use Kafka\Support\SingletonTrait;
-
+use \co;
 class Kafka
 {
     use SingletonTrait;
@@ -33,7 +33,7 @@ class Kafka
 
     /**
      * @var array $leaderTopicPartition
-     * ['leaderId'=>['topicName' =>'partitionIndex']]
+     * ['leaderId'=>['topicName' =>['partitionIndex']]]
      */
     private $leaderTopicPartition;
 
@@ -204,14 +204,15 @@ class Kafka
     {
         static $staticSocket;
 
-        if (is_array($staticSocket) && isset($staticSocket[$nodeId])) {
-            return $staticSocket[$nodeId];
+        $cid = co::getCid();
+        if (is_array($staticSocket) && isset($staticSocket[$cid][$nodeId])) {
+            return $staticSocket[$cid][$nodeId];
         }
 
         ['host' => $host, 'port' => $port] = $this->getBrokerInfoByNodeId($nodeId);
         $socket = new Socket();
         $socket->connect($host, $port);
-        $staticSocket[$nodeId] = $socket;
+        $staticSocket[$cid][$nodeId] = $socket;
 
         return $socket;
     }

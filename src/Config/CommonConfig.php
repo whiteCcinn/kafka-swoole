@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Kafka\Config;
 
+use Kafka\Enum\OffsetResetEnum;
 use Kafka\Enum\ProtocolPartitionAssignmentStrategyEnum;
 use Kafka\Exception\InvalidConfigException;
-use Kafka\Support\SingletonTrait;
 use Kafka\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 
@@ -52,6 +52,16 @@ class CommonConfig extends AbstractConfig
     protected $partitionAssignmentStrategy;
 
     /**
+     * @var int $autoCommitIntervalMs
+     */
+    protected $autoCommitIntervalMs;
+
+    /**
+     * @var string $autoOffsetReset
+     */
+    protected $autoOffsetReset;
+
+    /**
      * CommonConfig constructor.
      */
     protected function __construct()
@@ -65,6 +75,10 @@ class CommonConfig extends AbstractConfig
         $values = Yaml::parseFile(KAFKA_SWOOLE_CONFIG_COMMON_FILE);
         foreach ($values as $var => $value) {
             $var = Str::camel($var);
+            // Expression assignment is supported
+            if (preg_match('/^\s*-?\d+\s*[\+\-\*\/%]\s*-?\d+\s*([\+\-\*\/\%]\s*-?\d+\s*)*$/', $value)) {
+                eval('$value = ' . $value . ';');
+            }
             $this->{$var} = $value;
         }
     }
@@ -83,6 +97,8 @@ class CommonConfig extends AbstractConfig
             $config->getGroupKeepSessionMaxMs()
         );
         $this->validatePartitionAssignmentStrategy($config->getPartitionAssignmentStrategy());
+        $this->validateAutoCommitIntervalMs($config->getAutoCommitIntervalMs());
+        $this->validateAutoOffsetReset($config->getAutoOffsetReset());
     }
 
     /**
@@ -120,10 +136,39 @@ class CommonConfig extends AbstractConfig
             throw new InvalidConfigException("heartbeat.interval.ms = " . $heartbeatIntervalMs . " can't be larger than group.keep.session.max.ms size = " . $groupKeepSessionMaxMs);
     }
 
+    /**
+     * @param string $strategy
+     *
+     * @throws InvalidConfigException
+     */
     private function validatePartitionAssignmentStrategy(string $strategy)
     {
         if (!in_array($strategy, ProtocolPartitionAssignmentStrategyEnum::getAllText())) {
             throw new InvalidConfigException('partition.assignment.strategy Illegal value：' . $strategy . ' Please See ProtocolPartitionAssignmentStrategyEnum::class');
+        }
+    }
+
+    /**
+     * @param int $autoCommitIntervalMs
+     *
+     * @throws InvalidConfigException
+     */
+    private function validateAutoCommitIntervalMs(int $autoCommitIntervalMs)
+    {
+        if ($autoCommitIntervalMs <= 0) {
+            throw new InvalidConfigException('auto.commit.interval.ms must be greater than 0');
+        }
+    }
+
+    /**
+     * @param string $autoOffsetReset
+     *
+     * @throws InvalidConfigException
+     */
+    private function validateAutoOffsetReset(string $autoOffsetReset)
+    {
+        if (!in_array($autoOffsetReset, OffsetResetEnum::getAllText())) {
+            throw new InvalidConfigException('auto.offset.reset Illegal value：' . $autoOffsetReset . ' Please See OffsetResetEnum::class');
         }
     }
 
@@ -181,5 +226,21 @@ class CommonConfig extends AbstractConfig
     public function getPartitionAssignmentStrategy(): string
     {
         return $this->partitionAssignmentStrategy;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAutoCommitIntervalMs()
+    {
+        return $this->autoCommitIntervalMs;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAutoOffsetReset(): string
+    {
+        return $this->autoOffsetReset;
     }
 }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace Kafka\Subscriber;
 
 use App\App;
-use Co\Client;
-use Co\System;
 use Kafka\ClientKafka;
 use Kafka\Config\CommonConfig;
 use Kafka\Enum\ProtocolErrorEnum;
@@ -16,12 +14,14 @@ use Kafka\Event\CoreLogicBeforeEvent;
 use Kafka\Event\CoreLogicEvent;
 use Kafka\Event\FetchMessageEvent;
 use Kafka\Event\HeartbeatEvent;
+use Kafka\Event\OffsetCommitEvent;
 use Kafka\Exception\ClientException;
 use Kafka\Exception\RequestException\FetchRequestException;
 use Kafka\Exception\RequestException\FindCoordinatorRequestException;
 use Kafka\Exception\RequestException\HeartbeatRequestException;
 use Kafka\Exception\RequestException\JoinGroupRequestException;
 use Kafka\Exception\RequestException\ListOffsetsRequestException;
+use Kafka\Exception\RequestException\OffsetCommitRequestException;
 use Kafka\Exception\RequestException\OffsetFetchRequestException;
 use Kafka\Exception\RequestException\SyncGroupRequestException;
 use Kafka\Kafka;
@@ -38,6 +38,9 @@ use Kafka\Protocol\Request\JoinGroupRequest;
 use Kafka\Protocol\Request\ListOffsets\PartitionsListsOffsets;
 use Kafka\Protocol\Request\ListOffsets\TopicsListsOffsets;
 use Kafka\Protocol\Request\ListOffsetsRequest;
+use Kafka\Protocol\Request\OffsetCommit\PartitionsOffsetCommit;
+use Kafka\Protocol\Request\OffsetCommit\TopicsOffsetCommit;
+use Kafka\Protocol\Request\OffsetCommitRequest;
 use Kafka\Protocol\Request\OffsetFetch\PartitionsOffsetFetch;
 use Kafka\Protocol\Request\OffsetFetch\TopicsOffsetFetch;
 use Kafka\Protocol\Request\OffsetFetchRequest;
@@ -50,6 +53,7 @@ use Kafka\Protocol\Response\FindCoordinatorResponse;
 use Kafka\Protocol\Response\HeartbeatResponse;
 use Kafka\Protocol\Response\JoinGroupResponse;
 use Kafka\Protocol\Response\ListOffsetsResponse;
+use Kafka\Protocol\Response\OffsetCommitResponse;
 use Kafka\Protocol\Response\OffsetFetchResponse;
 use Kafka\Protocol\Response\SyncGroupResponse;
 use Kafka\Protocol\Type\Bytes32;
@@ -77,10 +81,14 @@ class CoreSubscriber implements EventSubscriberInterface
             CoreLogicEvent::NAME       => 'onCoreLogic',
             CoreLogicAfterEvent::NAME  => 'onCoreLogicAfter',
             HeartbeatEvent::NAME       => 'onHeartBeat',
+            OffsetCommitEvent::NAME    => 'onOffsetCommit'
         ];
     }
 
-    public function onHeartBeat(): void
+    /**
+     * @param HeartbeatEvent $event
+     */
+    public function onHeartBeat(HeartbeatEvent $event): void
     {
         go(function () {
             defer(function () {
@@ -89,15 +97,16 @@ class CoreSubscriber implements EventSubscriberInterface
             $heartbeatIntervalMs = App::$commonConfig->getHeartbeatIntervalMs();
             $sleepTime = $heartbeatIntervalMs / 1000;
             $socket = new Socket();
+            $heartbeatRequest = new HeartbeatRequest();
             while (true) {
                 try {
-                    $heartbeatRequest = new HeartbeatRequest();
                     $heartbeatRequest->setMemberId(String16::value(ClientKafka::getInstance()->getMemberId()))
                                      ->setGroupId(String16::value(App::$commonConfig->getGroupId()))
                                      ->setGenerationId(Int32::value(ClientKafka::getInstance()->getGenerationId()));
 
                     $data = $heartbeatRequest->pack();
-                    $socket->connect(ClientKafka::getInstance()->getOffsetConnectHost(), ClientKafka::getInstance()->getOffsetConnectPort())->send($data);
+                    $socket->connect(ClientKafka::getInstance()->getOffsetConnectHost(),
+                        ClientKafka::getInstance()->getOffsetConnectPort())->send($data);
                     $socket->revcByKafka($heartbeatRequest);
 
                     /** @var HeartbeatResponse $response */
@@ -123,6 +132,59 @@ class CoreSubscriber implements EventSubscriberInterface
     }
 
     /**
+     * @param OffsetCommitEvent $event
+     */
+    public function onOffsetCommit(OffsetCommitEvent $event): void
+    {
+        go(function () {
+            defer(function () {
+                throw new ClientException('OffsetCommit request coroutine aborted unexpectedly');
+            });
+            $offsetCommitRequest = new OffsetCommitRequest();
+            $autoCommitInterval = App::$commonConfig->getAutoCommitIntervalMs() / 1000;
+            while (true) {
+                \co::sleep($autoCommitInterval);
+                foreach (Kafka::getInstance()->getLeaderTopicPartition() as $leaderId => $topicPartitions) {
+                    $setTopics = [];
+                    foreach ($topicPartitions as $topic => $partitions) {
+                        $setPartitions = [];
+                        foreach ($partitions as $partition) {
+                            $setPartitions[] = (new PartitionsOffsetCommit())->setPartitionIndex(Int32::value($partition))
+                                                                             ->setCommittedOffset(Int64::value(ClientKafka::getInstance()
+                                                                                                                          ->getTopicPartitionOffsetByTopicPartition(
+                                                                                                                              $topic,
+                                                                                                                              $partition
+                                                                                                                          )
+                                                                             ))
+                                                                             ->setCommittedMetadata(String16::value(''));
+                        }
+                        $setTopics[] = (new TopicsOffsetCommit())->setPartitions($setPartitions)
+                                                                 ->setName(String16::value($topic));
+                    }
+                    $offsetCommitRequest->setTopics($setTopics)
+                                        ->setGroupId(String16::value(App::$commonConfig->getGroupId()));
+                    $socket = Kafka::getInstance()->getSocketByNodeId($leaderId);
+                    $data = $offsetCommitRequest->pack();
+                    $socket->send($data);
+                    $socket->revcByKafka($offsetCommitRequest);
+
+                    /** @var OffsetCommitResponse $response */
+                    $response = $offsetCommitRequest->response;
+                    foreach ($response->getTopics() as $topic) {
+                        foreach ($topic->getPartitions() as $partition) {
+                            if ($partition->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+                                throw new OffsetCommitRequestException(sprintf('OffsetCommitRequest request error, the error message is: %s',
+                                    ProtocolErrorEnum::getTextByCode($partition->getErrorCode()->getValue())));
+                            }
+                        }
+                    }
+                }
+                echo sprintf('Auto offsetCommit request every %s seconds...' . PHP_EOL, $autoCommitInterval);
+            }
+        });
+    }
+
+    /**
      * Client front-end operation：
      * 1、FindCoordinator
      * 2、JoinGroup
@@ -133,6 +195,8 @@ class CoreSubscriber implements EventSubscriberInterface
      * @throws ClientException
      * @throws FindCoordinatorRequestException
      * @throws JoinGroupRequestException
+     * @throws ListOffsetsRequestException
+     * @throws OffsetFetchRequestException
      * @throws SyncGroupRequestException
      * @throws \Kafka\Exception\Socket\NormalSocketConnectException
      */
@@ -482,7 +546,7 @@ class CoreSubscriber implements EventSubscriberInterface
      */
     public function onCoreLogic()
     {
-        // heartbeat request
+        // Heartbeat...
         dispatch(new HeartbeatEvent(), HeartbeatEvent::NAME);
 
         go(function () {
@@ -549,6 +613,10 @@ class CoreSubscriber implements EventSubscriberInterface
                 }
             }
         });
+
+
+        // OffsetCommit...
+        dispatch(new OffsetCommitEvent(), OffsetCommitEvent::NAME);
     }
 
 
