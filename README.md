@@ -5,7 +5,7 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 ## 
 ![kafka-client](http://g.recordit.co/cyQrMHAWae.gif)
-![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.giff)
+![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.gif)
 
 ## Config
 
