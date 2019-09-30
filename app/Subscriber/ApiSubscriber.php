@@ -8,6 +8,7 @@ use App\Handler\LowLevelHandler;
 use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Enum\MessageStorageEnum;
 use Kafka\Event\FetchMessageEvent;
+use Kafka\Event\MessageConsumedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -45,7 +46,7 @@ class ApiSubscriber implements EventSubscriberInterface
             $this->mode = env('KAFKA_CLIENT_API_MODE');
         }
         if ($this->handler === null) {
-            if ($this->mode ===  ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
+            if ($this->mode === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
                 $this->handler = new HighLevelHandler();
             } else {
                 $this->handler = new LowLevelHandler();
@@ -57,10 +58,28 @@ class ApiSubscriber implements EventSubscriberInterface
                     /** @var HighLevelHandler $handler */
                     $handler = $this->handler;
                     $handler->handler($event->getMessage());
+                    dispatch(
+                        new MessageConsumedEvent(
+                            ClientApiModeEnum::HIGH_LEVEL,
+                            $event->getTopic(),
+                            $event->getPartition(),
+                            $event->getOffset()
+                        ),
+                        MessageConsumedEvent::NAME
+                    );
                 } else {
                     /** @var LowLevelHandler $handler */
                     $handler = $this->handler;
                     $handler->handler($event->getOffset(), $event->getMessage());
+                    dispatch(
+                        new MessageConsumedEvent(
+                            ClientApiModeEnum::LOW_LEVEL,
+                            $event->getTopic(),
+                            $event->getPartition(),
+                            $event->getOffset()
+                        ),
+                        MessageConsumedEvent::NAME
+                    );
                 }
                 break;
             case MessageStorageEnum::FILE:

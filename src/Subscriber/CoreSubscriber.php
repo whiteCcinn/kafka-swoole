@@ -6,6 +6,7 @@ namespace Kafka\Subscriber;
 use App\App;
 use Kafka\ClientKafka;
 use Kafka\Config\CommonConfig;
+use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Enum\ProtocolPartitionAssignmentStrategyEnum;
 use Kafka\Enum\ProtocolVersionEnum;
@@ -136,52 +137,55 @@ class CoreSubscriber implements EventSubscriberInterface
      */
     public function onOffsetCommit(OffsetCommitEvent $event): void
     {
-        go(function () {
-            defer(function () {
-                throw new ClientException('OffsetCommit request coroutine aborted unexpectedly');
-            });
-            $offsetCommitRequest = new OffsetCommitRequest();
-            $autoCommitInterval = App::$commonConfig->getAutoCommitIntervalMs() / 1000;
-            while (true) {
-                \co::sleep($autoCommitInterval);
-                foreach (Kafka::getInstance()->getLeaderTopicPartition() as $leaderId => $topicPartitions) {
-                    $setTopics = [];
-                    foreach ($topicPartitions as $topic => $partitions) {
-                        $setPartitions = [];
-                        foreach ($partitions as $partition) {
-                            $setPartitions[] = (new PartitionsOffsetCommit())->setPartitionIndex(Int32::value($partition))
-                                                                             ->setCommittedOffset(Int64::value(ClientKafka::getInstance()
-                                                                                                                          ->getTopicPartitionOffsetByTopicPartition(
-                                                                                                                              $topic,
-                                                                                                                              $partition
-                                                                                                                          )
-                                                                             ))
-                                                                             ->setCommittedMetadata(String16::value(''));
+        // HighLevel Auto Offset Commit
+        if (env('KAFKA_CLIENT_API_MODE') === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
+            go(function () {
+                defer(function () {
+                    throw new ClientException('OffsetCommit request coroutine aborted unexpectedly');
+                });
+                $offsetCommitRequest = new OffsetCommitRequest();
+                $autoCommitInterval = App::$commonConfig->getAutoCommitIntervalMs() / 1000;
+                while (true) {
+                    \co::sleep($autoCommitInterval);
+                    foreach (Kafka::getInstance()->getLeaderTopicPartition() as $leaderId => $topicPartitions) {
+                        $setTopics = [];
+                        foreach ($topicPartitions as $topic => $partitions) {
+                            $setPartitions = [];
+                            foreach ($partitions as $partition) {
+                                $setPartitions[] = (new PartitionsOffsetCommit())->setPartitionIndex(Int32::value($partition))
+                                                                                 ->setCommittedOffset(Int64::value(ClientKafka::getInstance()
+                                                                                                                              ->getTopicPartitionOffsetByTopicPartition(
+                                                                                                                                  $topic,
+                                                                                                                                  $partition
+                                                                                                                              )
+                                                                                 ))
+                                                                                 ->setCommittedMetadata(String16::value(''));
+                            }
+                            $setTopics[] = (new TopicsOffsetCommit())->setPartitions($setPartitions)
+                                                                     ->setName(String16::value($topic));
                         }
-                        $setTopics[] = (new TopicsOffsetCommit())->setPartitions($setPartitions)
-                                                                 ->setName(String16::value($topic));
-                    }
-                    $offsetCommitRequest->setTopics($setTopics)
-                                        ->setGroupId(String16::value(App::$commonConfig->getGroupId()));
-                    $socket = Kafka::getInstance()->getSocketByNodeId($leaderId);
-                    $data = $offsetCommitRequest->pack();
-                    $socket->send($data);
-                    $socket->revcByKafka($offsetCommitRequest);
+                        $offsetCommitRequest->setTopics($setTopics)
+                                            ->setGroupId(String16::value(App::$commonConfig->getGroupId()));
+                        $socket = Kafka::getInstance()->getSocketByNodeId($leaderId);
+                        $data = $offsetCommitRequest->pack();
+                        $socket->send($data);
+                        $socket->revcByKafka($offsetCommitRequest);
 
-                    /** @var OffsetCommitResponse $response */
-                    $response = $offsetCommitRequest->response;
-                    foreach ($response->getTopics() as $topic) {
-                        foreach ($topic->getPartitions() as $partition) {
-                            if ($partition->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
-                                throw new OffsetCommitRequestException(sprintf('OffsetCommitRequest request error, the error message is: %s',
-                                    ProtocolErrorEnum::getTextByCode($partition->getErrorCode()->getValue())));
+                        /** @var OffsetCommitResponse $response */
+                        $response = $offsetCommitRequest->response;
+                        foreach ($response->getTopics() as $topic) {
+                            foreach ($topic->getPartitions() as $partition) {
+                                if ($partition->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+                                    throw new OffsetCommitRequestException(sprintf('OffsetCommitRequest request error, the error message is: %s',
+                                        ProtocolErrorEnum::getTextByCode($partition->getErrorCode()->getValue())));
+                                }
                             }
                         }
                     }
+                    echo sprintf('Auto offsetCommit request every %s seconds...' . PHP_EOL, $autoCommitInterval);
                 }
-                echo sprintf('Auto offsetCommit request every %s seconds...' . PHP_EOL, $autoCommitInterval);
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -337,7 +341,6 @@ class CoreSubscriber implements EventSubscriberInterface
         } else {
             // for waiting leader SyncGroup
             ClientKafka::getInstance()->setIsLeader(false);
-//            \co::sleep(3);
         }
 
         // SyncGroup...
@@ -550,9 +553,9 @@ class CoreSubscriber implements EventSubscriberInterface
         dispatch(new HeartbeatEvent(), HeartbeatEvent::NAME);
 
         go(function () {
-            defer(function () {
-                throw new ClientException('Fetch request coroutine aborted unexpectedly');
-            });
+//            defer(function () {
+//                throw new ClientException('Fetch request coroutine aborted unexpectedly');
+//            });
             while (true) {
                 // fetch data
                 $fetchRequest = new FetchRequest();
@@ -569,7 +572,7 @@ class CoreSubscriber implements EventSubscriberInterface
                                                                                      ->getTopicPartitionOffsetByTopicPartition(
                                                                                          $topic,
                                                                                          $partition
-                                                                                     )
+                                                                                     ) + 1
                                                                       ))
                                                                       ->setPartitionMaxBytes(Int32::value(65536));
                             $setPartitions[] = $partitionsFetch;
@@ -599,16 +602,18 @@ class CoreSubscriber implements EventSubscriberInterface
 
                             foreach ($partitionResponse->getRecordSet() as $recordSet) {
                                 $messages[] = [
-                                    'offset'  => $recordSet->getOffset()->getValue(),
-                                    'message' => $recordSet->getMessage()->getValue()->getValue()
+                                    'topic'     => $response->getTopic()->getValue(),
+                                    'partition' => $partitionResponse->getPartitionHeader()->getPartition()->getValue(),
+                                    'offset'    => $recordSet->getOffset()->getValue(),
+                                    'message'   => $recordSet->getMessage()->getValue()->getValue()
                                 ];
                             }
                         }
                     }
 
                     foreach ($messages as $item) {
-                        ['offset' => $offset, 'message' => $message] = $item;
-                        dispatch(new FetchMessageEvent($offset, $message), FetchMessageEvent::NAME);
+                        ['topic' => $topic, 'partition' => $partition, 'offset' => $offset, 'message' => $message] = $item;
+                        dispatch(new FetchMessageEvent($topic, $partition, $offset, $message), FetchMessageEvent::NAME);
                     }
                 }
             }

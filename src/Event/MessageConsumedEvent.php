@@ -5,9 +5,14 @@ namespace Kafka\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-class FetchMessageEvent extends Event
+class MessageConsumedEvent extends Event
 {
-    public const NAME = 'fetch.message';
+    public const NAME = 'message.consumed';
+
+    /**
+     * @var int $type
+     */
+    private $type;
 
     /**
      * @var string $topic
@@ -25,40 +30,27 @@ class FetchMessageEvent extends Event
     private $offset;
 
     /**
-     * @var string $message
-     */
-    private $message;
-
-    /**
-     * FetchMessageEvent constructor.
+     * MessageConsumedEvent constructor.
      *
+     * @param int    $type
      * @param string $topic
      * @param int    $partition
      * @param int    $offset
-     * @param string $message
      */
-    public function __construct(string $topic, int $partition, int $offset, string $message)
+    public function __construct(int $type, string $topic, int $partition, int $offset)
     {
+        $this->type = $type;
         $this->topic = $topic;
         $this->partition = $partition;
         $this->offset = $offset;
-        $this->message = $message;
     }
 
     /**
      * @return int
      */
-    public function getOffset(): int
+    public function getType(): int
     {
-        return $this->offset;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMessage(): string
-    {
-        return $this->message;
+        return $this->type;
     }
 
     /**
@@ -75,5 +67,13 @@ class FetchMessageEvent extends Event
     public function getPartition(): int
     {
         return $this->partition;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffset(): int
+    {
+        return $this->offset;
     }
 }
