@@ -3,13 +3,10 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 > If you would like to contribute code to help me speed up my progress, please contact me at email:471113744@qq.com
 
--- 
 
 ## rendering
 ![kafka-client](http://g.recordit.co/cyQrMHAWae.gif)
 ![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.gif)
-
---
 
 ## Config
 
