@@ -10,7 +10,7 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 ## Config
 
-### HighLevel
+### Common
 
 #### Options
 
@@ -19,10 +19,6 @@ FILE: `config/high_level.yaml`
 |  option   | optional | default  |
 |  ----  | ----  | ----  |
 | auto.offset.reset  | smallest \| largest | largest |
-
-### LowLevel
-
-FILE: `config/low_level.yaml`
 
 ### Producer
 
