@@ -119,6 +119,7 @@ class CoreSubscriber implements EventSubscriberInterface
 
                     // todo: Rebalance, need ReJoinGroup
 
+                    var_dump($response->toArray());
                 } catch (\Exception $e) {
                     var_dump($e->getMessage());
                     $socket->close();
@@ -230,6 +231,7 @@ class CoreSubscriber implements EventSubscriberInterface
                    ->setOffsetConnectWithPort($response->getPort()->getValue());
 
         // JoinGroup...
+        joinGroup:
         $joinGroupRequest = new JoinGroupRequest();
         $subscriptions = [];
         foreach (explode(',', $commonConfig->getTopicNames()) as $topicName) {
@@ -272,6 +274,7 @@ class CoreSubscriber implements EventSubscriberInterface
                    ->setLeader($response->getLeader()->getValue())
                    ->setMemberId($response->getMemberId()->getValue());
 
+        var_dump($response->toArray());
         $fetchSpec = [];
         // if leaderId === memberId , That Client is leader, which will receive all members Info
         if ($response->getLeader()->getValue() === $response->getMemberId()->getValue()) {
@@ -394,7 +397,10 @@ class CoreSubscriber implements EventSubscriberInterface
         $socket->revcByKafka($syncGroupRequest);
         /** @var SyncGroupResponse $response */
         $response = $syncGroupRequest->response;
-        if ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+        // The group is rebalancing, so a rejoin is needed.
+        if ($response->getErrorCode()->getValue() === ProtocolErrorEnum::REBALANCE_IN_PROGRESS) {
+            goto joinGroup;
+        } elseif ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
             throw new SyncGroupRequestException(sprintf('SyncGroupRequest request error, the error message is: %s',
                 ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
         }
@@ -458,16 +464,19 @@ class CoreSubscriber implements EventSubscriberInterface
                             ProtocolErrorEnum::getTextByCode($partitionResponse->getErrorCode()->getValue())));
                     }
 
-                    /**
-                     * @var Int64 $offset
-                     * @var Int64 $highWatermark
-                     */
-                    [$offset, $highWatermark] = $partitionResponse->getOffsets();
+                    if (count($partitionResponse->getOffsets()) > 1) {
+                        [$offset, $highWatermark] = $partitionResponse->getOffsets();
+                        $offset = $offset->getValue();
+                        $highWatermark = $highWatermark->getValue();
+                    } else {
+                        $offset = current($partitionResponse->getOffsets())->getValue();
+                        $highWatermark = $offset;
+                    }
                     ClientKafka::getInstance()->setTopicPartitionListOffsets(
                         $response->getTopic()->getValue(),
                         $partitionResponse->getPartition()->getValue(),
-                        $offset->getValue(),
-                        $highWatermark->getValue()
+                        $offset,
+                        $highWatermark
                     );
                 }
             }
@@ -495,17 +504,17 @@ class CoreSubscriber implements EventSubscriberInterface
             try {
                 foreach ($response->getResponses() as $response) {
                     foreach ($response->getPartitionResponses() as $partitionResponse) {
-                        if ($partitionResponse->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
-                            throw new OffsetFetchRequestException(sprintf('Api Version 0, OffsetFetchRequest request error, the error message is: %s',
-                                ProtocolErrorEnum::getTextByCode($partitionResponse->getErrorCode()->getValue())));
-                        }
-
                         // need change api version
                         if ($partitionResponse->getOffset()->getValue() === -1 && $partitionResponse->getMetadata()
                                                                                                     ->getValue() === '') {
                             throw new ClientException(
                                 sprintf('Offset does not exist in zookeeper, but in kafka. Therefore, API version needs to be changed')
                             );
+                        } else {
+                            if ($partitionResponse->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+                                throw new OffsetFetchRequestException(sprintf('Api Version 0, OffsetFetchRequest request error, the error message is: %s',
+                                    ProtocolErrorEnum::getTextByCode($partitionResponse->getErrorCode()->getValue())));
+                            }
                         }
 
                         ClientKafka::getInstance()->setTopicPartitionOffset(
@@ -559,9 +568,9 @@ class CoreSubscriber implements EventSubscriberInterface
             while (true) {
                 // fetch data
                 $fetchRequest = new FetchRequest();
-                $setTopics = [];
 
                 foreach (ClientKafka::getInstance()->getSelfLeaderTopicPartition() as $leaderId => $topicPartitions) {
+                    $setTopics = [];
                     foreach ($topicPartitions as $topic => $partitions) {
                         $topicsFetch = (new TopicsFetch())->setTopic(String16::value($topic));
                         $setPartitions = [];

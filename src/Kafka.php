@@ -5,6 +5,7 @@ namespace Kafka;
 use Kafka\Socket\Socket;
 use Kafka\Support\SingletonTrait;
 use \co;
+
 class Kafka
 {
     use SingletonTrait;

@@ -1,3 +1,5 @@
+# Your kafka version
+kafka.version: 0.9.0.0
 # This is for bootstrapping and the producer will only use it for getting metadata
 # (topics, partitions and replicas). The socket connections for sending the actual data
 # will be established based on the broker information returned in the metadata. The
@@ -18,7 +20,7 @@ group.id: "kafka-swoole"
 
 # Which you want to operation
 # Example: topic1,topic2,topic3,topic4,topic5
-topic.names: "caiwenhui"
+topic.names: "kafka-swoole"
 
 # The periodic time the heartbeat request is sent to tell kafka that the client still exists
 heartbeat.interval.ms: 10 * 1000

@@ -108,7 +108,8 @@ class MetadataManager
             $num = $envNum;
         } elseif ($minNum > 2) {
             $num = floor($minNum / 2);
-        } else {
+        }
+        else {
             $num = 1;
         }
 

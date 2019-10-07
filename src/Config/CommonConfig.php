@@ -62,6 +62,11 @@ class CommonConfig extends AbstractConfig
     protected $autoOffsetReset;
 
     /**
+     * @var
+     */
+    protected $kafkaVersion;
+
+    /**
      * CommonConfig constructor.
      */
     protected function __construct()
@@ -242,5 +247,13 @@ class CommonConfig extends AbstractConfig
     public function getAutoOffsetReset(): string
     {
         return $this->autoOffsetReset;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getKafkaVersion()
+    {
+        return $this->kafkaVersion;
     }
 }

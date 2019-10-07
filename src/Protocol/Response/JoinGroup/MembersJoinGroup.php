@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Kafka\Protocol\Response\JoinGroup;
 
+use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Protocol\TraitStructure\ToArrayTrait;
-use Kafka\Protocol\Type\Bytes32;
 use Kafka\Protocol\Type\String16;
 
 class MembersJoinGroup
@@ -21,7 +21,7 @@ class MembersJoinGroup
     /**
      * The group member metadata.
      *
-     * @var ProtocolMetadataJoinGroup[] $metadata
+     * @var ProtocolMetadataJoinGroup $metadata
      */
     private $metadata;
 
@@ -46,22 +46,38 @@ class MembersJoinGroup
     }
 
     /**
-     * @return ProtocolMetadataJoinGroup[]
+     * @return ProtocolMetadataJoinGroup
      */
-    public function getMetadata(): array
+    public function getMetadata(): ProtocolMetadataJoinGroup
     {
         return $this->metadata;
     }
 
     /**
-     * @param ProtocolMetadataJoinGroup[] $metadata
+     * @param ProtocolMetadataJoinGroup $metadata
      *
      * @return MembersJoinGroup
      */
-    public function setMetadata(array $metadata): MembersJoinGroup
+    public function setMetadata(ProtocolMetadataJoinGroup $metadata): MembersJoinGroup
     {
         $this->metadata = $metadata;
 
         return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @return bool
+     */
+    public function onMetadata(&$protocol): bool
+    {
+        $data = unpack(ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32),
+            substr($protocol, 0, ProtocolTypeEnum::B32));
+        $data = is_array($data) ? array_shift($data) : $data;
+        $length = $data;
+        $protocol = substr($protocol, ProtocolTypeEnum::B32, $length);
+
+        return false;
     }
 }
