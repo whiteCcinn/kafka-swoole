@@ -8,7 +8,7 @@ namespace Kafka\Storage;
  *
  * @package Kafka\Storage
  */
-class StorageAdapter
+class StorageAdapter implements StorageInterface
 {
     /**
      * @var RedisStorage | RedisStorage $adaptee
@@ -28,9 +28,9 @@ class StorageAdapter
     /**
      * @param array $data
      *
-     * @return StorageAdapter
+     * @retrun $this
      */
-    public function push(array $data = []): self
+    public function push(array $data = [])
     {
         $this->adaptee->push($data);
 
@@ -42,7 +42,7 @@ class StorageAdapter
      *
      * @return array
      */
-    public function pop(int $number = 1): array
+    public function pop(int $number = 1)
     {
         if ($number < 1) {
             return [];

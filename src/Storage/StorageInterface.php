@@ -10,5 +10,17 @@ namespace Kafka\Storage;
  */
 interface StorageInterface
 {
+    /**
+     * @param array $data
+     *
+     * @return mixed
+     */
+    public function push(array $data = []);
 
+    /**
+     * @param int $number
+     *
+     * @return mixed
+     */
+    public function pop(int $number = 1);
 }
