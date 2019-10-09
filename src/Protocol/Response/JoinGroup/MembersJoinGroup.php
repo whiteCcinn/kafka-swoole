@@ -72,11 +72,8 @@ class MembersJoinGroup
      */
     public function onMetadata(&$protocol): bool
     {
-        $data = unpack(ProtocolTypeEnum::getTextByCode(ProtocolTypeEnum::B32),
-            substr($protocol, 0, ProtocolTypeEnum::B32));
-        $data = is_array($data) ? array_shift($data) : $data;
-        $length = $data;
-        $protocol = substr($protocol, ProtocolTypeEnum::B32, $length);
+        // Because it is a byte, special processing is required, but a fixed length should not be intercepted because subsequent reads are required
+        $protocol = substr($protocol, ProtocolTypeEnum::B32);
 
         return false;
     }

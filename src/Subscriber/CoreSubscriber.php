@@ -9,6 +9,7 @@ use Kafka\Config\CommonConfig;
 use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Enum\ProtocolErrorEnum;
 use Kafka\Enum\ProtocolPartitionAssignmentStrategyEnum;
+use Kafka\Enum\ProtocolTypeEnum;
 use Kafka\Enum\ProtocolVersionEnum;
 use Kafka\Event\CoreLogicAfterEvent;
 use Kafka\Event\CoreLogicBeforeEvent;
@@ -112,14 +113,17 @@ class CoreSubscriber implements EventSubscriberInterface
 
                     /** @var HeartbeatResponse $response */
                     $response = $heartbeatRequest->response;
-                    if ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+
+                    // rebalance need RejoinGroup
+                    if ($response->getErrorCode()->getValue() === ProtocolErrorEnum::REBALANCE_IN_PROGRESS) {
+                        if (!ClientKafka::getInstance()->isRebalancing()) {
+                            echo ProtocolErrorEnum::getTextByCode(ProtocolErrorEnum::REBALANCE_IN_PROGRESS) . PHP_EOL;
+                            $this->rebalance(App::$commonConfig, $socket);
+                        }
+                    } elseif ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
                         throw new HeartbeatRequestException(sprintf('HeartbeatRequest request error, the error message is: %s',
                             ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
                     }
-
-                    // todo: Rebalance, need ReJoinGroup
-
-                    var_dump($response->toArray());
                 } catch (\Exception $e) {
                     var_dump($e->getMessage());
                     $socket->close();
@@ -127,7 +131,8 @@ class CoreSubscriber implements EventSubscriberInterface
                     var_dump($error->getMessage());
                     $socket->close();
                 }
-                echo sprintf('Heartbeat request every %s seconds...' . PHP_EOL, $sleepTime);
+                echo sprintf('%s:Heartbeat request every %s seconds...' . PHP_EOL,
+                    ClientKafka::getInstance()->getMemberId(), $sleepTime);
                 \co::sleep($sleepTime);
             }
         });
@@ -141,14 +146,15 @@ class CoreSubscriber implements EventSubscriberInterface
         // HighLevel Auto Offset Commit
         if (env('KAFKA_CLIENT_API_MODE') === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
             go(function () {
-                defer(function () {
-                    throw new ClientException('OffsetCommit request coroutine aborted unexpectedly');
-                });
+//                defer(function () {
+//                    throw new ClientException('OffsetCommit request coroutine aborted unexpectedly');
+//                });
                 $offsetCommitRequest = new OffsetCommitRequest();
                 $autoCommitInterval = App::$commonConfig->getAutoCommitIntervalMs() / 1000;
                 while (true) {
                     \co::sleep($autoCommitInterval);
-                    foreach (Kafka::getInstance()->getLeaderTopicPartition() as $leaderId => $topicPartitions) {
+                    foreach (ClientKafka::getInstance()->getSelfLeaderTopicPartition() as $leaderId => $topicPartitions)
+                    {
                         $setTopics = [];
                         foreach ($topicPartitions as $topic => $partitions) {
                             $setPartitions = [];
@@ -183,22 +189,17 @@ class CoreSubscriber implements EventSubscriberInterface
                             }
                         }
                     }
-                    echo sprintf('Auto offsetCommit request every %s seconds...' . PHP_EOL, $autoCommitInterval);
+                    echo sprintf('%s:Auto offsetCommit request every %s seconds...' . PHP_EOL,
+                        ClientKafka::getInstance()->getMemberId(), $autoCommitInterval);
                 }
             });
         }
     }
 
     /**
-     * Client front-end operation：
-     * 1、FindCoordinator
-     * 2、JoinGroup
-     * 3、SyncGroup
-     * 4、ListsOffsets
-     * 5、OffsetFetch
-     *
      * @throws ClientException
      * @throws FindCoordinatorRequestException
+     * @throws HeartbeatRequestException
      * @throws JoinGroupRequestException
      * @throws ListOffsetsRequestException
      * @throws OffsetFetchRequestException
@@ -231,196 +232,7 @@ class CoreSubscriber implements EventSubscriberInterface
                    ->setOffsetConnectWithPort($response->getPort()->getValue());
 
         // JoinGroup...
-        joinGroup:
-        $joinGroupRequest = new JoinGroupRequest();
-        $subscriptions = [];
-        foreach (explode(',', $commonConfig->getTopicNames()) as $topicName) {
-            $subscriptions[] = (new TopicJoinGroup())->setTopic(String16::value($topicName));
-        }
-        $joinGroupRequest->setGroupId(String16::value($commonConfig->getGroupId()))
-                         ->setMemberId(String16::value(''))
-                         ->setSessionTimeoutMs(Int32::value($commonConfig->getGroupKeepSessionMaxMs()))
-                         ->setProtocols([
-                             (new ProtocolsJoinGroup())->setName(
-                                 (new ProtocolNameJoinGroup())->setAssignmentStrategy(
-                                     String16::value(
-                                         ProtocolPartitionAssignmentStrategyEnum::getTextByCode(
-                                             ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR
-                                         )
-                                     )
-                                 )
-                             )->setMetadata(
-                                 (new ProtocolMetadataJoinGroup())->setVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
-                                                                  ->setSubscription($subscriptions)
-                                                                  ->setUserData(Bytes32::value(''))
-                             )
-                         ]);
-        $data = $joinGroupRequest->pack();
-        $socket->connect(
-            ClientKafka::getInstance()->getOffsetConnectHost(),
-            ClientKafka::getInstance()->getOffsetConnectPort()
-        )->send($data);
-        $socket->revcByKafka($joinGroupRequest);
-        ClientKafka::getInstance()->setOffsetConnectWithSocket($socket);
-
-        /** @var JoinGroupResponse $response */
-        $response = $joinGroupRequest->response;
-        if ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
-            throw new JoinGroupRequestException(sprintf('JoinGroupRequest request error, the error message is: %s',
-                ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
-        }
-        ClientKafka::getInstance()->setGenerationId($response->getGenerationId()->getValue())
-                   ->setProtocolName($response->getProtocolName()->getValue())
-                   ->setLeader($response->getLeader()->getValue())
-                   ->setMemberId($response->getMemberId()->getValue());
-
-        var_dump($response->toArray());
-        $fetchSpec = [];
-        // if leaderId === memberId , That Client is leader, which will receive all members Info
-        if ($response->getLeader()->getValue() === $response->getMemberId()->getValue()) {
-            ClientKafka::getInstance()->setIsLeader(true);
-            ClientKafka::getInstance()->setMembers($response->getMembers());
-            $topicMemberIds = $memberIdTopics = [];
-            foreach (ClientKafka::getInstance()->getMembers() as $member) {
-                foreach ($member->getMetadata() as $metadata) {
-                    foreach ($metadata->getSubscription() as $subscription) {
-                        $topicMemberIds[$subscription->getTopic()->getValue()][] = $member->getMemberId()->getValue();
-                        $memberIdTopics[$member->getMemberId()->getValue()][] = $subscription->getTopic()->getValue();
-                    }
-                }
-            }
-            array_unique($topicMemberIds);
-            array_unique($memberIdTopics);
-            ClientKafka::getInstance()->setTopicMemberIds($topicMemberIds)->setMemberIdTopics($memberIdTopics);
-
-            // leader execute partitionAssignStrategy...
-            $topicPartitions = Kafka::getInstance()->getPartitions();
-            switch (ClientKafka::getInstance()->getProtocolName()) {
-                case ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR:
-                    $topics = array_keys($topicMemberIds);
-                    foreach ($topics as $topic) {
-                        $partitionNum = count($topicPartitions[$topic]);
-                        $topicConsumerNum = count($topicMemberIds[$topic]);
-                        $partitionAssignNum = ceil($partitionNum / $topicConsumerNum);
-                        $partitionIndex = 0;
-                        foreach ($topicMemberIds[$topic] as $memberId) {
-                            $i = 0;
-                            while ($partitionNum) {
-                                if ($i < $partitionAssignNum) {
-                                    $fetchSpec[$memberId][$topic][] = $partitionIndex;
-                                    $partitionIndex++;
-                                    $i++;
-                                }
-                                $partitionNum--;
-                            }
-                        }
-                    }
-                    break;
-                case ProtocolPartitionAssignmentStrategyEnum::ROUND_ROBIN_ASSIGNOR:
-                    foreach ($topicPartitions as $topic => $partitions) {
-                        foreach ($topicMemberIds as $topic2 => $memberIds) {
-                            if ($topic === $topic2) {
-                                while (($partitionIndex = current($partitions)) !== false) {
-                                    while (($memberId = current($memberIds)) === false) {
-                                        reset($memberIds);
-                                    }
-                                    next($memberIds);
-                                    $fetchSpec[$memberId][$topic][] = $partitionIndex;
-                                    next($partitions);
-                                }
-                                unset($memberIds, $partitions);
-                            }
-                        }
-                    }
-
-                    break;
-                case ProtocolPartitionAssignmentStrategyEnum::STICKY_ASSIGNOR:
-                    // todo: kafka 0.11 support
-                    break;
-                default:
-                    throw new ClientException(sprintf('PartitionAssignmentStrategy error, the strategy is : %s',
-                        ClientKafka::getInstance()->getProtocolName()));
-            }
-        } else {
-            // for waiting leader SyncGroup
-            ClientKafka::getInstance()->setIsLeader(false);
-        }
-
-        // SyncGroup...
-        $syncGroupRequest = new SyncGroupRequest();
-        if (ClientKafka::getInstance()->isLeader()) {
-            $assignments = [];
-            foreach ($fetchSpec as $memberId => $tpt) {
-                $topic = key($tpt);
-                $partitions = current($tpt);
-                $groupAssignment = (new GroupAssignmentsSyncGroup())->setMemberId(
-                    String16::value(ClientKafka::getInstance()->getMemberId())
-                );
-                $partitionAssignments = [];
-                $pushPartition = [];
-                $partitionAssignmentsSyncGroup = new PartitionAssignmentsSyncGroup();
-                foreach ($partitions as $partitionIndex) {
-                    $pushPartition[] = Int32::value($partitionIndex);
-                }
-                $partitionAssignmentsSyncGroup->setTopic(String16::value($topic))->setPartition($pushPartition);
-                $partitionAssignments[] = $partitionAssignmentsSyncGroup;
-                $groupAssignment->setMemberAssignment(
-                    (new MemberAssignmentsSyncGroup())->setVersion(
-                        Int16::value(ProtocolVersionEnum::API_VERSION_0)
-                    )->setUserData(Bytes32::value(''))->setPartitionAssignment($partitionAssignments)
-                );
-                $assignments[] = $groupAssignment;
-            }
-        } else {
-            $assignments = [
-                (new GroupAssignmentsSyncGroup())->setMemberId(String16::value(ClientKafka::getInstance()
-                                                                                          ->getMemberId()))
-                                                 ->setMemberAssignment(
-                                                     (new MemberAssignmentsSyncGroup())->setVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
-                                                                                       ->setUserData(Bytes32::value(''))
-                                                                                       ->setPartitionAssignment([
-                                                                                           (new PartitionAssignmentsSyncGroup())->setPartition([
-                                                                                               Int32::value(0)
-                                                                                           ])
-                                                                                                                                ->setTopic(String16::value(''))
-                                                                                       ])
-                                                 )
-            ];
-        }
-        $syncGroupRequest->setMemberId(String16::value(ClientKafka::getInstance()->getMemberId()))
-                         ->setGenerationId(Int32::value(ClientKafka::getInstance()->getGenerationId()))
-                         ->setGroupId(String16::value($commonConfig->getGroupId()))
-                         ->setAssignments($assignments);
-        $data = $syncGroupRequest->pack();
-        $socket = ClientKafka::getInstance()->getOffsetConnectSocket();
-        $socket->send($data);
-        $socket->revcByKafka($syncGroupRequest);
-        /** @var SyncGroupResponse $response */
-        $response = $syncGroupRequest->response;
-        // The group is rebalancing, so a rejoin is needed.
-        if ($response->getErrorCode()->getValue() === ProtocolErrorEnum::REBALANCE_IN_PROGRESS) {
-            goto joinGroup;
-        } elseif ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
-            throw new SyncGroupRequestException(sprintf('SyncGroupRequest request error, the error message is: %s',
-                ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
-        }
-        $selfTopicPartition = [];
-        $selfLeaderTopicPartition = [];
-        foreach ($response->getAssignment()->getPartitionAssignment() as $partitionAssignment) {
-            foreach ($partitionAssignment->getPartition() as $partition) {
-                $topicValue = $partitionAssignment->getTopic()->getValue();
-                $partitionValue = $partition->getValue();
-                $selfTopicPartition[$topicValue][] = $partitionValue;
-                $leaderId = Kafka::getInstance()->getLeaderByTopicPartition(
-                    $topicValue,
-                    $partitionValue
-                );
-                $selfLeaderTopicPartition[$leaderId][$topicValue][] = $partitionValue;
-            }
-        }
-        ClientKafka::getInstance()->setSelfTopicPartition($selfTopicPartition);
-        ClientKafka::getInstance()->setSelfLeaderTopicPartition($selfLeaderTopicPartition);
-
+        $this->rebalance($commonConfig, $socket);
         // ListsOffsets...
         $topicsPartitionLeader = Kafka::getInstance()->getTopicsPartitionLeader();
         $point = [];
@@ -502,20 +314,20 @@ class CoreSubscriber implements EventSubscriberInterface
             /** @var OffsetFetchResponse $response */
             $response = $offsetFetchRequest->response;
             try {
+                $needChangeApiVersion = [];
                 foreach ($response->getResponses() as $response) {
                     foreach ($response->getPartitionResponses() as $partitionResponse) {
                         // need change api version
                         if ($partitionResponse->getOffset()->getValue() === -1 && $partitionResponse->getMetadata()
                                                                                                     ->getValue() === '') {
-                            throw new ClientException(
-                                sprintf('Offset does not exist in zookeeper, but in kafka. Therefore, API version needs to be changed')
-                            );
+                            $needChangeApiVersion[] = true;
                         } else {
                             if ($partitionResponse->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
                                 throw new OffsetFetchRequestException(sprintf('Api Version 0, OffsetFetchRequest request error, the error message is: %s',
                                     ProtocolErrorEnum::getTextByCode($partitionResponse->getErrorCode()->getValue())));
                             }
                         }
+                        $needChangeApiVersion[] = false;
 
                         ClientKafka::getInstance()->setTopicPartitionOffset(
                             $response->getTopic()->getValue(),
@@ -524,6 +336,11 @@ class CoreSubscriber implements EventSubscriberInterface
                         );
 
                     }
+                }
+                if (count(array_unique($needChangeApiVersion)) === 1 && current($needChangeApiVersion) === true) {
+                    throw new ClientException(
+                        sprintf('Offset does not exist in zookeeper, but in kafka. Therefore, API version needs to be changed')
+                    );
                 }
             } catch (ClientException $exception) {
                 $offsetFetchRequest->getRequestHeader()
@@ -549,6 +366,7 @@ class CoreSubscriber implements EventSubscriberInterface
                 }
             }
         }
+        echo posix_getpid() . ':ending' . PHP_EOL;
     }
 
     /**
@@ -637,5 +455,214 @@ class CoreSubscriber implements EventSubscriberInterface
     public function onCoreLogicAfter()
     {
         // nothing to do
+    }
+
+    /**
+     * @param $commonConfig
+     * @param $socket
+     *
+     * @return array
+     * @throws ClientException
+     * @throws HeartbeatRequestException
+     * @throws JoinGroupRequestException
+     * @throws SyncGroupRequestException
+     * @throws \Kafka\Exception\Socket\NormalSocketConnectException
+     */
+    private function rebalance($commonConfig, $socket): array
+    {
+        Rebalance:
+        ClientKafka::getInstance()->setIsRebalancing(true);
+        $joinGroupRequest = new JoinGroupRequest();
+        $subscriptions = [];
+        foreach (explode(',', $commonConfig->getTopicNames()) as $topicName) {
+            $subscriptions[] = (new TopicJoinGroup())->setTopic(String16::value($topicName));
+        }
+        $joinGroupRequest->setGroupId(String16::value($commonConfig->getGroupId()))
+                         ->setMemberId(String16::value(''))
+                         ->setSessionTimeoutMs(Int32::value($commonConfig->getGroupKeepSessionMaxMs()))
+                         ->setProtocols([
+                             (new ProtocolsJoinGroup())->setName(
+                                 (new ProtocolNameJoinGroup())->setAssignmentStrategy(
+                                     String16::value(
+                                         ProtocolPartitionAssignmentStrategyEnum::getTextByCode(
+                                             ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR
+                                         )
+                                     )
+                                 )
+                             )->setMetadata(
+                                 (new ProtocolMetadataJoinGroup())->setVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+                                                                  ->setSubscription($subscriptions)
+                                                                  ->setUserData(Bytes32::value(''))
+                             )
+                         ]);
+        $data = $joinGroupRequest->pack();
+        $socket->connect(
+            ClientKafka::getInstance()->getOffsetConnectHost(),
+            ClientKafka::getInstance()->getOffsetConnectPort()
+        )->send($data);
+        $socket->revcByKafka($joinGroupRequest);
+        ClientKafka::getInstance()->setOffsetConnectWithSocket($socket);
+
+        /** @var JoinGroupResponse $response */
+        $response = $joinGroupRequest->response;
+        if ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+            throw new JoinGroupRequestException(sprintf('JoinGroupRequest request error, the error message is: %s',
+                ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
+        }
+        ClientKafka::getInstance()->setGenerationId($response->getGenerationId()->getValue())
+                   ->setProtocolName($response->getProtocolName()->getValue())
+                   ->setLeader($response->getLeader()->getValue())
+                   ->setMemberId($response->getMemberId()->getValue());
+
+        $fetchSpec = [];
+        // if leaderId === memberId , That Client is leader, which will receive all members Info
+        if ($response->getLeader()->getValue() === $response->getMemberId()->getValue()) {
+            ClientKafka::getInstance()->setIsLeader(true);
+            ClientKafka::getInstance()->setMembers($response->getMembers());
+            $topicMemberIds = $memberIdTopics = [];
+            foreach (ClientKafka::getInstance()->getMembers() as $member) {
+                foreach ($member->getMetadata()->getSubscription() as $subscription) {
+                    $topicMemberIds[$subscription->getTopic()->getValue()][] = $member->getMemberId()->getValue();
+                    $memberIdTopics[$member->getMemberId()->getValue()][] = $subscription->getTopic()->getValue();
+                }
+            }
+            ClientKafka::getInstance()->setTopicMemberIds($topicMemberIds)->setMemberIdTopics($memberIdTopics);
+
+            // leader execute partitionAssignStrategy...
+            $topicPartitions = Kafka::getInstance()->getPartitions();
+            switch (ClientKafka::getInstance()->getProtocolName()) {
+                case ProtocolPartitionAssignmentStrategyEnum::getTextByCode(
+                    ProtocolPartitionAssignmentStrategyEnum::RANGE_ASSIGNOR
+                ):
+                    $topics = array_keys($topicMemberIds);
+                    foreach ($topics as $topic) {
+                        $partitionNum = count($topicPartitions[$topic]);
+                        $topicConsumerNum = count($topicMemberIds[$topic]);
+                        $partitionAssignNum = ceil($partitionNum / $topicConsumerNum);
+                        $partitionIndex = 0;
+                        foreach ($topicMemberIds[$topic] as $memberId) {
+                            $i = 0;
+                            while ($i < $partitionAssignNum) {
+                                $fetchSpec[$memberId][$topic][] = $partitionIndex;
+                                $partitionIndex++;
+                                $i++;
+                            }
+                        }
+                    }
+                    break;
+                case ProtocolPartitionAssignmentStrategyEnum::getTextByCode(
+                    ProtocolPartitionAssignmentStrategyEnum::ROUND_ROBIN_ASSIGNOR
+                ):
+                    foreach ($topicPartitions as $topic => $partitions) {
+                        foreach ($topicMemberIds as $topic2 => $memberIds) {
+                            if ($topic === $topic2) {
+                                while (($partitionIndex = current($partitions)) !== false) {
+                                    while (($memberId = current($memberIds)) === false) {
+                                        reset($memberIds);
+                                    }
+                                    next($memberIds);
+                                    $fetchSpec[$memberId][$topic][] = $partitionIndex;
+                                    next($partitions);
+                                }
+                                unset($memberIds, $partitions);
+                            }
+                        }
+                    }
+
+                    break;
+                case ProtocolPartitionAssignmentStrategyEnum::getTextByCode(
+                    ProtocolPartitionAssignmentStrategyEnum::STICKY_ASSIGNOR
+                ):
+                    // todo: kafka 0.11 support
+                    break;
+                default:
+                    throw new ClientException(sprintf('PartitionAssignmentStrategy error, the strategy is : %s',
+                        ClientKafka::getInstance()->getProtocolName()));
+            }
+        } else {
+            ClientKafka::getInstance()->setIsLeader(false);
+        }
+
+        // SyncGroup...
+        $syncGroupRequest = new SyncGroupRequest();
+        if (ClientKafka::getInstance()->isLeader()) {
+            $assignments = [];
+            foreach ($fetchSpec as $memberId => $tpt) {
+                $topic = key($tpt);
+                $partitions = current($tpt);
+                $groupAssignment = (new GroupAssignmentsSyncGroup())->setMemberId(
+                    String16::value($memberId)
+                );
+                $partitionAssignments = [];
+                $pushPartition = [];
+                $partitionAssignmentsSyncGroup = new PartitionAssignmentsSyncGroup();
+                foreach ($partitions as $partitionIndex) {
+                    $pushPartition[] = Int32::value($partitionIndex);
+                }
+                $partitionAssignmentsSyncGroup->setTopic(String16::value($topic))->setPartition($pushPartition);
+                $partitionAssignments[] = $partitionAssignmentsSyncGroup;
+                $groupAssignment->setMemberAssignment(
+                    (new MemberAssignmentsSyncGroup())->setVersion(
+                        Int16::value(ProtocolVersionEnum::API_VERSION_0)
+                    )->setUserData(Bytes32::value(''))->setPartitionAssignment($partitionAssignments)
+                );
+                $assignments[] = $groupAssignment;
+            }
+        } else {
+            $assignments = [
+                (new GroupAssignmentsSyncGroup())->setMemberId(String16::value(ClientKafka::getInstance()
+                                                                                          ->getMemberId()))
+                                                 ->setMemberAssignment(
+                                                     (new MemberAssignmentsSyncGroup())->setVersion(Int16::value(ProtocolVersionEnum::API_VERSION_0))
+                                                                                       ->setUserData(Bytes32::value(''))
+                                                                                       ->setPartitionAssignment([
+                                                                                           (new PartitionAssignmentsSyncGroup())->setPartition([
+                                                                                               Int32::value(0)
+                                                                                           ])
+                                                                                                                                ->setTopic(String16::value(''))
+                                                                                       ])
+                                                 )
+            ];
+        }
+        $syncGroupRequest->setMemberId(String16::value(ClientKafka::getInstance()->getMemberId()))
+                         ->setGenerationId(Int32::value(ClientKafka::getInstance()->getGenerationId()))
+                         ->setGroupId(String16::value($commonConfig->getGroupId()))
+                         ->setAssignments($assignments);
+        $data = $syncGroupRequest->pack();
+        $socket = ClientKafka::getInstance()->getOffsetConnectSocket();
+        $socket->send($data);
+        $socket->revcByKafka($syncGroupRequest);
+        /** @var SyncGroupResponse $response */
+        $response = $syncGroupRequest->response;
+        // The group is rebalancing, so a rejoin is needed.
+        if ($response->getErrorCode()->getValue() === ProtocolErrorEnum::REBALANCE_IN_PROGRESS) {
+            echo ProtocolErrorEnum::getTextByCode(ProtocolErrorEnum::REBALANCE_IN_PROGRESS) . PHP_EOL;
+//            $this->rebalance($commonConfig, $socket);
+            goto Rebalance;
+        } elseif ($response->getErrorCode()->getValue() !== ProtocolErrorEnum::NO_ERROR) {
+            throw new SyncGroupRequestException(sprintf('SyncGroupRequest request error, the error message is: %s',
+                ProtocolErrorEnum::getTextByCode($response->getErrorCode()->getValue())));
+        }
+        $selfTopicPartition = [];
+        $selfLeaderTopicPartition = [];
+        foreach ($response->getAssignment()->getPartitionAssignment() as $partitionAssignment) {
+            foreach ($partitionAssignment->getPartition() as $partition) {
+                $topicValue = $partitionAssignment->getTopic()->getValue();
+                $partitionValue = $partition->getValue();
+                $selfTopicPartition[$topicValue][] = $partitionValue;
+                $leaderId = Kafka::getInstance()->getLeaderByTopicPartition(
+                    $topicValue,
+                    $partitionValue
+                );
+                $selfLeaderTopicPartition[$leaderId][$topicValue][] = $partitionValue;
+            }
+        }
+        ClientKafka::getInstance()->setSelfTopicPartition($selfTopicPartition);
+        ClientKafka::getInstance()->setSelfLeaderTopicPartition($selfLeaderTopicPartition);
+
+        ClientKafka::getInstance()->setIsRebalancing(false);
+
+//        return [$data, $response, $topics, $topic, $partitions, $socket, $partition];
+        return [];
     }
 }

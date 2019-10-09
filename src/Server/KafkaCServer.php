@@ -151,8 +151,9 @@ class KafkaCServer
             go(function () use ($process) {
                 while (true) {
                     $this->checkMasterPid($process);
-                    echo sprintf('Check if the service master process exists every %s seconds...' . PHP_EOL, 3);
-                    co::sleep(3);
+                    echo sprintf('pid:%d,Check if the service master process exists every %s seconds...' . PHP_EOL,
+                        getmypid(), 60);
+                    co::sleep(60);
                 }
             });
 

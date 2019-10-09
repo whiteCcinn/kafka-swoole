@@ -74,7 +74,7 @@ class ProducerCommand extends Command
                  ]);
         $data = $protocol->pack();
         $socket = new Socket();
-        $socket->connect('mkafka4', 9092)->send($data);
+        $socket->connect('mkafka3', 9092)->send($data);
         $socket->revcByKafka($protocol);
         var_dump($protocol->response->toArray());
     }

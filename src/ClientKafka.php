@@ -112,6 +112,11 @@ class ClientKafka
     private $topicPartitionOffset = [];
 
     /**
+     * @var bool $isRebalancing
+     */
+    private $isRebalancing = false;
+
+    /**
      * @param int $nodeId
      *
      * @return ClientKafka
@@ -467,6 +472,26 @@ class ClientKafka
     public function setSelfLeaderTopicPartition(array $selfLeaderTopicPartition): ClientKafka
     {
         $this->selfLeaderTopicPartition = $selfLeaderTopicPartition;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRebalancing(): bool
+    {
+        return $this->isRebalancing;
+    }
+
+    /**
+     * @param bool $isRebalancing
+     *
+     * @return ClientKafka
+     */
+    public function setIsRebalancing(bool $isRebalancing): ClientKafka
+    {
+        $this->isRebalancing = $isRebalancing;
 
         return $this;
     }

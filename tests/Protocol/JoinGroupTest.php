@@ -98,18 +98,15 @@ final class JoinGroupTest extends AbstractProtocolTest
                             'memberId' => 'kafka-swoole-644e2f2d-2366-4ad8-82c4-59d2804ed6b9',
                             'metadata' =>
                                 [
-                                    0 =>
+                                    'version'      => 0,
+                                    'subscription' =>
                                         [
-                                            'version'      => 0,
-                                            'subscription' =>
+                                            0 =>
                                                 [
-                                                    0 =>
-                                                        [
-                                                            'topic' => 'caiwenhui',
-                                                        ],
+                                                    'topic' => 'caiwenhui',
                                                 ],
-                                            'userData'     => '',
                                         ],
+                                    'userData'     => '',
                                 ],
                         ],
                 ],
@@ -118,6 +115,103 @@ final class JoinGroupTest extends AbstractProtocolTest
                     'correlationId' => 11,
                 ],
             'size'           => 195,
+        ];
+        $this->assertEquals($expected, $response->toArray());
+    }
+
+    /**
+     * @author  caiwenhui
+     * @group   decode
+     * @throws \Kafka\Exception\ProtocolTypeException
+     * @throws \ReflectionException
+     */
+    public function testDecode2()
+    {
+        /** @var JoinGroupRequest $protocol */
+        $protocol = $this->protocol;
+        $buffer = '000001b70000000b000000000005000552616e676500316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d36393166626663623766323600316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d3639316662666362376632360000000400316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d36393166626663623766323600000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d31323031643564632d313530332d346631352d383837382d32653230343063386461323200000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d39326231373763342d326635342d346233662d393732302d35633231643463393132353300000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d64383332373066312d646433312d343238652d396266382d36306133323538653338313600000018000000000001000c6b61666b612d73776f6f6c65000000000000000b000000000005000552616e676500316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d36393166626663623766323600316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d3639316662666362376632360000000400316b61666b612d73776f6f6c652d66323637396337372d323064612d346365322d393730392d36393166626663623766323600000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d31323031643564632d313530332d346631352d383837382d32653230343063386461323200000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d39326231373763342d326635342d346233662d393732302d35633231643463393132353300000018000000000001000c6b61666b612d73776f6f6c650000000000316b61666b612d73776f6f6c652d64383332373066312d646433312d343238652d396266382d36306133323538653338313600000018000000000001000c6b61666b612d73776f6f6c6500000000';
+
+        $response = $protocol->response;
+        $response->unpack(hex2bin($buffer));
+
+        $expected = [
+            'errorCode'      => 0,
+            'generationId'   => 5,
+            'protocolName'   => 'Range',
+            'leader'         => 'kafka-swoole-f2679c77-20da-4ce2-9709-691fbfcb7f26',
+            'memberId'       => 'kafka-swoole-f2679c77-20da-4ce2-9709-691fbfcb7f26',
+            'members'        =>
+                [
+                    0 =>
+                        [
+                            'memberId' => 'kafka-swoole-f2679c77-20da-4ce2-9709-691fbfcb7f26',
+                            'metadata' =>
+                                [
+                                    'version'      => 0,
+                                    'subscription' =>
+                                        [
+                                            0 =>
+                                                [
+                                                    'topic' => 'kafka-swoole',
+                                                ],
+                                        ],
+                                    'userData'     => '',
+                                ],
+                        ],
+                    1 =>
+                        [
+                            'memberId' => 'kafka-swoole-1201d5dc-1503-4f15-8878-2e2040c8da22',
+                            'metadata' =>
+                                [
+                                    'version'      => 0,
+                                    'subscription' =>
+                                        [
+                                            0 =>
+                                                [
+                                                    'topic' => 'kafka-swoole',
+                                                ],
+                                        ],
+                                    'userData'     => '',
+                                ],
+                        ],
+                    2 =>
+                        [
+                            'memberId' => 'kafka-swoole-92b177c4-2f54-4b3f-9720-5c21d4c91253',
+                            'metadata' =>
+                                [
+                                    'version'      => 0,
+                                    'subscription' =>
+                                        [
+                                            0 =>
+                                                [
+                                                    'topic' => 'kafka-swoole',
+                                                ],
+                                        ],
+                                    'userData'     => '',
+                                ],
+                        ],
+                    3 =>
+                        [
+                            'memberId' => 'kafka-swoole-d83270f1-dd31-428e-9bf8-60a3258e3816',
+                            'metadata' =>
+                                [
+                                    'version'      => 0,
+                                    'subscription' =>
+                                        [
+                                            0 =>
+                                                [
+                                                    'topic' => 'kafka-swoole',
+                                                ],
+                                        ],
+                                    'userData'     => '',
+                                ],
+                        ],
+                ],
+            'responseHeader' =>
+                [
+                    'correlationId' => 11,
+                ],
+            'size'           => 439,
         ];
         $this->assertEquals($expected, $response->toArray());
     }
