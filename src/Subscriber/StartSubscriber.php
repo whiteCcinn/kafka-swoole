@@ -26,8 +26,7 @@ class StartSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @throws \Kafka\Exception\ProtocolTypeException
-     * @throws \ReflectionException
+     * @throws \Exception
      */
     public function onStartBefore(): void
     {

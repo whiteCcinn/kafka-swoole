@@ -366,7 +366,6 @@ class CoreSubscriber implements EventSubscriberInterface
                 }
             }
         }
-        echo posix_getpid() . ':ending' . PHP_EOL;
     }
 
     /**

@@ -3,10 +3,71 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 > If you would like to contribute code to help me speed up my progress, please contact me at email:471113744@qq.com
 
-
 ## rendering
+
+### A member of the consumer group
+
+```bash
+Topic:caiwenhui	PartitionCount:1	ReplicationFactor:1	Configs:
+	Topic: caiwenhui	Partition: 0	Leader: 1004	Replicas: 1004	Isr: 1004
+```
+
 ![kafka-client](http://g.recordit.co/cyQrMHAWae.gif)
+
 ![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.gif)
+
+### Multiple members of the consumer group
+
+```bash
+Topic:kafka-swoole	PartitionCount:4	ReplicationFactor:2	Configs:
+	Topic: kafka-swoole	Partition: 0	Leader: 1003	Replicas: 1003,1002	Isr: 1003,1002
+	Topic: kafka-swoole	Partition: 1	Leader: 1004	Replicas: 1004,1003	Isr: 1004,1003
+	Topic: kafka-swoole	Partition: 2	Leader: 1001	Replicas: 1001,1004	Isr: 1001,1004
+	Topic: kafka-swoole	Partition: 3	Leader: 1002	Replicas: 1002,1001	Isr: 1001,1002
+```
+
+- KAFKA_CLIENT_CONSUMER_NUM=2
+- KAFKA_CLIENT_CONSUMER_NUM=4
+
+![kafka-client-3](http://g.recordit.co/ReRtQzbYKI.gif)
+
+## Command
+
+### Produce
+
+`php bin/kafka-client kafka.produce [options] [--] <message>`
+
+```bash
+php bin/kafka-client kafka.produce --help
+
+Description:
+  Send a message
+
+Usage:
+  kafka.produce [options] [--] <message>
+
+Arguments:
+  message                      The message you wish to send.
+
+Options:
+  -t, --topic[=TOPIC]          Which is the topic you want to send?
+  -p, --partition[=PARTITION]  Which is the topic you want to send to partition?
+  -k, --key[=KEY]              Which is the topic you want to send to partition by key?
+  -h, --help                   Display this help message
+  -q, --quiet                  Do not output any message
+  -V, --version                Display this application version
+      --ansi                   Force ANSI output
+      --no-ansi                Disable ANSI output
+  -n, --no-interaction         Do not ask any interactive question
+  -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  This command will help you send separate messages to a topic..
+```
+
+### Consumer
+
+`php bin/kafka-client start`
 
 ## Config
 

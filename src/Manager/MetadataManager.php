@@ -24,10 +24,12 @@ class MetadataManager
     use SingletonTrait;
 
     /**
-     * @throws \Kafka\Exception\ProtocolTypeException
-     * @throws \ReflectionException
+     * @param array $extraTopics
+     *
+     * @return \Kafka\ClientKafka|CommonConfig|Kafka|MetadataManager
+     * @throws \Exception
      */
-    public function registerMetadataInfo()
+    public function registerMetadataInfo(array $extraTopics = [])
     {
         foreach (explode(',', App::$commonConfig->getMetadataBrokerList()) as $hostPorts) {
             [$host, $port] = explode(':', $hostPorts);
@@ -37,7 +39,7 @@ class MetadataManager
             $topics = App::$commonConfig->getTopicNames();
             $topicNames = array_map(function ($item) {
                 return String16::value($item);
-            }, explode(',', $topics));
+            }, array_unique(array_merge(explode(',', $topics),$extraTopics)));
             $metadataRequest->setTopicName($topicNames);
             $data = $metadataRequest->pack();
 
@@ -122,7 +124,6 @@ class MetadataManager
     public function registerConfig(): self
     {
         App::$commonConfig = CommonConfig::getInstance();
-//        App::$consumerConfig = new ConsumerConfig();
 //        App::$producerConfig = new ProducerConfig();
 
         return self::getInstance();
