@@ -68,7 +68,7 @@ class RedisStorage
         $message = [];
 
         while (count($message) < $number) {
-            $data = $redis->lPop($this->key);
+            $data = $redis->blPop($this->key, 3);
             if (!empty($data)) {
                 $message[] = json_decode($data, true);
             }

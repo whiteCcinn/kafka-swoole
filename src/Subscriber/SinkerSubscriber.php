@@ -65,6 +65,8 @@ use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use Kafka\Socket\Socket;
+use Kafka\Storage\RedisStorage;
+use Kafka\Storage\StorageAdapter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -89,6 +91,9 @@ class SinkerSubscriber implements EventSubscriberInterface
      */
     public function onSinker(SinkerEvent $event): void
     {
-
+        $storage = new StorageAdapter(RedisStorage::class);
+        while (true) {
+            echo 'Sinker: ' . var_export($storage->pop(), true) . PHP_EOL;
+        }
     }
 }

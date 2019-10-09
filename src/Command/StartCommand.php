@@ -32,6 +32,9 @@ class StartCommand extends Command
     {
         dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
         $processNum = MetadataManager::getInstance()->calculationClientNum();
-        KafkaCServer::getInstance()->setKafkaProcess($processNum)->start();
+        KafkaCServer::getInstance()
+                    ->setKafkaProcess($processNum)
+                    ->setSinkerProcess(env('KAFKA_SINKER_PROCESS_NUM'))
+                    ->start();
     }
 }
