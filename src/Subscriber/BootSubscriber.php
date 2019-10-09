@@ -67,5 +67,6 @@ class BootSubscriber implements EventSubscriberInterface
         App::$dispatcher->addSubscriber(new CoreSubscriber());
         App::$dispatcher->addSubscriber(new ApiSubscriber());
         App::$dispatcher->addSubscriber(new StepSubscriber());
+        App::$dispatcher->addSubscriber(new SinkerSubscriber());
     }
 }

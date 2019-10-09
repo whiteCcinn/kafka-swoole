@@ -18,11 +18,11 @@ class StorageAdapter implements StorageInterface
     /**
      * StorageAdapter constructor.
      *
-     * @param string $className
+     * @param $storage
      */
-    function __construct(string $className)
+    function __construct($storage)
     {
-        $this->adaptee = new $className;
+        $this->adaptee = $storage;
     }
 
     /**

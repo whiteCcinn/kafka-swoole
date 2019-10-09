@@ -64,7 +64,7 @@ class RedisStorage
             $this->key = env('KAFKA_STORAGE_REDIS_KEY');
         }
         /** @var Redis $redis */
-        ['redis' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
+        ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
         $message = [];
 
         while (count($message) < $number) {

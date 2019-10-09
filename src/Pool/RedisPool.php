@@ -78,11 +78,11 @@ class RedisPool
             $this->once[$index] = false;
         }
         if (!$this->once[$index]) {
-            $size = env("POOL_REDIS_{$index}_MAX_NUMBER");
-            $maxIdle = env("POOL_REDIS_{$index}_MAX_IDLE");
+            $size = (int)env("POOL_REDIS_{$index}_MAX_NUMBER");
+            $maxIdle = (int)env("POOL_REDIS_{$index}_MAX_IDLE");
             $host = env("POOL_REDIS_{$index}_HOST");
-            $port = env("POOL_REDIS_{$index}_PORT");
-            $this->pool = new Channel($size);
+            $port = (int)env("POOL_REDIS_{$index}_PORT");
+            $this->pool[$index] = new Channel($size);
             for ($i = 0; $i < $maxIdle; $i++) {
                 $redis = new Redis();
                 $res = $redis->connect($host, $port);

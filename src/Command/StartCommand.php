@@ -34,7 +34,7 @@ class StartCommand extends Command
         $processNum = MetadataManager::getInstance()->calculationClientNum();
         KafkaCServer::getInstance()
                     ->setKafkaProcess($processNum)
-                    ->setSinkerProcess(env('KAFKA_SINKER_PROCESS_NUM'))
+                    ->setSinkerProcess((int)env('KAFKA_SINKER_PROCESS_NUM'))
                     ->start();
     }
 }
