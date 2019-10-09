@@ -32,6 +32,6 @@ class StartCommand extends Command
     {
         dispatch(new StartBeforeEvent(), StartBeforeEvent::NAME);
         $processNum = MetadataManager::getInstance()->calculationClientNum();
-        KafkaCServer::getInstance()->setProcess($processNum)->start();
+        KafkaCServer::getInstance()->setKafkaProcess($processNum)->start();
     }
 }

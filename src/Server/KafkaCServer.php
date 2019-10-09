@@ -8,6 +8,7 @@ use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Event\CoreLogicAfterEvent;
 use Kafka\Event\CoreLogicBeforeEvent;
 use Kafka\Event\CoreLogicEvent;
+use Kafka\Event\SinkerEvent;
 use Swoole\Process;
 use Swoole\Server;
 use \co;
@@ -35,14 +36,24 @@ class KafkaCServer
     private $masterPid;
 
     /**
-     * @var int $nextIndex
+     * @var int $nextKafkaIndex
      */
-    private $nextIndex = 0;
+    private $nextKafkaIndex = 0;
 
     /**
-     * @var array $processes
+     * @var array $kafkaProcesses
      */
-    private $processes = [];
+    private $kafkaProcesses = [];
+
+    /**
+     * @var int $nextSinkerIndex
+     */
+    private $nextSinkerIndex = 0;
+
+    /**
+     * @var array $sinkerProcesses
+     */
+    private $sinkerProcesses = [];
 
     /**
      * KafkaCServer constructor.
@@ -120,21 +131,57 @@ class KafkaCServer
         var_dump($data);
     }
 
-    public function setProcess(int $processNum): KafkaCServer
+    public function setSinkerProcess(int $processNum): KafkaCServer
     {
         for ($i = 0; $i < $processNum; $i++) {
-            $this->createProcess();
+            $this->createSinkerProcess();
         }
 
         return self::getInstance();
     }
 
-    public function createProcess($index = null)
+    public function createSinkerProcess($index = null)
     {
         $process = new Process(function (Process $process) use (&$index) {
             if (is_null($index)) {
-                $index = $this->nextIndex;
-                $this->nextIndex++;
+                $index = $this->nextSinkerIndex;
+                $this->nextSinkerIndex++;
+            }
+            swoole_set_process_name($this->getProcessName('sinker'));
+
+            // Receiving process messages
+            swoole_event_add($process->pipe, function () use ($process) {
+                $msg = $process->read();
+                var_dump($msg);
+            });
+
+            // Sinker Logic
+            go(function () {
+                dispatch(new SinkerEvent(), SinkerEvent::NAME);
+            });
+        }, false, 1, true);
+
+        $pid = $process->start();
+        $this->sinkerProcesses[$index] = $pid;
+
+        return $pid;
+    }
+
+    public function setKafkaProcess(int $processNum): KafkaCServer
+    {
+        for ($i = 0; $i < $processNum; $i++) {
+            $this->createKafkaProcess();
+        }
+
+        return self::getInstance();
+    }
+
+    public function createKafkaProcess($index = null)
+    {
+        $process = new Process(function (Process $process) use (&$index) {
+            if (is_null($index)) {
+                $index = $this->nextKafkaIndex;
+                $this->nextKafkaIndex++;
             }
             swoole_set_process_name($this->getProcessName());
 
@@ -142,9 +189,6 @@ class KafkaCServer
             swoole_event_add($process->pipe, function () use ($process) {
                 $msg = $process->read();
                 var_dump($msg);
-//                    foreach ($server->connections as $conn) {
-//                        $server->send($conn, $msg);
-//                    }
             });
 
             // Heartbeat
@@ -158,16 +202,15 @@ class KafkaCServer
             });
 
             // Core Logic
-            go(function () use ($index) {
+            go(function () {
                 dispatch(new CoreLogicBeforeEvent(), CoreLogicBeforeEvent::NAME);
-                echo 'CoreLogic' . PHP_EOL;
                 dispatch(new CoreLogicEvent(), CoreLogicEvent::NAME);
                 dispatch(new CoreLogicAfterEvent(), CoreLogicAfterEvent::NAME);
             });
         }, false, 1, true);
 
         $pid = $process->start();
-        $this->processes[$index] = $pid;
+        $this->kafkaProcesses[$index] = $pid;
 
         return $pid;
     }
@@ -187,7 +230,7 @@ class KafkaCServer
     public function rebootProcess($ret)
     {
         $pid = $ret['pid'];
-        $index = array_search($pid, $this->processes);
+        $index = array_search($pid, $this->kafkaProcesses);
         if ($index !== false) {
             $index = intval($index);
             $new_pid = $this->CreateProcess($index);
@@ -204,7 +247,7 @@ class KafkaCServer
     public function processWait()
     {
         while (1) {
-            if (count($this->processes)) {
+            if (count($this->kafkaProcesses)) {
                 $ret = Process::wait();
                 if ($ret) {
                     $this->rebootProcess($ret);
@@ -217,11 +260,13 @@ class KafkaCServer
 
 
     /**
+     * @param string $type
+     *
      * @return string
      */
-    private function getProcessName(): string
+    private function getProcessName($type = 'kafka'): string
     {
-        return env('APP_NAME') . ':process';
+        return env('APP_NAME') . ':process' . ":{$type}";
     }
 
 

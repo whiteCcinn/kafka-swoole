@@ -31,7 +31,7 @@ Topic:kafka-swoole	PartitionCount:4	ReplicationFactor:2	Configs:
 
 ![kafka-client-3](http://g.recordit.co/ReRtQzbYKI.gif)
 
-![kafka-client-4](http://g.recordit.co/PYG4YTwheG.gif)
+![kafka-client-4](https://recordit.co/PYG4YTwheG)
 
 ## Command
 
