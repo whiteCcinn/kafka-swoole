@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Kafka\Subscriber;
 
+use App\App;
 use Kafka\Event\StartAfterEvent;
 use Kafka\Event\StartBeforeEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -30,7 +31,10 @@ class StartSubscriber implements EventSubscriberInterface
      */
     public function onStartBefore(): void
     {
-        MetadataManager::getInstance()->registerConfig()->registerMetadataInfo();
+        MetadataManager::getInstance()->registerConfig()->registerMetadataInfo(
+            App::$commonConfig->getMetadataBrokerList(),
+            App::$commonConfig->getTopicNames()
+        );
     }
 
     public function onStartAfter(): void
