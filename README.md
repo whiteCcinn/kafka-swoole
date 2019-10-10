@@ -75,11 +75,54 @@ Help:
 
 #### Options
 
-FILE: `config/high_level.yaml`
+FILE: `config/consumer.yaml`
 
-|  option   | optional | default  |
-|  ----  | ----  | ----  |
-| auto.offset.reset  | smallest \| largest | largest |
+```yaml
+# Your kafka version
+kafka.version: 0.9.0.0
+# This is for bootstrapping and the producer will only use it for getting metadata
+# (topics, partitions and replicas). The socket connections for sending the actual data
+# will be established based on the broker information returned in the metadata. The
+# format is host1:port1,host2:port2, and the list can be a subset of brokers or
+# a VIP pointing to a subset of brokers.
+metadata.broker.list: "mkafka1:9092,mkafka2:9092,mkafka3:9092,mkafka4:9092"
+
+# The producer generally refreshes the topic metadata from brokers when there is a failure
+# (partition missing, leader not available...). It will also poll regularly (default: every 10min
+# so 600000ms). If you set this to a negative value, metadata will only get refreshed on failure.
+# If you set this to zero, the metadata will get refreshed after each message sent (not recommended)
+# Important note: the refresh happen only AFTER the message is sent, so if the producer never sends
+# a message the metadata is never refreshed
+topic.metadata.refresh.interval.ms: 60 * 10 * 1000
+
+# a string that uniquely identifies a set of consumers within the same consumer group
+group.id: "kafka-swoole"
+
+# Which you want to operation
+# Example: topic1,topic2,topic3,topic4,topic5
+topic.names: "kafka-swoole"
+
+# The periodic time the heartbeat request is sent to tell kafka that the client still exists
+heartbeat.interval.ms: 10 * 1000
+
+# The maximum allowed time within a group for which no heartbeat is sent
+# So this value must be greater than the heartbeat sending cycle：heartbeat.interval.ms
+# (default: 30s)
+group.keep.session.max.ms: 30 * 1000
+
+# Select a strategy for assigning partitions to consumer streams. See ProtocolPartitionAssignmentStrategyEnum::class
+# Range：
+# RoundRobin：
+# Sticky：
+partition.assignment.strategy: "Range"
+
+# highLevelApi the frequency in ms that the consumer offsets are committed to zookeeper
+auto.commit.interval.ms: 10 * 1000
+
+# smallest : automatically reset the offset to the smallest offset
+# largest : automatically reset the offset to the largest offset
+auto.offset.reset: largest
+```
 
 ### Producer
 
