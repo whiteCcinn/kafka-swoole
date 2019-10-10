@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Kafka\Subscriber;
 
 use App\App;
+use App\Controller\SinkerController;
 use Kafka\ClientKafka;
 use Kafka\Config\CommonConfig;
 use Kafka\Enum\ClientApiModeEnum;
@@ -99,7 +100,8 @@ class SinkerSubscriber implements EventSubscriberInterface
         $storage = RedisStorage::getInstance();
         $adapter->setAdaptee($storage);
         while (true) {
-            echo 'Sinker: ' . var_export($storage->pop(2), true) . PHP_EOL;
+            $messages = $storage->pop();
+            (new SinkerController())->handler($messages);
         }
     }
 }

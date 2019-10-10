@@ -97,7 +97,7 @@ class ApiSubscriber implements EventSubscriberInterface
                 // auto commit
                 dispatch(
                     new MessageConsumedEvent(
-                        ClientApiModeEnum::HIGH_LEVEL,
+                        ClientApiModeEnum::getCodeByText($this->mode),
                         $event->getTopic(),
                         $event->getPartition(),
                         $event->getOffset()

@@ -136,6 +136,17 @@ class Kafka
     }
 
     /**
+     * @param string $topic
+     * @param int    $partition
+     *
+     * @return int
+     */
+    public function getTopicsPartitionLeaderByTopicAndPartition(string $topic, int $partition): int
+    {
+        return $this->topicsPartitionLeader[$topic][$partition];
+    }
+
+    /**
      * @param array $topicsPartitionLeader
      *
      * @return Kafka

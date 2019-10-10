@@ -75,7 +75,7 @@ class RedisStorage
                 [, $message] = $data;
                 $messages[] = json_decode($message, true);
             }
-            \co::sleep(1);
+//            \co::sleep(1);
         }
         RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
 
