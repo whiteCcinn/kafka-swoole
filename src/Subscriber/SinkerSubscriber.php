@@ -88,12 +88,18 @@ class SinkerSubscriber implements EventSubscriberInterface
 
     /**
      * @param SinkerEvent $event
+     *
+     * @throws \Exception
      */
     public function onSinker(SinkerEvent $event): void
     {
-        $storage = new StorageAdapter(RedisStorage::getInstance());
+        /** @var StorageAdapter $adapter */
+        $adapter = StorageAdapter::getInstance();
+        /** @var RedisStorage $storage */
+        $storage = RedisStorage::getInstance();
+        $adapter->setAdaptee($storage);
         while (true) {
-            echo 'Sinker: ' . var_export($storage->pop(), true) . PHP_EOL;
+            echo 'Sinker: ' . var_export($storage->pop(2), true) . PHP_EOL;
         }
     }
 }

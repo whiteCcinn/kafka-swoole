@@ -82,6 +82,8 @@ class RedisPool
             $maxIdle = (int)env("POOL_REDIS_{$index}_MAX_IDLE");
             $host = env("POOL_REDIS_{$index}_HOST");
             $port = (int)env("POOL_REDIS_{$index}_PORT");
+            $auth = env("POOL_REDIS_{$index}_AUTH");
+            $db = (int)env("POOL_REDIS_{$index}_DB");
             $this->pool[$index] = new Channel($size);
             for ($i = 0; $i < $maxIdle; $i++) {
                 $redis = new Redis();
@@ -89,6 +91,12 @@ class RedisPool
                 if ($res == false) {
                     throw new RuntimeException("failed to connect redis server.");
                 } else {
+                    if ($auth !== null) {
+                        $redis->auth($auth);
+                    }
+                    if ($db !== null) {
+                        $redis->select($db);
+                    }
                     $this->put($redis, $index);
                 }
             }

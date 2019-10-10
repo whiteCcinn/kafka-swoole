@@ -9,6 +9,8 @@ use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Enum\MessageStorageEnum;
 use Kafka\Event\FetchMessageEvent;
 use Kafka\Event\MessageConsumedEvent;
+use Kafka\Storage\RedisStorage;
+use Kafka\Storage\StorageAdapter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -52,7 +54,7 @@ class ApiSubscriber implements EventSubscriberInterface
                 $this->handler = new LowLevelHandler();
             }
         }
-        switch ($this->messageStorage) {
+        switch (MessageStorageEnum::getCodeByText($this->messageStorage)) {
             case MessageStorageEnum::DIRECTLY:
                 if ($this->mode === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
                     /** @var HighLevelHandler $handler */
@@ -85,6 +87,23 @@ class ApiSubscriber implements EventSubscriberInterface
             case MessageStorageEnum::FILE:
                 break;
             case MessageStorageEnum::REDIS:
+                /** @var StorageAdapter $adapter */
+                $adapter = StorageAdapter::getInstance();
+                /** @var RedisStorage $storage */
+                $storage = RedisStorage::getInstance();
+                $adapter->setAdaptee($storage);
+                $adapter->push([$event->getMessage()]);
+
+                // auto commit
+                dispatch(
+                    new MessageConsumedEvent(
+                        ClientApiModeEnum::HIGH_LEVEL,
+                        $event->getTopic(),
+                        $event->getPartition(),
+                        $event->getOffset()
+                    ),
+                    MessageConsumedEvent::NAME
+                );
                 break;
             default:
                 //

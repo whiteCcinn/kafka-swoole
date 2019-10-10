@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Kafka\Storage;
 
+use Kafka\Support\SingletonTrait;
+
 /**
  * Class StorageAdapter
  *
@@ -10,19 +12,32 @@ namespace Kafka\Storage;
  */
 class StorageAdapter implements StorageInterface
 {
+    use SingletonTrait;
     /**
      * @var RedisStorage | RedisStorage $adaptee
      */
     private $adaptee;
 
     /**
-     * StorageAdapter constructor.
-     *
-     * @param $storage
+     * @return RedisStorage
      */
-    function __construct($storage)
+    public function getAdaptee(): RedisStorage
     {
-        $this->adaptee = $storage;
+        return $this->adaptee;
+    }
+
+    /**
+     * @param RedisStorage $adaptee
+     *
+     * @return StorageAdapter
+     */
+    public function setAdaptee(RedisStorage $adaptee): StorageAdapter
+    {
+        if ($this->adaptee === null) {
+            $this->adaptee = $adaptee;
+        }
+
+        return $this;
     }
 
     /**

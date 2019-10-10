@@ -21,7 +21,7 @@ class MessageStorageEnum extends AbstractEnum
     public const FILE = 1;
 
     /**
-     * @message("DIRECTLY")
+     * @message("REDIS")
      */
     public const REDIS = 2;
 }

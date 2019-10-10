@@ -41,12 +41,14 @@ class RedisStorage
             $this->key = env('KAFKA_STORAGE_REDIS_KEY');
         }
         /** @var Redis $redis */
-        ['redis' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
+        ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
         foreach ($data as $item) {
             $redis->rPush($this->key, json_encode($item));
         }
 
         RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
+
+        return $this;
     }
 
     /**
@@ -65,16 +67,18 @@ class RedisStorage
         }
         /** @var Redis $redis */
         ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
-        $message = [];
+        $messages = [];
 
-        while (count($message) < $number) {
+        while (count($messages) < $number) {
             $data = $redis->blPop($this->key, 3);
-            if (!empty($data)) {
-                $message[] = json_decode($data, true);
+            if (!empty($data) && is_array($data)) {
+                [, $message] = $data;
+                $messages[] = json_decode($message, true);
             }
+            \co::sleep(1);
         }
         RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
 
-        return $message;
+        return $messages;
     }
 }
