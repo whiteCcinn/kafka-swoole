@@ -90,7 +90,7 @@ class RedisPool
                 $res = $redis->connect($host, $port);
                 if ($res == false) {
                     throw new RuntimeException("failed to connect redis server.");
-                } else {
+                } else {#
                     if ($auth !== null) {
                         $redis->auth($auth);
                     }
