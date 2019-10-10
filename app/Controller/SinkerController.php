@@ -7,9 +7,18 @@ class SinkerController
 {
     /**
      * @param array $messages
+     *
+     * @return array
      */
-    public function handler(array $messages)
+    public static function handler(array $messages): array
     {
-        // do something
+        $acks = [];
+        foreach ($messages as $k => $info) {
+            ['message' => $message] = $info;
+            var_dump($message);
+            $acks[$k] = true;
+        }
+
+        return $acks;
     }
 }

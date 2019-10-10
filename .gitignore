@@ -8,3 +8,4 @@ vendor/
 *.lock
 .env
 composer.lock
+app.backup/

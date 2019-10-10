@@ -101,7 +101,12 @@ class SinkerSubscriber implements EventSubscriberInterface
         $adapter->setAdaptee($storage);
         while (true) {
             $messages = $storage->pop();
-            (new SinkerController())->handler($messages);
+            $acks = SinkerController::handler($messages);
+            foreach ($messages as $k => $info) {
+                if ($acks[$k]) {
+                    $storage->ack($info);
+                }
+            }
         }
     }
 }

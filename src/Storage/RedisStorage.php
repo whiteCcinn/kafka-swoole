@@ -5,6 +5,7 @@ namespace Kafka\Storage;
 
 use Kafka\Pool\RedisPool;
 use Kafka\Support\SingletonTrait;
+use SebastianBergmann\CodeCoverage\Report\PHP;
 use Swoole\Coroutine\Redis;
 
 /**
@@ -22,9 +23,25 @@ class RedisStorage
     private $configIndex;
 
     /**
-     * @var string $key
+     * @var string $pendingKey
      */
-    private $key;
+    private $pendingKey;
+
+    /**
+     * @var string $processingKey
+     */
+    private $processingKey;
+
+    private function init()
+    {
+        if ($this->configIndex === null) {
+            if (preg_match('/[\s\S]*(?P<index>\d+)$/', env('KAFKA_STORAGE_REDIS'), $matches)) {
+                $this->configIndex = (int)$matches['index'];
+            }
+            $this->pendingKey = env('KAFKA_STORAGE_REDIS_PENDING_KEY');
+            $this->processingKey = env('KAFKA_STORAGE_REDIS_PROCESSING_KEY');
+        }
+    }
 
     /**
      * @param array $data
@@ -34,16 +51,15 @@ class RedisStorage
      */
     public function push(array $data = []): self
     {
-        if ($this->configIndex === null) {
-            if (preg_match('/[\s\S]*(?P<index>\d+)$/', env('KAFKA_STORAGE_REDIS'), $matches)) {
-                $this->configIndex = (int)$matches['index'];
-            }
-            $this->key = env('KAFKA_STORAGE_REDIS_KEY');
-        }
+        $this->init();
         /** @var Redis $redis */
         ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
         foreach ($data as $item) {
-            $redis->rPush($this->key, json_encode($item));
+            $info = [
+                'time'    => time(),
+                'message' => $item
+            ];
+            $redis->lPush($this->pendingKey, json_encode($info));
         }
 
         RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
@@ -59,26 +75,36 @@ class RedisStorage
      */
     public function pop(int $number = 1): array
     {
-        if ($this->configIndex === null) {
-            if (preg_match('/[\s\S]*(?P<index>\d+)$/', env('KAFKA_STORAGE_REDIS'), $matches)) {
-                $this->configIndex = (int)$matches['index'];
-            }
-            $this->key = env('KAFKA_STORAGE_REDIS_KEY');
-        }
+        $this->init();
         /** @var Redis $redis */
         ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
         $messages = [];
 
         while (count($messages) < $number) {
-            $data = $redis->blPop($this->key, 3);
-            if (!empty($data) && is_array($data)) {
-                [, $message] = $data;
-                $messages[] = json_decode($message, true);
+            $data = $redis->rpoplpush($this->pendingKey, $this->processingKey);
+            if (!empty($data)) {
+                $messages[] = json_decode($data, true);
             }
 //            \co::sleep(1);
         }
         RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
 
         return $messages;
+    }
+
+    /**
+     * @param array $info
+     *
+     * @throws \Exception
+     */
+    public function ack(array $info)
+    {
+        $this->init();
+        /** @var Redis $redis */
+        ['handler' => $redis] = RedisPool::getInstance($this->configIndex)->get($this->configIndex);
+
+        var_dump($redis->lRem($this->processingKey, json_encode($info), 1));
+
+        RedisPool::getInstance($this->configIndex)->put($redis, $this->configIndex);
     }
 }

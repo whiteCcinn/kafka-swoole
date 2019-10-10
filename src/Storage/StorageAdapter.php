@@ -65,4 +65,14 @@ class StorageAdapter implements StorageInterface
 
         return $this->adaptee->pop($number);
     }
+
+    /**
+     * @param string $message
+     *
+     * @throws \Exception
+     */
+    public function ack(string $message)
+    {
+        $this->adaptee->ack($message);
+    }
 }
