@@ -38,7 +38,8 @@ class ProducerApi
      */
     private static function refreshMetadata(string $conn, string $topics): bool
     {
-        $topics = array_unique(array_merge(explode(',', $topics), array_keys(self::$metadata[$conn])));
+        $topics = array_unique(array_merge(explode(',', $topics),
+            isset(self::$metadata[$conn]) ? (array_keys(self::$metadata[$conn]) ?? []) : []));
         $topics = implode(',', $topics);
 
         $result = MetadataApi::requestMetadata(self::$connBrokerListMap[$conn], $topics);

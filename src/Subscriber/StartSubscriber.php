@@ -31,10 +31,7 @@ class StartSubscriber implements EventSubscriberInterface
      */
     public function onStartBefore(): void
     {
-        MetadataManager::getInstance()->registerConfig()->registerMetadataInfo(
-            App::$commonConfig->getMetadataBrokerList(),
-            App::$commonConfig->getTopicNames()
-        );
+        MetadataManager::getInstance()->registerConfig()->registerMetadataInfo();
     }
 
     public function onStartAfter(): void
