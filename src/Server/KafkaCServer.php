@@ -9,6 +9,7 @@ use Kafka\Event\CoreLogicAfterEvent;
 use Kafka\Event\CoreLogicBeforeEvent;
 use Kafka\Event\CoreLogicEvent;
 use Kafka\Event\SinkerEvent;
+use Kafka\Event\SinkerOtherEvent;
 use Swoole\Process;
 use Swoole\Server;
 use \co;
@@ -148,6 +149,10 @@ class KafkaCServer
                 $this->nextSinkerIndex++;
             }
             swoole_set_process_name($this->getProcessName('sinker'));
+
+            go(function(){
+                dispatch(new SinkerOtherEvent(), SinkerOtherEvent::NAME);
+            });
 
             // Receiving process messages
             swoole_event_add($process->pipe, function () use ($process) {

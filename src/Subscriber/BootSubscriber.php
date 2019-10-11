@@ -12,6 +12,7 @@ use Kafka\Event\BootBeforeEvent;
 use Kafka\Event\StartBeforeEvent;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use \App\Subscriber\CoreSubscriber as AppCoreSubscriber;
 
 /**
  * Class BootSubscriber
@@ -68,5 +69,6 @@ class BootSubscriber implements EventSubscriberInterface
         App::$dispatcher->addSubscriber(new ApiSubscriber());
         App::$dispatcher->addSubscriber(new StepSubscriber());
         App::$dispatcher->addSubscriber(new SinkerSubscriber());
+        App::$dispatcher->addSubscriber(new AppCoreSubscriber());
     }
 }
