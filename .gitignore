@@ -9,3 +9,4 @@ vendor/
 .env
 composer.lock
 app.backup/
+setting/

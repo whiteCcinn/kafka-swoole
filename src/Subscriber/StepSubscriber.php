@@ -38,7 +38,7 @@ class StepSubscriber implements EventSubscriberInterface
         $offset = $event->getOffset();
         ClientKafka::getInstance()->setTopicPartitionOffset($topic, $partition, $offset);
         if ($event->getType() === ClientApiModeEnum::LOW_LEVEL) {
-            OffsetCommitApi::topicPartitionOffsetCommit($event->getTopic(), $event->getPartition(),
+            OffsetCommitApi::getInstance()->topicPartitionOffsetCommit($event->getTopic(), $event->getPartition(),
                 $event->getOffset());
         }
     }

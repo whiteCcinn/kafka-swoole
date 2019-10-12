@@ -58,7 +58,7 @@ class RedisPool
             throw new \Exception('invalid index');
         }
 
-        if (self::$instance[$index] === null) {
+        if (!isset(self::$instance[$index])) {
             static::$instance[$index] = new static();
             static::$instance[$index]->init($index);
         }
@@ -80,29 +80,37 @@ class RedisPool
         if (!$this->once[$index]) {
             $size = (int)env("POOL_REDIS_{$index}_MAX_NUMBER");
             $maxIdle = (int)env("POOL_REDIS_{$index}_MAX_IDLE");
-            $host = env("POOL_REDIS_{$index}_HOST");
-            $port = (int)env("POOL_REDIS_{$index}_PORT");
-            $auth = env("POOL_REDIS_{$index}_AUTH");
-            $db = (int)env("POOL_REDIS_{$index}_DB");
             $this->pool[$index] = new Channel($size);
             for ($i = 0; $i < $maxIdle; $i++) {
-                $redis = new Redis();
-                $res = $redis->connect($host, $port);
-                if ($res == false) {
-                    throw new RuntimeException("failed to connect redis server.");
-                } else {#
-                    if ($auth !== null) {
-                        $redis->auth($auth);
-                    }
-                    if ($db !== null) {
-                        $redis->select($db);
-                    }
-                    $this->put($redis, $index);
-                }
+                $this->createConnect($index);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @param int $index
+     */
+    function createConnect(int $index)
+    {
+        $host = env("POOL_REDIS_{$index}_HOST");
+        $port = (int)env("POOL_REDIS_{$index}_PORT");
+        $auth = env("POOL_REDIS_{$index}_AUTH");
+        $db = (int)env("POOL_REDIS_{$index}_DB");
+        $redis = new Redis();
+        $res = $redis->connect($host, $port);
+        if ($res == false) {
+            throw new RuntimeException("failed to connect redis server.");
+        } else {#
+            if ($auth !== null) {
+                $redis->auth($auth);
+            }
+            if ($db !== null) {
+                $redis->select($db);
+            }
+            $this->put($redis, $index);
+        }
     }
 
     /**
@@ -132,6 +140,21 @@ class RedisPool
             throw new RuntimeException("The pool invalid");
         }
 
-        return ['index' => $index, 'handler' => $this->pool[$index]->pop()];
+        /**
+         * @var Redis $redis
+         */
+        pop:
+        $redis = $this->pool[$index]->pop();
+        try {
+            if ($redis->ping() !== 0) {
+                $this->createConnect($index);
+                goto pop;
+            }
+        } catch (\Exception $e) {
+            $this->createConnect($index);
+            goto pop;
+        }
+
+        return ['index' => $index, 'handler' => $redis];
     }
 }

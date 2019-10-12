@@ -20,13 +20,14 @@ use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 use Kafka\Socket\Socket;
+use Kafka\Support\SingletonTrait;
 
 /**
  * Class MetadataApi
  *
  * @package Kafka\Api
  */
-class MetadataApi
+class MetadataApi extends AbstractApi
 {
     /**
      * @param string $brokerList
@@ -34,7 +35,7 @@ class MetadataApi
      *
      * @return array
      */
-    public static function requestMetadata(string $brokerList, string $topics): array
+    public function requestMetadata(string $brokerList, string $topics): array
     {
         foreach (explode(',', $brokerList) as $hostPorts) {
             [$host, $port] = explode(':', $hostPorts);

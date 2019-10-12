@@ -11,6 +11,7 @@ use Kafka\Event\CoreLogicEvent;
 use Kafka\Event\SinkerEvent;
 use Kafka\Event\SinkerOtherEvent;
 use Swoole\Process;
+use Swoole\Runtime;
 use Swoole\Server;
 use \co;
 
@@ -149,8 +150,9 @@ class KafkaCServer
                 $this->nextSinkerIndex++;
             }
             swoole_set_process_name($this->getProcessName('sinker'));
+            Runtime::enableCoroutine(true,SWOOLE_HOOK_FILE);
 
-            go(function(){
+            go(function () {
                 dispatch(new SinkerOtherEvent(), SinkerOtherEvent::NAME);
             });
 
@@ -232,13 +234,13 @@ class KafkaCServer
      *
      * @throws \Exception
      */
-    public function rebootProcess($ret)
+    public function rebootKafkaProcess($ret)
     {
         $pid = $ret['pid'];
         $index = array_search($pid, $this->kafkaProcesses);
         if ($index !== false) {
             $index = intval($index);
-            $new_pid = $this->CreateProcess($index);
+            $new_pid = $this->createKafkaProcess($index);
             echo "rebootProcess: {$index}={$new_pid} Done\n";
 
             return;
@@ -255,7 +257,7 @@ class KafkaCServer
             if (count($this->kafkaProcesses)) {
                 $ret = Process::wait();
                 if ($ret) {
-                    $this->rebootProcess($ret);
+                    $this->rebootKafkaProcess($ret);
                 }
             } else {
                 break;

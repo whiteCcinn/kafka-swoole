@@ -15,7 +15,7 @@ use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 
-class OffsetCommitApi
+class OffsetCommitApi extends AbstractApi
 {
     /**
      * @param string $topic
@@ -24,7 +24,7 @@ class OffsetCommitApi
      *
      * @throws OffsetCommitRequestException
      */
-    public static function topicPartitionOffsetCommit(string $topic, int $partition, int $offset)
+    public function topicPartitionOffsetCommit(string $topic, int $partition, int $offset)
     {
         $offsetCommitRequest = new OffsetCommitRequest();
 

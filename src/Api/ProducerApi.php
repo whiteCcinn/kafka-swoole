@@ -16,19 +16,19 @@ use Kafka\Protocol\Type\Int32;
 use Kafka\Protocol\Type\Int64;
 use Kafka\Protocol\Type\String16;
 
-class ProducerApi
+class ProducerApi extends AbstractApi
 {
     /**
      * @var array
      */
-    private static $connBrokerListMap = [];
+    private $connBrokerListMap = [];
 
     /**
      * ['conn'=>['topic' => ['partition'=>'leaderId']]]
      *
      * @var array
      */
-    private static $metadata = [];
+    private $metadata = [];
 
     /**
      * @param string $conn
@@ -36,13 +36,13 @@ class ProducerApi
      *
      * @return bool
      */
-    private static function refreshMetadata(string $conn, string $topics): bool
+    private function refreshMetadata(string $conn, string $topics): bool
     {
         $topics = array_unique(array_merge(explode(',', $topics),
-            isset(self::$metadata[$conn]) ? (array_keys(self::$metadata[$conn]) ?? []) : []));
+            isset($this->metadata[$conn]) ? (array_keys($this->metadata[$conn]) ?? []) : []));
         $topics = implode(',', $topics);
 
-        $result = MetadataApi::requestMetadata(self::$connBrokerListMap[$conn], $topics);
+        $result = MetadataApi::getInstance()->requestMetadata($this->connBrokerListMap[$conn], $topics);
         if (empty($result)) {
             return false;
         }
@@ -55,7 +55,7 @@ class ProducerApi
         foreach ($topicPartitions as $topic => $partitions) {
             foreach ($partitions as $partition) {
                 $leaderId = $topicsPartitionLeader[$topic][$partition];
-                self::$metadata[$conn]['topicPartitionLeader'][$topic][$partition] = $leaderId;
+                $this->metadata[$conn]['topicPartitionLeader'][$topic][$partition] = $leaderId;
             }
         }
 
@@ -66,9 +66,9 @@ class ProducerApi
      * @param string $conn
      * @param string $brokerList
      */
-    public static function setBrokerListMap(string $conn, string $brokerList)
+    public function setBrokerListMap(string $conn, string $brokerList)
     {
-        self::$connBrokerListMap[$conn] = $brokerList;
+        $this->connBrokerListMap[$conn] = $brokerList;
     }
 
     /**
@@ -80,19 +80,19 @@ class ProducerApi
      *
      * @return bool
      */
-    public static function produce(string $conn, string $topic, ?int $partition, ?string $key, string $message): bool
+    public function produce(string $conn, string $topic, ?int $partition, ?string $key, string $message): bool
     {
-        if (!isset(self::$connBrokerListMap[$conn])) {
+        if (!isset($this->connBrokerListMap[$conn])) {
             return false;
         }
 
-        if (!isset(self::$metadata[$conn]['topicPartitionLeader'][$topic][$partition])) {
+        if (!isset($this->metadata[$conn]['topicPartitionLeader'][$topic][$partition])) {
             self::refreshMetadata($conn, $topic);
         }
 
         Send:
-        $partitions = array_keys(self::$metadata[$conn]['topicPartitionLeader'][$topic]);
-        $topicPartitionLeaders = self::$metadata[$conn]['topicPartitionLeader'];
+        $partitions = array_keys($this->metadata[$conn]['topicPartitionLeader'][$topic]);
+        $topicPartitionLeaders = $this->metadata[$conn]['topicPartitionLeader'];
         $topicPartition = isset($partitions[$topic]) ? $partitions[$topic] : [0];
         $topicPartitionLeader = isset($topicPartitionLeaders[$topic]) ? $topicPartitionLeaders[$topic] : current($topicPartitionLeaders);
         // Range
