@@ -5,6 +5,26 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 core framework：[kafka-swoole-core](https://github.com/whiteCcinn/kafka-swoole-core)
 
+## Install
+
+### by composer
+
+```bash
+version=dev-master;composer create-project ccinn/kafka-swoole kafka-swoole ${version}
+```
+
+## by git
+
+```bash
+git clone https://github.com/whiteCcinn/kafka-swoole.git && cd kafka-swoole && composer install
+```
+## docker
+
+```bash
+docker build -t kafka-swoole:latest .
+docker run -it --name kafka-swoole -v $(PWD):/data/www kafka-swoole:latest bash
+```
+
 ## rendering
 
 ### A member of the consumer group
@@ -17,13 +37,6 @@ Topic:caiwenhui	PartitionCount:1	ReplicationFactor:1	Configs:
 ![kafka-client](http://g.recordit.co/cyQrMHAWae.gif)
 
 ![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.gif)
-
-## docker
-
-```bash
-docker build -t kafka-swoole:latest .
-docker run -it --name kafka-swoole -v $(PWD):/data/www kafka-swoole:latest bash
-```
 
 ### Multiple members of the consumer group
 
