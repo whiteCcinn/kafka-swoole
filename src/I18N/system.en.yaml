@@ -1,8 +1,0 @@
-config:
-  validate:
-    MetadataBrokerList: metadataBrokerList : {0} , which is worng!
-
-manager:
-  metadata:
-    max:
-      consumer: The number of consumers in the configuration {0} is greater than the maximum partition {1}

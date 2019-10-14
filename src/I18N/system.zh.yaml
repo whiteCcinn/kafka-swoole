@@ -1,8 +1,0 @@
-config:
-  validate:
-    MetadataBrokerList: metadataBrokerList : {0} , 存在错误
-
-manager:
-  metadata:
-    max:
-      consumer: 配置中的消费者数 {0} 大于最大partition的数量 {1}
