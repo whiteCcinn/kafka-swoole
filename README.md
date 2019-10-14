@@ -3,6 +3,8 @@ Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis 
 
 > If you would like to contribute code to help me speed up my progress, please contact me at email:471113744@qq.com
 
+core framework：[kafka-swoole-core](https://github.com/whiteCcinn/kafka-swoole-core)
+
 ## rendering
 
 ### A member of the consumer group
