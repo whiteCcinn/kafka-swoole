@@ -77,7 +77,7 @@ Help:
 
 #### Options
 
-FILE: `config/consumer.yaml`
+FILE: `config/common.yaml`
 
 ```yaml
 # Your kafka version
@@ -125,10 +125,6 @@ auto.commit.interval.ms: 10 * 1000
 # largest : automatically reset the offset to the largest offset
 auto.offset.reset: largest
 ```
-
-### Producer
-
-FILE: `config/producer.yaml`
 
 ## Protocol
 
