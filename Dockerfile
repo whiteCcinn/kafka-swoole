@@ -68,6 +68,3 @@ RUN  cd /data/www \
 
 WORKDIR /data/www
 EXPOSE 9501
-
-# ENTRYPOINT ["php", "/data/www/bin/swoft", "http:start"]
-# CMD ["php", "/data/www/bin/swoft", "http:start"]

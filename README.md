@@ -18,6 +18,13 @@ Topic:caiwenhui	PartitionCount:1	ReplicationFactor:1	Configs:
 
 ![kafka-client-2](http://g.recordit.co/6QFSjl7vSo.gif)
 
+## docker
+
+```bash
+docker build -t kafka-swoole:latest .
+docker run -it --name kafka-swoole -v $(PWD):/data/www kafka-swoole:latest bash
+```
+
 ### Multiple members of the consumer group
 
 ```bash
