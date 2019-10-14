@@ -21,6 +21,9 @@
     "php": "^7.1",
     "ccinn/kafka-swoole-core": "dev-master"
   },
+  "require-dev": {
+    "swoft/swoole-ide-helper": "dev-master"
+  },
   "autoload": {
     "psr-4": {
       "App\\": "app"
