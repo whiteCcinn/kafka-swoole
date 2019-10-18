@@ -87,6 +87,113 @@ Help:
   This command will help you send separate messages to a topic..
 ```
 
+### Rpc
+
+Support real-time acquisition of data in runtime, interaction through RPC protocol with AF_UNIX interprocess communication
+
+```
+php bin/kafka-client rpc -h
+Description:
+  Built-in runtime RPC command
+
+Usage:
+  rpc <type>
+
+Arguments:
+  type                  which you want to execute command?
+
+Options:
+  -h, --help            Display this help message
+  -q, --quiet           Do not output any message
+  -V, --version         Display this application version
+      --ansi            Force ANSI output
+      --no-ansi         Disable ANSI output
+  -n, --no-interaction  Do not ask any interactive question
+  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  The following are the built-in RPC command options：
+  kafka_lag
+  offset_checker
+  block_size
+  member_leader
+  metadata_brokers
+  metadata_topics
+```
+
+- kafka_lag（Check the total difference between the current offset and the maximum offset in kafka）
+```bash
+php bin/kafka-client rpc kafka_lag
+1000
+```
+
+- offset_checker(View the details of the current offset and the offset and difference in the kafka service for each partition of the topic)
+
+```bash
+php bin/kafka-client rpc offset_checker
+ -------------- ----------- ---------------- ------------------ -----------------
+  topic          partition   current-offset   kafka-max-offset   remaining-count
+ -------------- ----------- ---------------- ------------------ -----------------
+  kafka-swoole   2           50223            50223              0
+  kafka-swoole   3           70353            70353              0
+  kafka-swoole   0           52395            52395              0
+  kafka-swoole   1           50407            50407              0
+ -------------- ----------- ---------------- ------------------ -----------------
+```
+
+- block_size(If you are using storage media in indirect mode, you can use this command to see the current number of storage media)
+
+```bash
+php bin/kafka-client rpc block_size
+254
+```
+
+- block_size(If you are using storage media in indirect mode, you can use this command to see the current number of storage media)
+
+```bash
+php bin/kafka-client rpc block_size
+254
+```
+
+- member_leader（View the Leader of the current consumer group）
+
+```bash
+php bin/kafka-client rpc member_leader
+ ---------------------------------------------------
+  consumer-group-leaderId
+ ---------------------------------------------------
+  kafka-swoole-4c668caa-c352-4132-9233-ed00942e47e7
+ ---------------------------------------------------
+```
+
+- metadata_brokers(View available brokers for the kafka service)
+
+```bash
+php bin/kafka-client rpc metadata_brokers
+ --------- --------- ------
+  node-id   host      port
+ --------- --------- ------
+  1003      mkafka3   9092
+  1004      mkafka4   9092
+  1001      mkafka1   9092
+  1002      mkafka2   9092
+ --------- --------- ------
+```
+
+- metadata_topicss(See the subscribed topic for more details)
+
+```bash
+php bin/kafka-client rpc metadata_topics
+ -------------- ----------- ----------- --------------- -----------
+  topic          partition   leader-id   replica-nodes   isr-nodes
+ -------------- ----------- ----------- --------------- -----------
+  kafka-swoole   2           1001        1001,1004       1001,1004
+  kafka-swoole   1           1004        1004,1003       1004,1003
+  kafka-swoole   3           1002        1002,1001       1002,1001
+  kafka-swoole   0           1003        1003,1002       1002,1003
+ -------------- ----------- ----------- --------------- -----------
+```
+
 ### Consumer
 
 `php bin/kafka-client start`
