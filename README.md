@@ -148,13 +148,6 @@ php bin/kafka-client rpc block_size
 254
 ```
 
-- block_size(If you are using storage media in indirect mode, you can use this command to see the current number of storage media)
-
-```bash
-php bin/kafka-client rpc block_size
-254
-```
-
 - member_leader（View the Leader of the current consumer group）
 
 ```bash
