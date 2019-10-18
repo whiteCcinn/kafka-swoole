@@ -121,6 +121,8 @@ Help:
   metadata_topics
 ```
 
+![rpc](http://g.recordit.co/ny3N3Edhxn.gif)
+
 - kafka_lag（Check the total difference between the current offset and the maximum offset in kafka）
 ```bash
 php bin/kafka-client rpc kafka_lag
