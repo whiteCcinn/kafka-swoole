@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 
-class SinkerController
+class SinkerController extends AbstractController
 {
     /**
      * @param array $messages
