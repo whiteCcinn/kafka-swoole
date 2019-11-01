@@ -175,7 +175,7 @@ Help:
   metadata_topics
 ```
 
-![rpc](http://g.recordit.co/ny3N3Edhxn.gif)
+![rpc](https://camo.githubusercontent.com/a31edc90c4b1ac8e4518ef3fe828e38f6df2bfc2/687474703a2f2f672e7265636f726469742e636f2f6e79334e33456468786e2e676966)
 
 - kafka_lag（Check the total difference between the current offset and the maximum offset in kafka）
 ```bash
