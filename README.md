@@ -90,6 +90,57 @@ Help:
   This command will help you send separate messages to a topic..
 ```
 
+### DescribeGroups
+
+See consumer group details
+
+```bash
+Description:
+  See consumer group details
+
+Usage:
+  kafka.describeGroups [options]
+
+Options:
+  -t, --topic=TOPIC     Which topic is subscribed by the consumer group?
+  -g, --group=GROUP     Which consumer group?
+  -h, --help            Display this help message
+  -q, --quiet           Do not output any message
+  -V, --version         Display this application version
+      --ansi            Force ANSI output
+      --no-ansi         Disable ANSI output
+  -n, --no-interaction  Do not ask any interactive question
+  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  See consumer group details...
+```
+
+```bash
+php bin/kafka-client kafka.describeGroups -t mulog_clean_24 -g kafka-swoole
+
+DescribeGruops-BaseInfo
+=======================
+
+ -------------- ------------ -------------- --------------
+  groupId        groupState   protocolType   protocolData
+ -------------- ------------ -------------- --------------
+  kafka-swoole   Stable       consumer       Range
+ -------------- ------------ -------------- --------------
+
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+  memberId                                            clientId       clientHost     topcic           paritions
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+  kafka-swoole-44857c49-b019-439b-90dd-d71112b2c01e   kafka-swoole   /192.167.8.2   mulog_clean_24   0,1
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+  memberId                                            clientId       clientHost     topcic           paritions
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+  kafka-swoole-5714cd77-a0dd-4d29-aa20-718f9d713908   kafka-swoole   /192.167.8.2   mulog_clean_24   2,3
+ --------------------------------------------------- -------------- -------------- ---------------- -----------
+```
+
 ### Rpc
 
 Support real-time acquisition of data in runtime, interaction through RPC protocol with AF_UNIX interprocess communication
