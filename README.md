@@ -333,7 +333,7 @@ auto.offset.reset: largest
 - [x] Heartbeat
 - [x] LeaveGroup
 - [x] SyncGroup
-- [ ] DescribeGroups
+- [x] DescribeGroups
 - [ ] ListGroups
 - [ ] ListGroups
 - [ ] SaslHandshake
