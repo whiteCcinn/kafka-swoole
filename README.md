@@ -1,4 +1,7 @@
 # kafka-swoole
+
+🌈The first php-kafka client to support *multiple compression* forms
+
 Implement all kafka protocols, providing 'HighLevel' and 'LowLevel' client apis respectively, and utilize swoole to realize collaboration and flexibly extend consumers' client
 
 > If you would like to contribute code to help me speed up my progress, please contact me at email:471113744@qq.com
@@ -259,7 +262,7 @@ auto.offset.reset: largest
 
 - nomoral
 - gzip
-- snappy (If you need snappy compressed data, you will need to install an additional [php-ext-snappy extension](https://github.com/kjdev/php-ext-snappy))
+- snappy (If you need snappy compressed data, you will need to install an additional [php-ext-snappy](https://github.com/kjdev/php-ext-snappy) extension)
 
 ## Protocol
 
