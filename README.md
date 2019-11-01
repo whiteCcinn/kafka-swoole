@@ -255,6 +255,12 @@ auto.commit.interval.ms: 10 * 1000
 auto.offset.reset: largest
 ```
 
+## Support compression protocol
+
+- nomoral
+- gzip
+- snappy (If you need snappy compressed data, you will need to install an additional [php-ext-snappy extension](https://github.com/kjdev/php-ext-snappy))
+
 ## Protocol
 
 - [x] Produce
