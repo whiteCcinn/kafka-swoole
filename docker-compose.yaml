@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  mzookeeper:
+    image: wurstmeister/zookeeper
+    container_name: kafka-swoole-zookeeper
+
+  mkafka1:
+    image: wurstmeister/kafka:2.11-0.9.0.1
+    container_name: kafka-swoole-kafka1
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: mzookeeper:2181
+      KAFKA_NUM_PARTITIONS: 4
+    depends_on:
+    - mzookeeper
+
+  mkafka2:
+    image: wurstmeister/kafka:2.11-0.9.0.1
+    container_name: kafka-swoole-kafka2
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: mzookeeper:2181
+      KAFKA_NUM_PARTITIONS: 4
+    depends_on:
+    - mzookeeper
+
+  mkafka3:
+    image: wurstmeister/kafka:2.11-0.9.0.1
+    container_name: kafka-swoole-kafka3
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: mzookeeper:2181
+      KAFKA_NUM_PARTITIONS: 4
+    depends_on:
+    - mzookeeper
+
+  mkafka4:
+    image: wurstmeister/kafka:2.11-0.9.0.1
+    container_name: kafka-swoole-kafka3
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: mzookeeper:2181
+      KAFKA_NUM_PARTITIONS: 4
+    depends_on:
+    - mzookeeper
+
+  kafka-swoole:
+    build: ./
+    container_name: kafka-swoole-php
+    volumes:
+      - ./:/data/www
+
+

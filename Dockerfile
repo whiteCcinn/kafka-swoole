@@ -67,4 +67,3 @@ RUN  cd /data/www \
     && composer clearcache
 
 WORKDIR /data/www
-EXPOSE 9501
