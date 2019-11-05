@@ -54,5 +54,10 @@ services:
     container_name: kafka-swoole-php
     volumes:
       - ./:/data/www
-
+    depends_on:
+    - mzookeeper
+    - mkafka1
+    - mkafka2
+    - mkafka3
+    - mkafka4
 
