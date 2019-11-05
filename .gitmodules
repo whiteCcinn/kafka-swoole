@@ -1,0 +1,4 @@
+[submodule "kafka-docker"]
+	path = kafka-docker
+	url = https://github.com/wurstmeister/kafka-docker.git
+	branch = 0.9.x
