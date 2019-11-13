@@ -42,3 +42,6 @@ auto.commit.interval.ms: 10 * 1000
 # smallest : automatically reset the offset to the smallest offset
 # largest : automatically reset the offset to the largest offset
 auto.offset.reset: largest
+
+# Note: the producer should try not to compress a large amount of data into a single request, or it will become very CPU intensive when unpacking
+fetch.max.bytes: 65536 * 10
