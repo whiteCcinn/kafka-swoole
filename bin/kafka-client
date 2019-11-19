@@ -5,4 +5,6 @@ declare(strict_types=1);
 include_once dirname(__DIR__) . '/vendor/autoload.php';
 include_once __DIR__.'/define.php';
 
+ini_set("swoole.enable_preemptive_scheduler","1");
+
 \Kafka\Boot::boot();
