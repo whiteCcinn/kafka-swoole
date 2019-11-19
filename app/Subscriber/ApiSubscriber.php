@@ -6,8 +6,10 @@ namespace App\Subscriber;
 use App\Handler\HighLevelHandler;
 use App\Handler\LowLevelHandler;
 use Kafka\Enum\ClientApiModeEnum;
+use Kafka\Enum\MessageReliabilityEnum;
 use Kafka\Enum\MessageStorageEnum;
 use Kafka\Event\FetchMessageEvent;
+use Kafka\Event\FetchMessagesEvent;
 use Kafka\Event\MessageConsumedEvent;
 use Kafka\Storage\RedisStorage;
 use Kafka\Storage\StorageAdapter;
@@ -29,23 +31,29 @@ class ApiSubscriber implements EventSubscriberInterface
 
     private $mode;
 
+    private $messageReliability;
+
     /**
      * @return array
      */
     public static function getSubscribedEvents(): array
     {
         return [
-            FetchMessageEvent::NAME => 'onFetchMessage',
+            FetchMessagesEvent::NAME => 'onFetchMessages',
         ];
     }
 
-    public function onFetchMessage(FetchMessageEvent $event)
+    public function onFetchMessages(FetchMessagesEvent $event)
     {
+        $messages = $event->getMessages();
         if ($this->messageStorage === null) {
             $this->messageStorage = env('KAFKA_MESSAGE_STORAGE');
         }
         if ($this->mode === null) {
             $this->mode = env('KAFKA_CLIENT_API_MODE');
+        }
+        if ($this->mode === null) {
+            $this->messageReliability = env('KAFKA_MESSAGE_RELIABILITY');
         }
         if ($this->handler === null) {
             if ($this->mode === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
@@ -59,29 +67,41 @@ class ApiSubscriber implements EventSubscriberInterface
                 if ($this->mode === ClientApiModeEnum::getTextByCode(ClientApiModeEnum::HIGH_LEVEL)) {
                     /** @var HighLevelHandler $handler */
                     $handler = $this->handler;
-                    $handler->handler($event->getMessage());
-                    dispatch(
-                        new MessageConsumedEvent(
-                            ClientApiModeEnum::HIGH_LEVEL,
-                            $event->getTopic(),
-                            $event->getPartition(),
-                            $event->getOffset()
-                        ),
-                        MessageConsumedEvent::NAME
-                    );
+                    foreach ($messages as $item) {
+                        ['topic' => $topic, 'partition' => $partition, 'offset' => $offset, 'message' => $message] = $item;
+                        $handler->handler($topic, $partition, $offset, $message);
+                    }
                 } else {
                     /** @var LowLevelHandler $handler */
                     $handler = $this->handler;
-                    $handler->handler($event->getOffset(), $event->getMessage());
-                    dispatch(
-                        new MessageConsumedEvent(
-                            ClientApiModeEnum::LOW_LEVEL,
-                            $event->getTopic(),
-                            $event->getPartition(),
-                            $event->getOffset()
-                        ),
-                        MessageConsumedEvent::NAME
-                    );
+                    $topic = '';
+                    $partition = $offset = 0;
+                    foreach ($messages as $item) {
+                        ['topic' => $topic, 'partition' => $partition, 'offset' => $offset, 'message' => $message] = $item;
+                        $handler->handler($topic, $partition, $offset, $message);
+                        if ($this->messageReliability === MessageReliabilityEnum::getTextByCode(MessageReliabilityEnum::HIGH)) {
+                            dispatch(
+                                new MessageConsumedEvent(
+                                    ClientApiModeEnum::LOW_LEVEL,
+                                    $topic,
+                                    $partition,
+                                    $offset
+                                ),
+                                MessageConsumedEvent::NAME
+                            );
+                        }
+                    }
+                    if ($this->messageReliability === MessageReliabilityEnum::getTextByCode(MessageReliabilityEnum::LOW)) {
+                        dispatch(
+                            new MessageConsumedEvent(
+                                ClientApiModeEnum::LOW_LEVEL,
+                                $topic,
+                                $partition,
+                                $offset
+                            ),
+                            MessageConsumedEvent::NAME
+                        );
+                    }
                 }
                 break;
             case MessageStorageEnum::FILE:
@@ -92,15 +112,17 @@ class ApiSubscriber implements EventSubscriberInterface
                 /** @var RedisStorage $storage */
                 $storage = RedisStorage::getInstance();
                 $adapter->setAdaptee($storage);
-                $adapter->push([$event->getMessage()]);
+                $pushMessages = array_column($messages, 'message');
+                // unreliable...
+                $acks = $adapter->push($pushMessages);
+                ['topic' => $topic, 'partition' => $partition, 'offset' => $offset] = end($messages);
 
-                // auto commit
                 dispatch(
                     new MessageConsumedEvent(
-                        ClientApiModeEnum::getCodeByText($this->mode),
-                        $event->getTopic(),
-                        $event->getPartition(),
-                        $event->getOffset()
+                        ClientApiModeEnum::LOW_LEVEL,
+                        $topic,
+                        $partition,
+                        $offset
                     ),
                     MessageConsumedEvent::NAME
                 );
