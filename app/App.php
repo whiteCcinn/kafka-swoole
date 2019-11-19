@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Command\DemoCommand;
 use Kafka\Config\CommonConfig;
 use Kafka\Config\ConsumerConfig;
 use Kafka\Config\ProducerConfig;
@@ -50,6 +51,7 @@ class App
     {
         if (!self::$once) {
             self::changeOnce();
+            self::registerCommand();
         }
     }
 
@@ -58,11 +60,8 @@ class App
         self::$once = !self::$once;
     }
 
-    /**
-     * @return array
-     */
-    public static function getBroker()
+    private static function registerCommand(): void
     {
-        return Kafka::getInstance()->getBrokers();
+        App::$application->add(new DemoCommand());
     }
 }
