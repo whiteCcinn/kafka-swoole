@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Kafka\Enum\StorageOffsetCommitTypeEnum;
 
 class SinkerController extends AbstractController
 {
@@ -12,13 +13,11 @@ class SinkerController extends AbstractController
      */
     public static function handler(array $messages): array
     {
-        $acks = [];
         foreach ($messages as $k => $info) {
             ['message' => $message] = $info;
-            var_dump($message);
-            $acks[$k] = true;
         }
 
-        return $acks;
+        $success = true;
+        return ['type' => StorageOffsetCommitTypeEnum::AUTO, 'success' => $success];
     }
 }

@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Subscriber;
 
+use Kafka\Event\SetKafkaProcessNameEvent;
+use Kafka\Event\SetMasterProcessNameEvent;
+use Kafka\Event\SetSinkerProcessNameEvent;
 use Kafka\Event\SinkerOtherEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 

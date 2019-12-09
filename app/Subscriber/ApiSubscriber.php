@@ -8,7 +8,6 @@ use App\Handler\LowLevelHandler;
 use Kafka\Enum\ClientApiModeEnum;
 use Kafka\Enum\MessageReliabilityEnum;
 use Kafka\Enum\MessageStorageEnum;
-use Kafka\Event\FetchMessageEvent;
 use Kafka\Event\FetchMessagesEvent;
 use Kafka\Event\MessageConsumedEvent;
 use Kafka\Storage\RedisStorage;
