@@ -55,4 +55,14 @@ class CoreSubscriber implements EventSubscriberInterface
         $index = $event->getIndex();
         swoole_set_process_name(env('APP_NAME') . '_' . env('APP_ID') . ':sinker_' . $index);
     }
+
+    /**
+     * @param SinkerOtherEvent $event
+     *
+     * @throws \Exception
+     */
+    public function onSinkerOther(SinkerOtherEvent $event): void
+    {
+        // Do something parallel to the sink task and remember to release control
+    }
 }

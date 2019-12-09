@@ -15,6 +15,7 @@ class SinkerController extends AbstractController
     {
         foreach ($messages as $k => $info) {
             ['message' => $message] = $info;
+            var_dump($message);
         }
 
         $success = true;

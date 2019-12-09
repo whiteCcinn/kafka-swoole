@@ -1,11 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace Kafka\Command;
+namespace App\Command;
 
-use Kafka\Event\StartBeforeEvent;
-use Kafka\Manager\MetadataManager;
-use Kafka\Server\KafkaCServer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

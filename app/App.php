@@ -45,6 +45,16 @@ class App
     public static $producerConfig;
 
     /**
+     * @var bool $running
+     */
+    public static $running = false;
+
+    /**
+     * @var bool $closing
+     */
+    public static $closing = false;
+
+    /**
      * @throws \Exception
      */
     public static function boot()
@@ -63,5 +73,11 @@ class App
     private static function registerCommand(): void
     {
         App::$application->add(new DemoCommand());
+    }
+
+
+    public static function switchRunState()
+    {
+        self::$running = !self::$running;
     }
 }
