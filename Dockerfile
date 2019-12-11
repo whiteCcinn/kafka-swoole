@@ -10,6 +10,7 @@ ARG work_user=www-data
 ENV TIMEZONE=${timezone:-"Asia/Shanghai"} \
     PHPREDIS_VERSION=4.3.0 \
     SWOOLE_VERSION=4.4.7 \
+    SNAPPY_VERSION=0.1.3 \
     COMPOSER_ALLOW_SUPERUSER=1
 
 # Libs -y --no-install-recommends
@@ -23,6 +24,7 @@ RUN apt-get update \
         libjpeg-dev \
         libpng-dev \
         libfreetype6-dev \
+        strace \
 # Install PHP extensions
     && docker-php-ext-install \
        bcmath gd pdo_mysql mbstring sockets zip sysvmsg sysvsem sysvshm
@@ -31,6 +33,20 @@ RUN apt-get update \
 Run curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer \
     && composer self-update --clean-backups \
+# Install snappy extension
+    && wget https://github.com/kjdev/php-ext-snappy/archive/${SNAPPY_VERSION}.zip -O snappy.tar.gz \
+    && mkdir -p snappy \
+    && unzip snappy.tar.gz -d snappy \
+    && rm snappy.tar.gz \
+    && ( \
+        cd snappy/php-ext-snappy-${SNAPPY_VERSION} \
+        && phpize \
+        && ./configure \
+        && make -j$(nproc) \
+        && make install \
+    ) \
+    && rm -r snappy \
+    && docker-php-ext-enable snappy \
 # Install redis extension
     && wget http://pecl.php.net/get/redis-${PHPREDIS_VERSION}.tgz -O /tmp/redis.tar.tgz \
     && pecl install /tmp/redis.tar.tgz \
